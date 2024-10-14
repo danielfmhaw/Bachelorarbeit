@@ -1,0 +1,29 @@
+➜  ~ gnuplot
+
+	G N U P L O T
+	Version 6.0 patchlevel 1    last modified 2024-05-13 
+
+	Copyright (C) 1986-1993, 1998, 2004, 2007-2024
+	Thomas Williams, Colin Kelley and many others
+
+	gnuplot home:     http://www.gnuplot.info
+	faq, bugs, etc:   type "help FAQ"
+	immediate help:   type "help"  (plot window: hit 'h')
+
+	Terminal type is now qt
+gnuplot> plot "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/gnuplot/exmaple_2.dat.txt"
+gnuplot> plot "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/gnuplot/exmaple_2.dat.txt" using 1:2:($3/1000) title "TestDaniel" lt 7 lc 0 with errorbars
+gnuplot> plot "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/gnuplot/exmaple_2.dat.txt" using 1:2:($3/1000) title "TestDaniel" lt 7 lc -1 with errorbars
+gnuplot> set output "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/gnuplot/dataImg.png"
+gnuplot> set terminal png size 1920 1080
+
+Terminal type is now 'png'
+                                    ^
+         warning: illegal font size
+Options are 'truecolor nocrop enhanced butt size 1920,480 font "arial,12.0" '
+gnuplot> set terminal png size 1920,1080
+
+Terminal type is now 'png'
+Options are 'truecolor nocrop enhanced butt size 1920,1080 font "arial,12.0" '
+gnuplot> replot
+

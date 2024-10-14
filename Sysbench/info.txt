@@ -1,0 +1,30 @@
+TODO:
+1.	Sysbench ✅
+2.	htop, iostat, and vmstat
+3.	BenchBase
+
+MYSQL - Daten
+    localhost: 3306
+    user: root
+    password: password
+
+Benchmark-Suites: https://benchant.com/blog/benchmarking-suites
+
+Benchbase: https://github.com/cmu-db/benchbase.git
+Cd .. && cd .. && ./mvnw clean package -P mysql && cd target && tar xvzf benchbase-mysql.tgz && cd benchbase-mysql/ &&  java -jar benchbase.jar -b tpcc -c config/mysql/sample_tpcc_config.xml --create=true --load=true - execute=true
+
+
+Sysbench: https://www.percona.com/blog/creating-custom-sysbench-scripts/
+
+sysbench \
+  --db-driver=mysql \
+  --mysql-host=127.0.0.1 \
+  --mysql-port=3306 \
+  --mysql-user=root \
+  --mysql-password=password \
+  --mysql-db=sys \
+  --time=60 \
+  --threads=4 \
+  --events=0 \
+  --point_selects=10 \
+  custom_workload.lua run

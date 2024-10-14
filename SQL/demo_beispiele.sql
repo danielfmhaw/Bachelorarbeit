@@ -1,0 +1,11 @@
+-- MySQL: mysql -u root -p => macbook-pw
+CREATE TABLE KUNDEN
+(
+    KUNDEN_ID INT AUTO_INCREMENT PRIMARY KEY,
+    NAME      VARCHAR(255),
+    KONTAKT   JSON,
+    STADT     VARCHAR(255)
+);
+
+INSERT INTO KUNDEN(NAME, KONTAKT, STADT) VALUE ('Hans Peter', '{"nummer":"0176111111"}','Hamburg');
+SELECT * FROM KUNDEN;
