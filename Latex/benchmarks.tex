@@ -73,4 +73,55 @@ erkannt werden können.
     Die meisten Systeme sind jedoch nicht linear skalierbar und zeigen Leistungseinbußen, wenn die Parameter variieren.
 \end{itemize}
 
-\section{Tools}
+\section{Tools}\label{sec:tools}
+\subsection{Einführung}\label{subsec:einfuhrung}
+
+\begin{itemize}
+    \item \href{https://www.webhosterwissen.de/know-how/server/mysql-benchmark-mittels-sysbench/}{Webhoster Wissen - MySQL Benchmark mit Sysbench}
+    \item \href{https://github.com/akopytov/sysbench}{Sysbench GitHub Repository}
+\end{itemize}
+
+Als Haupttool, um Benchmarktests durchzuführen, habe ich mich für Sysbench entschieden. Sysbench ist ein Open-Source-Tool, das ein skriptfähiges, multi-threaded Benchmark-Tool, das auf LuaJIT basiert. Es wird auch hauptsächlich für Datenbankbenchmarks verwendet, kann jedoch auch dazu eingesetzt werden, beliebig komplexe Arbeitslasten zu erstellen, die keinen Datenbankserver erfordern. Dabei werden Tests auf verschiedenen Systemressourcen, wie CPU, Speicher, I/O und Datenbanken wie MySQL verwendet.
+
+Im Zuge der Recherchearbeit habe ich mir auch andere Benchmarking-Tools betrachtet, wie z.B. Benchbase \href{https://github.com/cmu-db/benchbase}{(GitHub)} oder mybench \href{https://github.com/Shopify/mybench}{(GitHub)}. Die größten Vorteile von Sysbench habe ich in der Skriptfähigkeit und Flexibilität gesehen. D.h. dass ich benutzerdefinierte Benchmarks schneller und unkompliziert erstellen kann. Außerdem hat sich Sysbench als de facto Standard im Bereich der Datenbankbenchmarks etabliert \href{https://shopify.github.io/mybench/introduction.html}{(mybench)}. Dadurch stehen eine breite Nutzerbasis und viele verfügbare Ressourcen zur Verfügung. Im Vergleich zu den anderen Tools bietet allerdings Sysbench eine weniger präzise Steuerung der Ergebnisrate und der Transaktionen. Außerdem haben Tools wie mybench die Möglichkeit, in Echtzeit umfassende Visualisierungen darzustellen. Damit können Metriken live in einem Diagramm angezeigt werden \href{https://shopify.github.io/mybench/detailed-design-doc.html#live-monitoring-user-interface}{(mybench Live Monitoring)}. Dieses Feature ist sicherlich hilfreich, aber in meinem Fall habe ich abgewogen und bin zu dem Entschluss gekommen, dass die einfachere Bedienung für mich der ausschlaggebende Grund, neben dem Fakt, dass Sysbench der de facto Standard ist.
+
+Da die Graphen aber trotzdem eine entscheidende Rolle bei der Analyse darstellen, werde ich das Tool Gnuplot \href{https://github.com/gnuplot/gnuplot}{(GitHub)} dafür benutzen, um die Werte nach der Durchführung des Benchmarks zu visualisieren.
+
+\subsection{Kurze Einführung in die Tools}\label{sec:kurze-einfuhrung-in-die-tools}
+
+Zunächst müssen die beiden Tools installiert werden.
+Auf einem Mac erfolgt dies über:
+
+\begin{lstlisting}[label={lst:install tools}]
+brew install sysbench
+brew install gnuplot
+\end{lstlisting}
+
+Mit der Hilfe von Homebrew.
+Des Weiteren muss der MySQL-Server korrekt gestartet sein und eine Datenbank erstellt werden mit:
+
+\begin{lstlisting}[label={lst:create databse}]
+CREATE DATABASE sbtest;
+\end{lstlisting}
+
+Um einfach Testdaten in die Datenbank einzufügen, kann dieser Befehl verwendet werden:
+
+\begin{lstlisting}[style=custom_daniel,label={lst:sysbenchrun}]
+sysbench --db-driver=mysql --mysql-host=localhost --mysql-user=YOUR_USER --mysql-password=YOUR_PASSWORD --mysql-db=sbtest oltp_insert --tables=10 --table-size=100000 prepare
+\end{lstlisting}
+
+\texttt{YOUR\_USER} und \texttt{YOUR\_PASSWORD} müssen entsprechend ersetzt werden.
+
+\lstinputlisting[
+    language=bash,
+    caption=Sysbench Script,
+    label={lst:sysbench_monitor},
+    style=custom_daniel,
+]{Scripts/sysbench_monitor.sh}
+
+\lstinputlisting[
+    language=gnuplot,
+    caption=Gnuplot Script,
+    label={lst:plot_sysbench},
+    style=custom_daniel,
+]{Scripts/plot_sysbench.gp}

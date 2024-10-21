@@ -78,6 +78,7 @@
 \definecolor{haw}{HTML}{003CA0}
 \definecolor{haw2}{HTML}{0096D2}
 \definecolor{haw3}{HTML}{A0BEDC}
+\definecolor{darkgreen}{rgb}{0, 0.5, 0}
 
 % typographisch anspruchsvolle Tabellen; siehe chap3.tex
 \usepackage{booktabs}
@@ -113,6 +114,20 @@
     numbersep=6pt,
     belowcaptionskip=1em,
     aboveskip=\bigskipamount,
+}
+
+\lstdefinestyle{custom_daniel}{
+    backgroundcolor=\color{gray!20},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{haw2},
+    commentstyle=\color{gray},
+    numberstyle=\footnotesize\color{haw},
+    stringstyle=\color{darkgreen},
+    numbers=left,
+    breaklines=true,
+    keepspaces=true,
+    showspaces=false,
+    showstringspaces=false,
 }
 \lstset{style=mystyle}
 % damit es "Codeblock" und nicht "Listing" heißt
