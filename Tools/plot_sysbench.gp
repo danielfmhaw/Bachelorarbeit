@@ -1,3 +1,6 @@
+# Use the current working directory
+WORK_DIR = system("pwd")
+
 set datafile separator ","
 set title "Benchmark Results: TPS, Latency, Queries, and More"
 set xlabel "Time (s)"
@@ -5,11 +8,11 @@ set ylabel "Values"
 set grid
 set key outside
 set terminal pngcairo enhanced font 'Arial,10'
-set output "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Output/sysbench_output_plot.png"
+set output WORK_DIR . "/output/sysbench_output.png"
 set yrange [0:*]
 
 # Plot each attribute on its own line
-plot "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Output/sysbench_output.csv" using 1:2 title "Threads" lt 1 lc rgb "black" with lines, \
+plot WORK_DIR . "/output/sysbench_output.csv" using 1:2 title "Threads" lt 1 lc rgb "black" with lines, \
      "" using 1:3 title "TPS" lt 2 lc rgb "green" with lines, \
      "" using 1:4 title "QPS" lt 3 lc rgb "blue" with lines, \
      "" using 1:5 title "Reads" lt 4 lc rgb "red" with lines, \
