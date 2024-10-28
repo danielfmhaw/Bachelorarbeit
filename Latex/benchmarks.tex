@@ -18,7 +18,7 @@ Datenbank getestet, sondern die gesamte Applikation, einschließlich des Webserv
 des Netzwerks und des Applikationscodes. Der Ansatz dahinter ist, dass ein Nutzer
 genauso lange auf eine Abfrage warten muss, wie das gesamte System benötigt.
 Daher sollte diese Wartezeit so gering wie möglich sein. Es kann dabei vorkommen,
-dass MySQL nicht immer das Bottleneck ist.\footnote{Gemeint ist ein Engpass beim Transport von Daten oder Waren, der maßgeblichen Einfluss auf die Abarbeitungsgeschwindigkeit hat. Optimierungsversuche an anderer Stelle führen oft nur zu geringen oder gar keinen messbaren Verbesserungen der Gesamtsituation. (https://martinvogel.de/lexikon/bottleneck.html)}
+dass MySQL nicht immer das Bottleneck ist.\footnote{Gemeint ist ein Engpass beim Transport von Daten oder Waren, der maßgeblichen Einfluss auf die Abarbeitungsgeschwindigkeit hat. Optimierungsversuche an anderer Stelle führen oft nur zu geringen oder gar keinen messbaren Verbesserungen der Gesamtsituation. (\cite{bottleneck})}
 
 Full-Stack-Benchmarks haben jedoch auch Nachteile. Sie sind schwieriger zu erstellen
 und insbesondere schwieriger korrekt einzurichten. Wenn man lediglich verschiedene
@@ -31,7 +31,7 @@ kürzer sind und man schneller Ergebnisse erhält.
 Wenn bei Benchmarks schlechte Designentscheidungen getroffen werden, kann dies zu einer
 falschen Interpretation des Systems führen, da die Ergebnisse nicht die Realität widerspiegeln.
 Die Größe des Datensatzes und des Workloads muss realistisch sein. Idealerweise verwendet
-man einen Snapshot\footnote{Snapshots bestehen größtenteils aus Metadaten, die den Zustand Ihrer Daten definieren, und sind keine vollständige Duplikation der Daten auf Ihrer Festplatte. Snapshots werden häufig für Test-/Entwicklungsaufgaben verwendet. (https://www.rubrik.com/de/insights/what-is-a-snapshot-backup) } des tatsächlichen produktiven Datensatzes.
+man einen Snapshot\footnote{Snapshots bestehen größtenteils aus Metadaten, die den Zustand Ihrer Daten definieren, und sind keine vollständige Duplikation der Daten auf Ihrer Festplatte. Snapshots werden häufig für Test-/Entwicklungsaufgaben verwendet. (\cite{snapshot}) } des tatsächlichen produktiven Datensatzes.
 Gibt es keine Produktionsdaten, sollten die Daten und der Workload simuliert werden,
 da realistische Benchmarks komplex und zeitaufwendig sein können.
 
@@ -77,15 +77,15 @@ erkannt werden können.
 \subsection{Einführung}\label{subsec:einfuhrung}
 
 \begin{itemize}
-    \item \href{https://www.webhosterwissen.de/know-how/server/mysql-benchmark-mittels-sysbench/}{Webhoster Wissen - MySQL Benchmark mit Sysbench}
-    \item \href{https://github.com/akopytov/sysbench}{Sysbench GitHub Repository}
+    \item \cite{sysbench_mysql}
+    \item \cite{sysbench_repo}
 \end{itemize}
 
 Als Haupttool, um Benchmarktests durchzuführen, habe ich mich für Sysbench entschieden. Sysbench ist ein Open-Source-Tool, das ein skriptfähiges, multi-threaded Benchmark-Tool, das auf LuaJIT basiert. Es wird auch hauptsächlich für Datenbankbenchmarks verwendet, kann jedoch auch dazu eingesetzt werden, beliebig komplexe Arbeitslasten zu erstellen, die keinen Datenbankserver erfordern. Dabei werden Tests auf verschiedenen Systemressourcen, wie CPU, Speicher, I/O und Datenbanken wie MySQL verwendet.
 
-Im Zuge der Recherchearbeit habe ich mir auch andere Benchmarking-Tools betrachtet, wie z.B. Benchbase \href{https://github.com/cmu-db/benchbase}{(GitHub)} oder mybench \href{https://github.com/Shopify/mybench}{(GitHub)}. Die größten Vorteile von Sysbench habe ich in der Skriptfähigkeit und Flexibilität gesehen. D.h. dass ich benutzerdefinierte Benchmarks schneller und unkompliziert erstellen kann. Außerdem hat sich Sysbench als de facto Standard im Bereich der Datenbankbenchmarks etabliert \href{https://shopify.github.io/mybench/introduction.html}{(mybench)}. Dadurch stehen eine breite Nutzerbasis und viele verfügbare Ressourcen zur Verfügung. Im Vergleich zu den anderen Tools bietet allerdings Sysbench eine weniger präzise Steuerung der Ergebnisrate und der Transaktionen. Außerdem haben Tools wie mybench die Möglichkeit, in Echtzeit umfassende Visualisierungen darzustellen. Damit können Metriken live in einem Diagramm angezeigt werden \href{https://shopify.github.io/mybench/detailed-design-doc.html#live-monitoring-user-interface}{(mybench Live Monitoring)}. Dieses Feature ist sicherlich hilfreich, aber in meinem Fall habe ich abgewogen und bin zu dem Entschluss gekommen, dass die einfachere Bedienung für mich der ausschlaggebende Grund, neben dem Fakt, dass Sysbench der de facto Standard ist.
+Im Zuge der Recherchearbeit habe ich mir auch andere Benchmarking-Tools betrachtet, wie z.B. Benchbase \cite{DifallahPCC13} oder mybench \cite{mybench_repo}. Die größten Vorteile von Sysbench habe ich in der Skriptfähigkeit und Flexibilität gesehen. D.h. dass ich benutzerdefinierte Benchmarks schneller und unkompliziert erstellen kann. Außerdem hat sich Sysbench als de facto Standard im Bereich der Datenbankbenchmarks etabliert \cite{mybench_comparison}. Dadurch stehen eine breite Nutzerbasis und viele verfügbare Ressourcen zur Verfügung. Im Vergleich zu den anderen Tools bietet allerdings Sysbench eine weniger präzise Steuerung der Ergebnisrate und der Transaktionen. Außerdem haben Tools wie mybench die Möglichkeit, in Echtzeit umfassende Visualisierungen darzustellen. Damit können Metriken live in einem Diagramm angezeigt werden \cite{mybench_user_interface}. Dieses Feature ist sicherlich hilfreich, aber in meinem Fall habe ich abgewogen und bin zu dem Entschluss gekommen, dass die einfachere Bedienung für mich der ausschlaggebende Grund, neben dem Fakt, dass Sysbench der de facto Standard ist.
 
-Da die Graphen aber trotzdem eine entscheidende Rolle bei der Analyse darstellen, werde ich das Tool Gnuplot \href{https://github.com/gnuplot/gnuplot}{(GitHub)} dafür benutzen, um die Werte nach der Durchführung des Benchmarks zu visualisieren.
+Da die Graphen aber trotzdem eine entscheidende Rolle bei der Analyse darstellen, werde ich das Tool Gnuplot \cite{gnuplot} dafür benutzen, um die Werte nach der Durchführung des Benchmarks zu visualisieren.
 
 \subsection{Kurze Einführung in die Tools}\label{sec:kurze-einfuhrung-in-die-tools}
 

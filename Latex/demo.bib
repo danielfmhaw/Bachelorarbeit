@@ -1,65 +1,218 @@
 % Eine exemplarische Sammlung von Büchern und anderen Quellen für das Literaturverzeichnis.
 
 % typischer Eintrag für ein Buch; "voss" ist ein frei wählbares Wort, das für Befehle wie \cite verwendet wird
+
 @book{voss,
-AUTHOR = {Herbert Voß},
-TITLE = {Die wissenschaftliche Arbeit mit LaTeX},
-SUBTITLE = {unter Verwendung von LuaTeX, KOMA-Script und Biber/BibLaTeX},
-PUBLISHER = {Lehmanns Media},
-LOCATION = {Berlin},
-EDITION = 2,
-YEAR = 2021,
+    AUTHOR = {Herbert Voß},
+    TITLE = {Die wissenschaftliche Arbeit mit LaTeX},
+    SUBTITLE = {unter Verwendung von LuaTeX, KOMA-Script und Biber/BibLaTeX},
+    PUBLISHER = {Lehmanns Media},
+    LOCATION = {Berlin},
+    EDITION = 2,
+    YEAR = 2021,
 }
 
 % typischer Eintrag für einen Fachartikel
+
 @article{weitz2,
-AUTHOR={Weitz, Edmund},
-TITLE={Hausdorff's forgotten proof that almost all numbers are normal},
-JOURNAL={Math. Semesterberichte},
-DATE={2021-10-01},
-VOLUME={68},
-NUMBER={2},
-PAGES={273-282},
-ISSN={1432-1815},
-DOI={10.1007/s00591-021-00303-w},
-URL={https://doi.org/10.1007/s00591-021-00303-w},
+    AUTHOR = {Weitz, Edmund},
+    TITLE = {Hausdorff's forgotten proof that almost all numbers are normal},
+    JOURNAL = {Math. Semesterberichte},
+    DATE = {2021-10-01},
+    VOLUME = {68},
+    NUMBER = {2},
+    PAGES = {273-282},
+    ISSN = {1432-1815},
+    DOI = {10.1007/s00591-021-00303-w},
+    URL = {https://doi.org/10.1007/s00591-021-00303-w},
 }
 
 % typischer Eintrag für eine Internetquelle; beachten Sie URLDATE
+
 @online{zappa,
-AUTHOR = {Frank Zappa},
-TITLE = {Apostrophe (')},
-SUBTITLE = {Stink-Foot},
-URL = {http://www.donlope.net/fz/lyrics/Apostrophe_(').html},
-URLDATE = {2022-03-11},
-PUBLISHER = {DiscReet},
-LOCATION = {Hollywood},
-YEAR = {1974},
+    AUTHOR = {Frank Zappa},
+    TITLE = {Apostrophe (')},
+    SUBTITLE = {Stink-Foot},
+    URL = {http://www.donlope.net/fz/lyrics/Apostrophe_(').html},
+    URLDATE = {2022-03-11},
+    PUBLISHER = {DiscReet},
+    LOCATION = {Hollywood},
+    YEAR = {1974},
 }
 
 @book{schlosser,
-AUTHOR = {Joachim Schlosser},
-TITLE = {Wissenschaftliche Arbeiten schreiben mit LaTeX},
-SUBTITLE = {Leitfaden für Einsteiger},
-PUBLISHER = {mitp},
-LOCATION = {Frechen},
-EDITION = 7,
-YEAR = {2021},
+    AUTHOR = {Joachim Schlosser},
+    TITLE = {Wissenschaftliche Arbeiten schreiben mit LaTeX},
+    SUBTITLE = {Leitfaden für Einsteiger},
+    PUBLISHER = {mitp},
+    LOCATION = {Frechen},
+    EDITION = 7,
+    YEAR = {2021},
 }
 
 @book{weitz,
-AUTHOR = {Edmund Weitz},
-TITLE = {Pi und die Primzahlen},
-SUBTITLE = {Eine Entdeckungsreise in die Mathematik},
-PUBLISHER = {Springer},
-LOCATION = {Berlin \& Heidelberg},
-YEAR = {2021},
+    AUTHOR = {Edmund Weitz},
+    TITLE = {Pi und die Primzahlen},
+    SUBTITLE = {Eine Entdeckungsreise in die Mathematik},
+    PUBLISHER = {Springer},
+    LOCATION = {Berlin \& Heidelberg},
+    YEAR = {2021},
 }
 
 % ein Eintrag, der nicht im Literaturverzeichnis auftaucht, weil er nicht zitiert wird
+
 @book{rand,
-AUTHOR = {{Rand Corporation}},
-TITLE = {A million random digits with 100,000 normal deviates},
-PUBLISHER = {Free Press},
-YEAR = {1955},
+    AUTHOR = {{Rand Corporation}},
+    TITLE = {A million random digits with 100,000 normal deviates},
+    PUBLISHER = {Free Press},
+    YEAR = {1955},
+}
+
+% Chapter Benchmarks Online Literature https://martinvogel.de/lexikon/bottleneck.html
+
+@online{bottleneck,
+    AUTHOR = {Martin Vogel},
+    TITLE = {EDV-Lexikon},
+    SUBTITLE = {Bottleneck},
+    URL = {https://martinvogel.de/lexikon/bottleneck.html},
+    URLDATE = {2024-10-28},
+    PUBLISHER = {Martin Vogel},
+    LOCATION = {Dortmund},
+    YEAR = {2009},
+}
+
+@online{snapshot,
+    AUTHOR = {Rubrik Germany},
+    TITLE = {Was ist ein Snapshot Backup?},
+    URL = {https://www.rubrik.com/de/insights/what-is-a-snapshot-backup},
+    URLDATE = {2024-10-28},
+    PUBLISHER = {Rubrik Germany},
+    LOCATION = {Frankfurt am Main},
+    YEAR = {2024},
+}
+
+@online{sysbench_mysql,
+    AUTHOR = {Nils Reimers},
+    TITLE = {Virtuelle, dezidierte und Cloud-Server},
+    SUBTITLE = {MySQL-Benchmark mittels sysbench},
+    URL = {https://www.webhosterwissen.de/know-how/server/mysql-benchmark-mittels-sysbench/},
+    URLDATE = {2024-10-28},
+    PUBLISHER = {WebhosterWissen},
+    LOCATION = {Darmstadt},
+    YEAR = {2017},
+}
+
+@online{sysbench_repo,
+    AUTHOR = {akopytov},
+    TITLE = {Sysbench Github Repository},
+    URL = {https://github.com/akopytov/sysbench},
+    URLDATE = {2024-10-28},
+    PUBLISHER = {akopytov},
+    YEAR = {2024},
+}
+
+@online{mybench_repo,
+    AUTHOR = {Shopify},
+    TITLE = {Mybench Github Repository},
+    URL = {https://github.com/Shopify/mybench},
+    URLDATE = {2024-10-28},
+    PUBLISHER = {Shopify},
+    YEAR = {2024},
+}
+
+@online{mybench_comparison,
+    AUTHOR = {Shopify},
+    TITLE = {What is mybench?},
+    URL = {https://shopify.github.io/mybench/introduction.html},
+    URLDATE = {2024-10-28},
+    PUBLISHER = {Shopify},
+    YEAR = {2022},
+}
+
+@online{mybench_user_interface,
+    AUTHOR = {Shopify},
+    TITLE = {Detailed design documentation},
+    URL = {https://shopify.github.io/mybench/detailed-design-doc.html#live-monitoring-user-interface},
+    URLDATE = {2024-10-28},
+    PUBLISHER = {Shopify},
+    YEAR = {2022},
+}
+
+@article{DifallahPCC13,
+    author = {Djellel Eddine Difallah and Andrew Pavlo and Carlo Curino and Philippe Cudr{\'e}-Mauroux},
+    title = {OLTP-Bench: An Extensible Testbed for Benchmarking Relational Databases},
+    journal = {PVLDB},
+    volume = {7},
+    number = {4},
+    year = {2013},
+    pages = {277--288},
+    url = {http://www.vldb.org/pvldb/vol7/p277-difallah.pdf},
+}
+
+@online{gnuplot,
+    AUTHOR = { Thomas Williams and Colin Kelley and {many others} },
+    TITLE = {Gnuplot Repository},
+    URL = {https://github.com/gnuplot/gnuplot},
+    URLDATE = {2024-10-28},
+    PUBLISHER = {Gnuplot},
+    YEAR = {2024},
+}
+
+% Literatur 01-08
+
+@article{silberschatz2011database,
+    title = {Database system concepts},
+    author = {Silberschatz, Abraham and Korth, Henry F and Sudarshan, Shashank},
+    year = {2011},
+    journal = {Development},
+    publisher = {McGraw-Hill Education}
+}
+
+@book{garcia2008database,
+    title = {Database systems: the complete book},
+    author = {Garcia-Molina, Hector},
+    year = {2008},
+    publisher = {Pearson Education India}
+}
+
+@article{winand2011sql,
+    title = {SQL performance explained},
+    author = {Winand, Markus},
+    journal = {Development},
+    year = {2011}
+}
+
+@book{ramakrishnan2002database,
+    title = {Database management systems},
+    author = {Ramakrishnan, Raghu and Gehrke, Johannes},
+    year = {2002},
+    publisher = {McGraw-Hill, Inc.}
+}
+
+@book{kleppmann2017designing,
+    title = {Designing data-intensive applications: The big ideas behind reliable, scalable, and maintainable systems},
+    author = {Kleppmann, Martin},
+    year = {2017},
+    publisher = {" O'Reilly Media, Inc."}
+}
+
+@book{kimball2011data,
+    title = {The data warehouse toolkit: the complete guide to dimensional modeling},
+    author = {Kimball, Ralph and Ross, Margy},
+    year = {2011},
+    publisher = {John Wiley \& Sons}
+}
+
+@book{schwartz2012high,
+    title = {High performance MySQL: optimization, backups, and replication},
+    author = {Schwartz, Baron and Zaitsev, Peter and Tkachenko, Vadim},
+    year = {2012},
+    publisher = {" O'Reilly Media, Inc."}
+}
+
+@book{da2015redis,
+    title = {Redis Essentials},
+    author = {Da Silva, Maxwell Dayvson and Tavares, Hugo Lopes},
+    year = {2015},
+    publisher = {Packt Publishing Ltd}
 }

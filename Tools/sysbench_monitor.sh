@@ -15,11 +15,31 @@ TABLE_SIZE=10000
 DURATION=10
 
 echo "Preparing the database..."
-sysbench oltp_read_write --db-driver=mysql --mysql-host=$DB_HOST --mysql-user=$DB_USER --mysql-password=$DB_PASS --mysql-db=$DB_NAME --tables=$TABLES --table-size=$TABLE_SIZE prepare > $RAW_RESULTS_FILE 2>&1
+sysbench oltp_read_write \
+  --db-driver=mysql \
+  --mysql-host=$DB_HOST \
+  --mysql-user=$DB_USER \
+  --mysql-password=$DB_PASS \
+  --mysql-db=$DB_NAME \
+  --tables=$TABLES \
+  --table-size=$TABLE_SIZE \
+  prepare > $RAW_RESULTS_FILE 2>&1
+
 echo "Database prepared."
 
 echo "Running benchmark..."
-sysbench oltp_read_write --db-driver=mysql --mysql-host=$DB_HOST --mysql-user=$DB_USER --mysql-password=$DB_PASS --mysql-db=$DB_NAME --tables=$TABLES --table-size=$TABLE_SIZE --time=$DURATION --threads=1 --report-interval=1 run >> $RAW_RESULTS_FILE 2>&1
+sysbench oltp_read_write \
+  --db-driver=mysql \
+  --mysql-host=$DB_HOST \
+  --mysql-user=$DB_USER \
+  --mysql-password=$DB_PASS \
+  --mysql-db=$DB_NAME \
+  --tables=$TABLES \
+  --table-size=$TABLE_SIZE \
+  --time=$DURATION \
+  --threads=1 \
+  --report-interval=1 \
+  run >> $RAW_RESULTS_FILE 2>&1
 
 echo "Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms,95%),Err/s,Reconn/s" > "$OUTPUT_FILE"
 
@@ -51,5 +71,14 @@ gnuplot $GNUPLOT_SCRIPT
 echo "Plot generated."
 
 echo "Cleaning up..."
-sysbench oltp_read_write --db-driver=mysql --mysql-host=$DB_HOST --mysql-user=$DB_USER --mysql-password=$DB_PASS --mysql-db=$DB_NAME --tables=$TABLES cleanup >> $RAW_RESULTS_FILE 2>&1
+
+sysbench oltp_read_write \
+  --db-driver=mysql \
+  --mysql-host=$DB_HOST \
+  --mysql-user=$DB_USER \
+  --mysql-password=$DB_PASS \
+  --mysql-db=$DB_NAME \
+  --tables=$TABLES \
+  cleanup >> $RAW_RESULTS_FILE 2>&1
+
 echo "Database cleanup complete."
