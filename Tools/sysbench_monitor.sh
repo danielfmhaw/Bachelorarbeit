@@ -41,7 +41,7 @@ sysbench oltp_read_write \
   --report-interval=1 \
   run >> $RAW_RESULTS_FILE 2>&1
 
-echo "Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms,95%),Err/s,Reconn/s" > "$OUTPUT_FILE"
+echo "Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE"
 
 # Extract the relevant lines and format as CSV
 grep '^\[ ' $RAW_RESULTS_FILE | while read -r line; do
@@ -65,11 +65,6 @@ done
 
 echo "Benchmark complete. Results saved to $OUTPUT_FILE."
 
-# Generate the Gnuplot graph
-echo "Generating plot..."
-gnuplot $GNUPLOT_SCRIPT
-echo "Plot generated."
-
 echo "Cleaning up..."
 
 sysbench oltp_read_write \
@@ -82,3 +77,20 @@ sysbench oltp_read_write \
   cleanup >> $RAW_RESULTS_FILE 2>&1
 
 echo "Database cleanup complete."
+
+# Generate plot with gnuplot
+echo "Generating plot..."
+gnuplot $GNUPLOT_SCRIPT
+echo "Plot generated."
+
+# Generate plot with pandas
+echo "Generating plot..."
+python3 Pandas/generateplot.py "$OUTPUT_FILE"
+
+# Check if the plot generation was successful
+if [ $? -eq 0 ]; then
+    echo "Plots generated successfully."
+else
+    echo "Plot generation failed."
+    exit 1
+fi

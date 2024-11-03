@@ -3,6 +3,7 @@
 # File Paths
 OUTPUT_FILE="output/sysbench_output.csv"
 OUTPUT_DIR="output/logs"
+GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pandas/generateplot.py"
 LUA_SCRIPTS=("int_queries.lua" "varchar_queries.lua")
 
 # Connection parameters
@@ -17,14 +18,14 @@ TIME=60
 THREADS=4
 EVENTS=0
 POINT_SELECTS=10
-REPORT_INTERVAL=1
+REPORT_INTERVAL=5
 
 # Ensure output directories exist
 mkdir -p "$OUTPUT_DIR"
 mkdir -p "$(dirname "$OUTPUT_FILE")"
 
 # Prepare CSV header
-echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms,95%),Err/s,Reconn/s" > "$OUTPUT_FILE"
+echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE"
 
 # Loop through each Lua script
 for LUA_SCRIPT in "${LUA_SCRIPTS[@]}"; do
@@ -121,7 +122,7 @@ done
 
 # Generate plot after all tasks are completed
 echo "Generating plots..."
-python3 generateplot.py "$OUTPUT_FILE" QPS Reads Writes Other
+python3 $GENERATE_PLOT_SCRIPT "$OUTPUT_FILE" QPS Reads Writes Other
 
 # Check if the plot generation was successful
 if [ $? -eq 0 ]; then
