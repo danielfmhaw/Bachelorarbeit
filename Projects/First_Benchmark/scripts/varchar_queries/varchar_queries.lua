@@ -1,11 +1,9 @@
 local num_rows = 10000
 
 function prepare()
-    -- SQL query to create the KUNDENMITID table without auto-increment for KUNDEN_ID
     local create_kunden_query = [[
-        CREATE TABLE IF NOT EXISTS KUNDENMITID (
-            KUNDEN_ID     INT PRIMARY KEY,
-            NAME          VARCHAR(255),
+        CREATE TABLE IF NOT EXISTS KUNDENMITVARCHAR (
+            NAME          VARCHAR(255) PRIMARY KEY,
             GEBURTSTAG    DATE,
             ADRESSE       VARCHAR(255),
             STADT         VARCHAR(100),
@@ -16,28 +14,32 @@ function prepare()
         );
     ]]
 
-    -- SQL query to create the BESTELLUNGMITID table
+    -- SQL query to create BESTELLUNGMITVARCHAR table
     local create_bestellung_query = [[
-        CREATE TABLE IF NOT EXISTS BESTELLUNGMITID (
+        CREATE TABLE IF NOT EXISTS BESTELLUNGMITVARCHAR (
             BESTELLDATUM DATE,
             ARTIKEL_ID   INT,
-            FK_KUNDEN    INT NOT NULL,
+            FK_KUNDEN    VARCHAR(255) NOT NULL,
             UMSATZ       INT,
             PRIMARY KEY (BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN),
-            FOREIGN KEY (FK_KUNDEN) REFERENCES KUNDENMITID (KUNDEN_ID)
+            FOREIGN KEY (FK_KUNDEN) REFERENCES KUNDENMITVARCHAR (NAME)
         );
     ]]
 
     -- Execute the table creation queries
     db_query(create_kunden_query)
     db_query(create_bestellung_query)
-    print("Tables KUNDENMITID and BESTELLUNGMITID have been successfully created.")
+
+    -- Log message indicating tables have been created
+    print("Tables KUNDENMITVARCHAR and BESTELLUNGMITVARCHAR have been successfully created.")
+
+    insert_data()
 end
 
--- Function to insert randomized data into KUNDENMITID and BESTELLUNGMITID
+-- Function to insert randomized data into KUNDENMITVARCHAR and BESTELLUNGMITVARCHAR
 function insert_data()
     for i = 1, num_rows do
-        local kunden_id = i
+        -- Random data generation for KUNDENMITVARCHAR fields
         local name = string.format("Customer_%d", i)
         local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
         local adresse = string.format("Address_%d", i)
@@ -47,29 +49,29 @@ function insert_data()
         local email = string.format("customer%d@example.com", i)
         local telefonnummer = string.format("+49157%07d", math.random(1000000, 9999999))
 
-        -- Insert into KUNDENMITID, ignoring duplicates
+        -- Insert into KUNDENMITVARCHAR, ignoring duplicates
         local kunden_query = string.format([[
-            INSERT IGNORE INTO KUNDENMITID
-            (KUNDEN_ID, NAME, GEBURTSTAG, ADRESSE, STADT, POSTLEITZAHL, LAND, EMAIL, TELEFONNUMMER)
-            VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
-        ]], kunden_id, name, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
+            INSERT IGNORE INTO KUNDENMITVARCHAR
+            (NAME, GEBURTSTAG, ADRESSE, STADT, POSTLEITZAHL, LAND, EMAIL, TELEFONNUMMER)
+            VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
+        ]], name, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
 
         -- Execute the customer insertion
         db_query(kunden_query)
 
-        -- Insert randomized orders into BESTELLUNGMITID for each customer
+        -- Insert randomized orders into BESTELLUNGMITVARCHAR for each customer
         local order_count = math.random(1, 5)  -- Random number of orders per customer
         for j = 1, order_count do
             local bestelldatum = string.format("2024-%02d-%02d", math.random(1, 12), math.random(1, 28))
             local artikel_id = math.random(1, 1000)
             local umsatz = math.random(100, 1000)
 
-            -- Insert into BESTELLUNGMITID, referencing KUNDEN_ID
+            -- Insert into BESTELLUNGMITVARCHAR, ignoring duplicates
             local bestellung_query = string.format([[
-                INSERT IGNORE INTO BESTELLUNGMITID
+                INSERT IGNORE INTO BESTELLUNGMITVARCHAR
                 (BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
-                VALUES ('%s', %d, %d, %d);
-            ]], bestelldatum, artikel_id, kunden_id, umsatz)
+                VALUES ('%s', %d, '%s', %d);
+            ]], bestelldatum, artikel_id, name, umsatz)
 
             -- Execute the order insertion
             db_query(bestellung_query)
@@ -77,29 +79,24 @@ function insert_data()
     end
 end
 
--- Function to execute a JOIN query to calculate total Umsatz per Stadt
+-- Execute a JOIN query to calculate the sum of Umsatz per Stadt
 function select_query()
     local join_query = [[
         SELECT k.STADT, SUM(b.UMSATZ) AS Total_Umsatz
-        FROM KUNDENMITID k
-        JOIN BESTELLUNGMITID b ON k.KUNDEN_ID = b.FK_KUNDEN
+        FROM KUNDENMITVARCHAR k
+        JOIN BESTELLUNGMITVARCHAR b ON k.NAME = b.FK_KUNDEN
         GROUP BY k.STADT;
     ]]
+
     db_query(join_query)
 end
 
--- Cleanup function to drop tables
+
 function cleanup()
-    local drop_bestellung_query = "DROP TABLE IF EXISTS BESTELLUNGMITID;"
-    local drop_kunden_query = "DROP TABLE IF EXISTS KUNDENMITID;"
+    local drop_kunden_query = "DROP TABLE IF EXISTS KUNDENMITVARCHAR;"
+    local drop_bestellung_query = "DROP TABLE IF EXISTS BESTELLUNGMITVARCHAR;"
 
     db_query(drop_bestellung_query)
     db_query(drop_kunden_query)
     print("Cleanup successfully done")
-end
-
--- Main event function to insert data and execute query
-function event()
-    insert_data()
-    select_query()
 end

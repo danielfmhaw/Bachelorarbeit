@@ -4,7 +4,12 @@
 OUTPUT_FILE="output/sysbench_output.csv"
 OUTPUT_DIR="output/logs"
 GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pandas/generateplot.py"
-LUA_SCRIPTS=("int_queries.lua" "varchar_queries.lua")
+
+# Lua script directories for int_queries and varchar_queries
+SCRIPT_PATHS=(
+  "scripts/int_queries"
+  "scripts/varchar_queries"
+)
 
 # Connection parameters
 DB_HOST="127.0.0.1"
@@ -15,9 +20,8 @@ DB_NAME="sbtest"
 
 # Sysbench configuration
 TIME=60
-THREADS=4
+THREADS=8
 EVENTS=0
-POINT_SELECTS=10
 REPORT_INTERVAL=5
 
 # Ensure output directories exist
@@ -27,12 +31,12 @@ mkdir -p "$(dirname "$OUTPUT_FILE")"
 # Prepare CSV header
 echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE"
 
-# Loop through each Lua script
-for LUA_SCRIPT in "${LUA_SCRIPTS[@]}"; do
-  SCRIPT_NAME=$(basename "$LUA_SCRIPT" .lua)
-  RAW_RESULTS_FILE="$OUTPUT_DIR/${SCRIPT_NAME}_sysbench.log"
+# Helper function to run sysbench with specified Lua script and mode
+run_sysbench() {
+  local LUA_SCRIPT_PATH="$1"
+  local MODE="$2"
+  local LOG_FILE="$3"
 
-  # Prepare the database
   sysbench \
     --db-driver=mysql \
     --mysql-host="$DB_HOST" \
@@ -43,40 +47,43 @@ for LUA_SCRIPT in "${LUA_SCRIPTS[@]}"; do
     --time=$TIME \
     --threads=$THREADS \
     --events=$EVENTS \
-    --point_selects=$POINT_SELECTS \
     --report-interval=$REPORT_INTERVAL \
-    "$LUA_SCRIPT" prepare > "$RAW_RESULTS_FILE" 2>&1
+    "$LUA_SCRIPT_PATH" "$MODE" >> "$LOG_FILE" 2>&1
 
+  return $?
+}
+
+# Loop through each query path
+for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
+  MAIN_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH").lua"
+  INSERT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_insert.lua"
+  SELECT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_select.lua"
+
+  # Prepare phase
+  RAW_RESULTS_FILE="$OUTPUT_DIR/$(basename "$QUERY_PATH")_prepare.log"
+  echo "Preparing database for $MAIN_SCRIPT..."
+  run_sysbench "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
   if [ $? -ne 0 ]; then
-    echo "Database preparation failed for script $LUA_SCRIPT. Exiting."
+    echo "Database preparation failed for $MAIN_SCRIPT. Exiting."
     exit 1
   fi
-  echo "Database prepared for $LUA_SCRIPT."
+  echo "Database prepared for $MAIN_SCRIPT."
 
-  # Run the benchmark
-  echo "Running benchmark for $LUA_SCRIPT..."
-  sysbench \
-    --db-driver=mysql \
-    --mysql-host="$DB_HOST" \
-    --mysql-port="$DB_PORT" \
-    --mysql-user="$DB_USER" \
-    --mysql-password="$DB_PASS" \
-    --mysql-db="$DB_NAME" \
-    --time=$TIME \
-    --threads=$THREADS \
-    --events=$EVENTS \
-    --point_selects=$POINT_SELECTS \
-    --report-interval=$REPORT_INTERVAL \
-    "$LUA_SCRIPT" run >> "$RAW_RESULTS_FILE" 2>&1
+  # Run benchmarks for INSERT and SELECT
+  for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT"; do
+    SCRIPT_NAME=$(basename "$SCRIPT" .lua)
+    RAW_RESULTS_FILE="$OUTPUT_DIR/${SCRIPT_NAME}_sysbench.log"
 
-  if [ $? -ne 0 ]; then
-    echo "Benchmark failed for script $LUA_SCRIPT. Exiting."
-    exit 1
-  fi
-  echo "Benchmark complete for $LUA_SCRIPT."
+    echo "Running benchmark for $SCRIPT..."
+    run_sysbench "$SCRIPT" "run" "$RAW_RESULTS_FILE"
+    if [ $? -ne 0 ]; then
+      echo "Benchmark failed for script $SCRIPT. Exiting."
+      exit 1
+    fi
+    echo "Benchmark complete for $SCRIPT."
 
-  # Extract data and format it as CSV
-  grep '^\[ ' "$RAW_RESULTS_FILE" | while read -r line; do
+    # Extract data and format it as CSV
+    grep '^\[ ' "$RAW_RESULTS_FILE" | while read -r line; do
       time=$(echo "$line" | awk '{print $2}' | sed 's/s//')
       threads=$(echo "$line" | awk -F 'thds: ' '{print $2}' | awk '{print $1}')
       tps=$(echo "$line" | awk -F 'tps: ' '{print $2}' | awk '{print $1}')
@@ -94,35 +101,24 @@ for LUA_SCRIPT in "${LUA_SCRIPTS[@]}"; do
 
       # Append to CSV file with script identifier
       echo "$SCRIPT_NAME,$time,$threads,$tps,$qps,$reads,$writes,$other,$latency,$err_per_sec,$reconn_per_sec" >> "$OUTPUT_FILE"
+    done
+    echo "Results for $SCRIPT saved to $OUTPUT_FILE."
   done
 
-  echo "Results for $LUA_SCRIPT saved to $OUTPUT_FILE."
-
-  # Clean up the database
-  sysbench \
-    --db-driver=mysql \
-    --mysql-host="$DB_HOST" \
-    --mysql-port="$DB_PORT" \
-    --mysql-user="$DB_USER" \
-    --mysql-password="$DB_PASS" \
-    --mysql-db="$DB_NAME" \
-    --time=$TIME \
-    --threads=$THREADS \
-    --events=$EVENTS \
-    --point_selects=$POINT_SELECTS \
-    --report-interval=$REPORT_INTERVAL \
-    "$LUA_SCRIPT" cleanup >> "$RAW_RESULTS_FILE" 2>&1
-
+  # Cleanup phase
+  RAW_RESULTS_FILE="$OUTPUT_DIR/$(basename "$QUERY_PATH")_cleanup.log"
+  echo "Cleaning up database for $MAIN_SCRIPT..."
+  run_sysbench "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
   if [ $? -ne 0 ]; then
-    echo "Database cleanup failed for script $LUA_SCRIPT."
+    echo "Database cleanup failed for $MAIN_SCRIPT."
     exit 1
   fi
-  echo "Database cleanup complete for $LUA_SCRIPT."
+  echo "Database cleanup complete for $MAIN_SCRIPT."
 done
 
 # Generate plot after all tasks are completed
 echo "Generating plots..."
-python3 $GENERATE_PLOT_SCRIPT "$OUTPUT_FILE" QPS Reads Writes Other
+python3 "$GENERATE_PLOT_SCRIPT" "$OUTPUT_FILE"
 
 # Check if the plot generation was successful
 if [ $? -eq 0 ]; then

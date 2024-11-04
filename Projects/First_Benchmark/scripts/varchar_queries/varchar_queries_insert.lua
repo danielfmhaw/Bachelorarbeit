@@ -1,39 +1,5 @@
 local num_rows = 10000
 
-function prepare()
-    local create_kunden_query = [[
-        CREATE TABLE IF NOT EXISTS KUNDENMITVARCHAR (
-            NAME          VARCHAR(255) PRIMARY KEY,
-            GEBURTSTAG    DATE,
-            ADRESSE       VARCHAR(255),
-            STADT         VARCHAR(100),
-            POSTLEITZAHL  VARCHAR(10),
-            LAND          VARCHAR(100),
-            EMAIL         VARCHAR(255) UNIQUE,
-            TELEFONNUMMER VARCHAR(20)
-        );
-    ]]
-
-    -- SQL query to create BESTELLUNGMITVARCHAR table
-    local create_bestellung_query = [[
-        CREATE TABLE IF NOT EXISTS BESTELLUNGMITVARCHAR (
-            BESTELLDATUM DATE,
-            ARTIKEL_ID   INT,
-            FK_KUNDEN    VARCHAR(255) NOT NULL,
-            UMSATZ       INT,
-            PRIMARY KEY (BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN),
-            FOREIGN KEY (FK_KUNDEN) REFERENCES KUNDENMITVARCHAR (NAME)
-        );
-    ]]
-
-    -- Execute the table creation queries
-    db_query(create_kunden_query)
-    db_query(create_bestellung_query)
-
-    -- Log message indicating tables have been created
-    print("Tables KUNDENMITVARCHAR and BESTELLUNGMITVARCHAR have been successfully created.")
-end
-
 -- Function to insert randomized data into KUNDENMITVARCHAR and BESTELLUNGMITVARCHAR
 function insert_data()
     for i = 1, num_rows do
@@ -77,29 +43,6 @@ function insert_data()
     end
 end
 
--- Execute a JOIN query to calculate the sum of Umsatz per Stadt
-function select_query()
-    local join_query = [[
-        SELECT k.STADT, SUM(b.UMSATZ) AS Total_Umsatz
-        FROM KUNDENMITVARCHAR k
-        JOIN BESTELLUNGMITVARCHAR b ON k.NAME = b.FK_KUNDEN
-        GROUP BY k.STADT;
-    ]]
-
-    db_query(join_query)
-end
-
-
-function cleanup()
-    local drop_kunden_query = "DROP TABLE IF EXISTS KUNDENMITVARCHAR;"
-    local drop_bestellung_query = "DROP TABLE IF EXISTS BESTELLUNGMITVARCHAR;"
-
-    db_query(drop_bestellung_query)
-    db_query(drop_kunden_query)
-    print("Cleanup sucessfully done")
-end
-
 function event()
     insert_data()
-    select_query()
 end

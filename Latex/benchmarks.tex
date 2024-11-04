@@ -1,6 +1,9 @@
 %! Author = danielmendes
 %! Date = 21.10.24
+
+
 \chapter{Überblick}
+
 
 \section{Einführung in Benchmarks}
 
@@ -53,6 +56,7 @@ fehlerhafte Tests wertlos sind. Außerdem ist es wichtig, die Ergebnisse in eine
 darzustellen, da auftretende Phänomene sonst anhand einer tabellarischen Darstellung nicht
 erkannt werden können.
 
+
 \section{Measures}
 \begin{itemize}[label={--}]
     \item \textbf{Durchsatz (Throughput):} Der Durchsatz ist die Anzahl an Transaktionen pro Zeiteinheit.
@@ -73,7 +77,9 @@ erkannt werden können.
     Die meisten Systeme sind jedoch nicht linear skalierbar und zeigen Leistungseinbußen, wenn die Parameter variieren.
 \end{itemize}
 
+
 \section{Tools}\label{sec:tools}
+
 \subsection{Einführung}\label{subsec:einfuhrung}
 
 \begin{itemize}
@@ -125,3 +131,26 @@ sysbench --db-driver=mysql --mysql-host=localhost --mysql-user=YOUR_USER --mysql
     label={lst:plot_sysbench},
     style=custom_daniel,
 ]{Scripts/plot_sysbench.gp}
+
+
+\begin{itemize}
+    \item \textbf{Threads}: Die Anzahl der gleichzeitig verwendeten Threads.
+    Mehr Threads können die Parallelität erhöhen, jedoch kann eine zu hohe Anzahl
+    die Leistung beeinträchtigen, wenn das System überlastet wird.
+    \item \textbf{TPS (Transactions Per Second)}: Die Anzahl der Transaktionen pro Sekunde.
+    Ein höherer Wert deutet auf eine bessere Datenbankleistung hin.
+    \item \textbf{QPS (Queries Per Second)}: Die Anzahl der Abfragen pro Sekunde.
+    Ein höherer Wert ist besser und zeigt die Effizienz bei der Verarbeitung von Abfragen.
+    \item \textbf{Reads}: Die Anzahl der Leseoperationen.
+    Mehr Leseoperationen sind im Allgemeinen besser, da sie eine höhere Datenauslastung anzeigen, was jedoch auch vom spezifischen Anwendungsfall abhängt.
+    \item \textbf{Writes}: Die Anzahl der Schreiboperationen.
+    Ähnlich wie bei den Leseoperationen: Mehr Schreibvorgänge sind besser, solange die Performance erhalten bleibt.
+    \item \textbf{Other}: Bezieht sich auf andere Arten von Operationen, die weder als Reads noch als Writes kategorisiert werden.
+    Ein höherer Wert ist gut, solange er nicht zu einer Überlastung führt.
+    \item \textbf{Latency (ms; 95\%)}: Die durchschnittliche Zeit in Millisekunden, die benötigt wird, um Anfragen zu bearbeiten, wobei der Wert im 95. Perzentil betrachtet wird.
+    Niedrigere Werte sind besser, da sie auf schnellere Reaktionszeiten hinweisen.
+    \item \textbf{ErrPs (Errors Per Second)}: Die Anzahl der Fehler pro Sekunde.
+    Ein niedriger Wert ist wünschenswert, da er auf eine höhere Stabilität und Zuverlässigkeit des Systems hinweist.
+    \item \textbf{ReconnPs (Reconnects Per Second)}: Die Anzahl der Wiederverbindungen pro Sekunde.
+    Ein niedrigerer Wert ist ebenfalls besser, da häufige Wiederverbindungen auf Stabilitätsprobleme hindeuten können.
+\end{itemize}
