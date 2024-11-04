@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # File Paths
+OUTPUT_FILE_INOFFICIAL="output/sysbench_output_inofficial.csv"
 OUTPUT_FILE="output/sysbench_output.csv"
 OUTPUT_DIR="output/logs"
 GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pandas/generateplot.py"
@@ -19,17 +20,17 @@ DB_PASS="password"
 DB_NAME="sbtest"
 
 # Sysbench configuration
-TIME=60
+TIME=30
 THREADS=8
 EVENTS=0
-REPORT_INTERVAL=5
+REPORT_INTERVAL=1
 
 # Ensure output directories exist
 mkdir -p "$OUTPUT_DIR"
-mkdir -p "$(dirname "$OUTPUT_FILE")"
+mkdir -p "$(dirname "$OUTPUT_FILE_INOFFICIAL")"
 
 # Prepare CSV header
-echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE"
+echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE_INOFFICIAL"
 
 # Helper function to run sysbench with specified Lua script and mode
 run_sysbench() {
@@ -100,9 +101,9 @@ for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
       reconn_per_sec=$(echo "$line" | awk -F 'reconn/s: ' '{print $2}' | awk '{print $1}')
 
       # Append to CSV file with script identifier
-      echo "$SCRIPT_NAME,$time,$threads,$tps,$qps,$reads,$writes,$other,$latency,$err_per_sec,$reconn_per_sec" >> "$OUTPUT_FILE"
+      echo "$SCRIPT_NAME,$time,$threads,$tps,$qps,$reads,$writes,$other,$latency,$err_per_sec,$reconn_per_sec" >> "$OUTPUT_FILE_INOFFICIAL"
     done
-    echo "Results for $SCRIPT saved to $OUTPUT_FILE."
+    echo "Results for $SCRIPT saved to $OUTPUT_FILE_INOFFICIAL."
   done
 
   # Cleanup phase
@@ -115,6 +116,41 @@ for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
   fi
   echo "Database cleanup complete for $MAIN_SCRIPT."
 done
+
+# Prepare CSV header for the output file
+echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE"
+
+# Read the input file (skip the header)
+tail -n +2 "$OUTPUT_FILE_INOFFICIAL" | while IFS=, read -r SCRIPT TIME THREADS TPS QPS READS WRITES OTHER LATENCY ERRPS RECONNPS; do
+    # Determine the base script name by removing _insert or _select suffix
+    BASE_SCRIPT=$(echo "$SCRIPT" | sed -E 's/_(insert|select)$//')
+
+    # Check if it's an insert script row, in which case we try to find matching select
+    if [[ "$SCRIPT" == *_insert ]]; then
+        # Read corresponding select row with the same base script and time
+        MATCHING_SELECT=$(grep "${BASE_SCRIPT}_select,$TIME," "$OUTPUT_FILE_INOFFICIAL")
+
+        if [[ -n "$MATCHING_SELECT" ]]; then
+            # Extract values from matching select row
+            IFS=, read -r _ _ _ TPS_SEL QPS_SEL READS_SEL WRITES_SEL OTHER_SEL LATENCY_SEL ERRPS_SEL RECONNPS_SEL <<< "$MATCHING_SELECT"
+
+            # Sum up values from insert and select rows
+            COMBINED_TPS=$(echo "$TPS + $TPS_SEL" | bc)
+            COMBINED_QPS=$(echo "$QPS + $QPS_SEL" | bc)
+            COMBINED_READS=$(echo "$READS + $READS_SEL" | bc)
+            COMBINED_WRITES=$(echo "$WRITES + $WRITES_SEL" | bc)
+            COMBINED_OTHER=$(echo "$OTHER + $OTHER_SEL" | bc)
+            COMBINED_LATENCY=$(echo "$LATENCY + $LATENCY_SEL" | bc)
+            COMBINED_ERRPS=$(echo "$ERRPS + $ERRPS_SEL" | bc)
+            COMBINED_RECONNPS=$(echo "$RECONNPS + $RECONNPS_SEL" | bc)
+
+            # Write combined row to output CSV
+            echo "${BASE_SCRIPT},$TIME,$THREADS,$COMBINED_TPS,$COMBINED_QPS,$COMBINED_READS,$COMBINED_WRITES,$COMBINED_OTHER,$COMBINED_LATENCY,$COMBINED_ERRPS,$COMBINED_RECONNPS" >> "$OUTPUT_FILE"
+        fi
+    fi
+done
+
+echo "Combined CSV file created at $OUTPUT_FILE"
 
 # Generate plot after all tasks are completed
 echo "Generating plots..."
