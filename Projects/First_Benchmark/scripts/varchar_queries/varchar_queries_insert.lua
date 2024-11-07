@@ -1,7 +1,17 @@
 local num_rows = 10000
 
+function delete_data()
+    local delete_bestellung_query = "DELETE FROM BESTELLUNGMITVARCHAR;"
+    local delete_kunden_query = "DELETE FROM KUNDENMITVARCHAR;"
+    db_query("START TRANSACTION")
+    db_query(delete_bestellung_query)
+    db_query(delete_kunden_query)
+    db_query("COMMIT")
+end
+
 -- Function to insert randomized data into KUNDENMITVARCHAR and BESTELLUNGMITVARCHAR
 function insert_data()
+    delete_data()
     for i = 1, num_rows do
         -- Random data generation for KUNDENMITVARCHAR fields
         local name = string.format("Customer_%d", i)
@@ -23,19 +33,18 @@ function insert_data()
         -- Execute the customer insertion
         db_query(kunden_query)
 
-        -- Insert randomized orders into BESTELLUNGMITVARCHAR for each customer
-        local order_count = math.random(1, 5)  -- Random number of orders per customer
-        for j = 1, order_count do
-            local bestelldatum = string.format("2024-%02d-%02d", math.random(1, 12), math.random(1, 28))
-            local artikel_id = math.random(1, 1000)
-            local umsatz = math.random(100, 1000)
+        for j = 1, 5 do
+          local bestellung_id = i + j
+          local bestelldatum = string.format("2024-%02d-%02d", math.random(1, 12), math.random(1, 28))
+          local artikel_id = math.random(1, 1000)
+          local umsatz = math.random(100, 1000)
 
-            -- Insert into BESTELLUNGMITVARCHAR, ignoring duplicates
-            local bestellung_query = string.format([[
-                INSERT IGNORE INTO BESTELLUNGMITVARCHAR
-                (BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
-                VALUES ('%s', %d, '%s', %d);
-            ]], bestelldatum, artikel_id, name, umsatz)
+          -- Insert into BESTELLUNGMITVARCHAR, ignoring duplicates
+          local bestellung_query = string.format([[
+              INSERT IGNORE INTO BESTELLUNGMITVARCHAR
+              (BESTELLUNG_ID, BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
+              VALUES (%d,'%s', %d, '%s', %d);
+          ]],bestellung_id, bestelldatum, artikel_id, name, umsatz)
 
             -- Execute the order insertion
             db_query(bestellung_query)

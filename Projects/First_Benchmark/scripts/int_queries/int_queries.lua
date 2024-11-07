@@ -19,11 +19,11 @@ function prepare()
     -- SQL query to create the BESTELLUNGMITID table
     local create_bestellung_query = [[
         CREATE TABLE IF NOT EXISTS BESTELLUNGMITID (
+            BESTELLUNG_ID INT PRIMARY KEY,
             BESTELLDATUM DATE,
             ARTIKEL_ID   INT,
             FK_KUNDEN    INT NOT NULL,
             UMSATZ       INT,
-            PRIMARY KEY (BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN),
             FOREIGN KEY (FK_KUNDEN) REFERENCES KUNDENMITID (KUNDEN_ID)
         );
     ]]
@@ -59,19 +59,17 @@ function insert_data()
         -- Execute the customer insertion
         db_query(kunden_query)
 
-        -- Insert randomized orders into BESTELLUNGMITID for each customer
-        local order_count = math.random(1, 5)
-        for j = 1, order_count do
+        for j = 1, 5 do
+            local bestellung_id = i + j
             local bestelldatum = string.format("2024-%02d-%02d", math.random(1, 12), math.random(1, 28))
             local artikel_id = math.random(1, 1000)
             local umsatz = math.random(100, 1000)
-
             -- Insert into BESTELLUNGMITID, referencing KUNDEN_ID
             local bestellung_query = string.format([[
                 INSERT IGNORE INTO BESTELLUNGMITID
-                (BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
-                VALUES ('%s', %d, %d, %d);
-            ]], bestelldatum, artikel_id, kunden_id, umsatz)
+                (BESTELLUNG_ID, BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
+                VALUES (%d,'%s', %d, %d, %d);
+            ]], bestellung_id, bestelldatum, artikel_id, kunden_id, umsatz)
 
             db_query(bestellung_query)
         end

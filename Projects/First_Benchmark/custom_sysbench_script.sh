@@ -6,10 +6,11 @@ OUTPUT_FILE="output/sysbench_output.csv"
 OUTPUT_DIR="output/logs"
 GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pandas/generateplot.py"
 
-# Lua script directories for int_queries and varchar_queries
+# Lua script directories for int_queries and varchar_queries "scripts/varchar_queries_length"
 SCRIPT_PATHS=(
   "scripts/int_queries"
   "scripts/varchar_queries"
+  "scripts/varchar_queries_length"
 )
 
 # Connection parameters
@@ -20,10 +21,10 @@ DB_PASS="password"
 DB_NAME="sbtest"
 
 # Sysbench configuration
-TIME=30
+TIME=60
 THREADS=8
 EVENTS=0
-REPORT_INTERVAL=1
+REPORT_INTERVAL=5
 
 # Ensure output directories exist
 mkdir -p "$OUTPUT_DIR"

@@ -1,7 +1,17 @@
 local num_rows = 10000
 
+-- Function to delete data in a safe order considering foreign key dependencies
+function delete_data()
+    local delete_bestellung_query = "DELETE FROM BESTELLUNGMITID;"
+    local delete_kunden_query = "DELETE FROM KUNDENMITID;"
+    db_query("START TRANSACTION")
+    db_query(delete_bestellung_query)
+    db_query(delete_kunden_query)
+    db_query("COMMIT")
+end
 -- Function to insert randomized data into KUNDENMITID and BESTELLUNGMITID
 function insert_data()
+    delete_data()
     for i = 1, num_rows do
         local kunden_id = i
         local name = string.format("Customer_%d", i)
@@ -23,19 +33,17 @@ function insert_data()
         -- Execute the customer insertion
         db_query(kunden_query)
 
-        -- Insert randomized orders into BESTELLUNGMITID for each customer
-        local order_count = math.random(1, 5)
-        for j = 1, order_count do
+        for j = 1, 5 do
+            local bestellung_id = i + j
             local bestelldatum = string.format("2024-%02d-%02d", math.random(1, 12), math.random(1, 28))
             local artikel_id = math.random(1, 1000)
             local umsatz = math.random(100, 1000)
-
             -- Insert into BESTELLUNGMITID, referencing KUNDEN_ID
             local bestellung_query = string.format([[
                 INSERT IGNORE INTO BESTELLUNGMITID
-                (BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
-                VALUES ('%s', %d, %d, %d);
-            ]], bestelldatum, artikel_id, kunden_id, umsatz)
+                (BESTELLUNG_ID, BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
+                VALUES (%d,'%s', %d, %d, %d);
+            ]], bestellung_id, bestelldatum, artikel_id, kunden_id, umsatz)
 
             db_query(bestellung_query)
         end
