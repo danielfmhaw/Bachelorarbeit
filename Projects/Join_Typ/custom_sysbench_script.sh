@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # File Paths
+GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pandas/generateplot.py"
 OUTPUT_FILE_INOFFICIAL="output/sysbench_output_inofficial.csv"
 OUTPUT_FILE="output/sysbench_output.csv"
 OUTPUT_DIR="output"
-GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pandas/generateplot.py"
 
 # Lua script directories for int_queries and varchar_queries "scripts/varchar_queries_length"
 SCRIPT_PATHS=(

@@ -8,7 +8,7 @@ set ylabel "Values"
 set grid
 set key outside
 set terminal pngcairo enhanced font 'Arial,10'
-set output WORK_DIR . "/output/sysbench_output.png"
+set output WORK_DIR . "/output/gnuplot/sysbench_output.png"
 set yrange [0:*]
 
 # Plot each attribute on its own line

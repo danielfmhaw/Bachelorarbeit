@@ -7,12 +7,17 @@ Dieses Repository enthält die Bachelorarbeit von Daniel Freire Mendes mit dem T
 Die Verzeichnisstruktur des Repositories ist wie folgt:
 
 ```
-├── benchmarks 
-├── latex     
-├── gnuplot   
-├── literature
-├── sql       
-└── sysbench  
+├── Latex 
+├── Literature    
+├── Projects
+   └── Demo
+   └── Join_Typ
+├── SQL
+├── Tools       
+    └── Gnuplot  
+    └── Pandas  
+    └── Sysbench  
+├── Word
 ```
 
 ### Beschreibung der Verzeichnisse

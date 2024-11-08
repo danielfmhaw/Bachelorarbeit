@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # File Paths
+GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pandas/generateplot.py"
+OUTPUT_DIR="output"
 OUTPUT_FILE="output/sysbench_output.csv"
 RAW_RESULTS_FILE="output/sysbench.log"
 GNUPLOT_SCRIPT="plot_sysbench.gp"
@@ -13,6 +15,10 @@ DB_NAME="sbtest"
 TABLES=10
 TABLE_SIZE=10000
 DURATION=10
+
+# Ensure output directories exist
+rm -rf "$OUTPUT_DIR"
+mkdir -p "$OUTPUT_DIR"
 
 echo "Preparing the database..."
 sysbench oltp_read_write \
@@ -79,18 +85,20 @@ sysbench oltp_read_write \
 echo "Database cleanup complete."
 
 # Generate plot with gnuplot
-echo "Generating plot..."
+rm -rf "$OUTPUT_DIR/gnuplot"
+mkdir -p "$OUTPUT_DIR/gnuplot"
+echo "Generating plot with gnuplot..."
 gnuplot $GNUPLOT_SCRIPT
-echo "Plot generated."
 
-# Generate plot with pandas
-echo "Generating plot..."
-python3 Pandas/generateplot.py "$OUTPUT_FILE"
+# Generate plot with pandas und verschiebe die Objekte in Pandas
+echo "Generating plots with pandas..."
+python3 "$GENERATE_PLOT_SCRIPT" "$OUTPUT_FILE"
+SOURCE_DIR="output/detailed_pngs"
+DEST_DIR="output/pandas"
+FILE_TO_MOVE="output/output_final.png"
+mkdir -p "$DEST_DIR"
+mv "$SOURCE_DIR"/* "$DEST_DIR"
+mv "$FILE_TO_MOVE" "$DEST_DIR/Summary.png"
+rm -rf "$SOURCE_DIR"
 
-# Check if the plot generation was successful
-if [ $? -eq 0 ]; then
-    echo "Plots generated successfully."
-else
-    echo "Plot generation failed."
-    exit 1
-fi
+echo "Plots generated."

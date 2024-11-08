@@ -42,40 +42,40 @@ Initializing worker threads...
 
 Threads started!
 
-[ 1s ] thds: 1 tps: 1228.86 qps: 24583.18 (r/w/o: 17209.02/4915.44/2458.72) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
-[ 2s ] thds: 1 tps: 1329.97 qps: 26599.47 (r/w/o: 18619.63/5319.89/2659.95) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
-[ 3s ] thds: 1 tps: 1320.18 qps: 26399.54 (r/w/o: 18478.48/5280.71/2640.35) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
-[ 4s ] thds: 1 tps: 1331.75 qps: 26638.02 (r/w/o: 18647.51/5327.00/2663.50) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
-[ 5s ] thds: 1 tps: 1332.22 qps: 26658.35 (r/w/o: 18661.04/5332.87/2664.43) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
-[ 6s ] thds: 1 tps: 1332.46 qps: 26636.11 (r/w/o: 18645.37/5325.82/2664.91) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
-[ 7s ] thds: 1 tps: 1336.72 qps: 26731.35 (r/w/o: 18711.05/5346.87/2673.44) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
-[ 8s ] thds: 1 tps: 1341.29 qps: 26829.75 (r/w/o: 18782.03/5365.15/2682.58) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
-[ 9s ] thds: 1 tps: 1334.70 qps: 26688.93 (r/w/o: 18680.75/5338.79/2669.39) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 1s ] thds: 1 tps: 1393.29 qps: 27882.85 (r/w/o: 19520.09/5575.17/2787.59) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 2s ] thds: 1 tps: 1494.08 qps: 29882.54 (r/w/o: 20917.08/5977.30/2988.15) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 3s ] thds: 1 tps: 1539.96 qps: 30800.29 (r/w/o: 21559.50/6160.86/3079.93) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 4s ] thds: 1 tps: 1538.58 qps: 30771.51 (r/w/o: 21540.06/6154.30/3077.15) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 5s ] thds: 1 tps: 1541.62 qps: 30819.43 (r/w/o: 21573.70/6162.48/3083.25) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 6s ] thds: 1 tps: 1577.35 qps: 31560.09 (r/w/o: 22091.96/6313.42/3154.71) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 7s ] thds: 1 tps: 1582.30 qps: 31639.95 (r/w/o: 22150.15/6325.20/3164.59) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 8s ] thds: 1 tps: 1584.03 qps: 31684.54 (r/w/o: 22178.38/6338.11/3168.05) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 9s ] thds: 1 tps: 1590.40 qps: 31800.05 (r/w/o: 22259.63/6359.61/3180.80) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
 SQL statistics:
     queries performed:
-        read:                            185248
-        write:                           52928
-        other:                           26464
-        total:                           264640
-    transactions:                        13232  (1323.05 per sec.)
-    queries:                             264640 (26461.06 per sec.)
+        read:                            216244
+        write:                           61784
+        other:                           30892
+        total:                           308920
+    transactions:                        15446  (1544.48 per sec.)
+    queries:                             308920 (30889.54 per sec.)
     ignored errors:                      0      (0.00 per sec.)
     reconnects:                          0      (0.00 per sec.)
 
 General statistics:
-    total time:                          10.0008s
-    total number of events:              13232
+    total time:                          10.0006s
+    total number of events:              15446
 
 Latency (ms):
-         min:                                    0.68
-         avg:                                    0.76
-         max:                                    4.20
+         min:                                    0.55
+         avg:                                    0.65
+         max:                                    4.47
          95th percentile:                        0.00
-         sum:                                 9996.41
+         sum:                                 9996.34
 
 Threads fairness:
-    events (avg/stddev):           13232.0000/0.00
-    execution time (avg/stddev):   9.9964/0.00
+    events (avg/stddev):           15446.0000/0.00
+    execution time (avg/stddev):   9.9963/0.00
 
 sysbench 1.0.20 (using system LuaJIT 2.1.1725453128)
 
