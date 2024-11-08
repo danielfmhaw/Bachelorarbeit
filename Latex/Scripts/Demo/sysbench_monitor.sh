@@ -8,7 +8,6 @@ RAW_RESULTS_FILE="output/sysbench.log"
 GNUPLOT_SCRIPT="plot_sysbench.gp"
 
 # Connection parameters
-DB_HOST="localhost"
 DB_USER="root"
 DB_PASS="password"
 DB_NAME="sbtest"
@@ -28,7 +27,6 @@ run_sysbench() {
 
   sysbench oltp_read_write \
     --db-driver=mysql \
-    --mysql-host="$DB_HOST" \
     --mysql-user="$DB_USER" \
     --mysql-password="$DB_PASS" \
     --mysql-db="$DB_NAME" \
