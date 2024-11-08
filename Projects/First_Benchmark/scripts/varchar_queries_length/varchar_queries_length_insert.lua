@@ -1,4 +1,5 @@
-local num_rows = 10000
+local num_rows = 2000
+local bestellungProKunde = 10
 
 function delete_data()
     local delete_bestellung_query = "DELETE FROM BESTELLUNGMITVARCHARLENGTH;"
@@ -43,17 +44,18 @@ function insert_data()
         -- Execute the customer insertion
         db_query(kunden_query)
 
-        for j = 1, 5 do
+        for j = 1, bestellungProKunde do
+            local bestellung_id = (i-1) * bestellungProKunde + j
             local bestelldatum = string.format("2024-%02d-%02d", math.random(1, 12), math.random(1, 28))
             local artikel_id = math.random(1, 1000)
             local umsatz = math.random(100, 1000)
 
             -- Insert into BESTELLUNGMITVARCHARLENGTH, ignoring duplicates
             local bestellung_query = string.format([[
-                INSERT IGNORE INTO BESTELLUNGMITVARCHARLENGTH
-                (BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
-                VALUES ('%s', %d, '%s', %d);
-            ]], bestelldatum, artikel_id, name, umsatz)
+              INSERT IGNORE INTO BESTELLUNGMITVARCHARLENGTH
+              (BESTELLUNG_ID, BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
+              VALUES (%d,'%s', %d, '%s', %d);
+            ]],bestellung_id, bestelldatum, artikel_id, name, umsatz)
 
             -- Execute the order insertion
             db_query(bestellung_query)

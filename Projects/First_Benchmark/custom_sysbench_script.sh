@@ -3,7 +3,7 @@
 # File Paths
 OUTPUT_FILE_INOFFICIAL="output/sysbench_output_inofficial.csv"
 OUTPUT_FILE="output/sysbench_output.csv"
-OUTPUT_DIR="output/logs"
+OUTPUT_DIR="output"
 GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pandas/generateplot.py"
 
 # Lua script directories for int_queries and varchar_queries "scripts/varchar_queries_length"
@@ -21,14 +21,14 @@ DB_PASS="password"
 DB_NAME="sbtest"
 
 # Sysbench configuration
-TIME=60
+TIME=21
 THREADS=8
 EVENTS=0
-REPORT_INTERVAL=5
+REPORT_INTERVAL=3
 
 # Ensure output directories exist
+rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
-mkdir -p "$(dirname "$OUTPUT_FILE_INOFFICIAL")"
 
 # Prepare CSV header
 echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE_INOFFICIAL"
@@ -60,9 +60,11 @@ for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
   MAIN_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH").lua"
   INSERT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_insert.lua"
   SELECT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_select.lua"
+  LOG_DIR="$OUTPUT_DIR/logs/$(basename "$QUERY_PATH")"
 
   # Prepare phase
-  RAW_RESULTS_FILE="$OUTPUT_DIR/$(basename "$QUERY_PATH")_prepare.log"
+  mkdir -p "$LOG_DIR"
+  RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_prepare.log"
   echo "Preparing database for $MAIN_SCRIPT..."
   run_sysbench "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
   if [ $? -ne 0 ]; then
@@ -74,7 +76,7 @@ for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
   # Run benchmarks for INSERT and SELECT
   for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT"; do
     SCRIPT_NAME=$(basename "$SCRIPT" .lua)
-    RAW_RESULTS_FILE="$OUTPUT_DIR/${SCRIPT_NAME}_sysbench.log"
+    RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}_sysbench.log"
 
     echo "Running benchmark for $SCRIPT..."
     run_sysbench "$SCRIPT" "run" "$RAW_RESULTS_FILE"
@@ -106,20 +108,10 @@ for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
     done
     echo "Results for $SCRIPT saved to $OUTPUT_FILE_INOFFICIAL."
   done
-
-  # Cleanup phase
-  RAW_RESULTS_FILE="$OUTPUT_DIR/$(basename "$QUERY_PATH")_cleanup.log"
-  echo "Cleaning up database for $MAIN_SCRIPT..."
-  run_sysbench "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
-  if [ $? -ne 0 ]; then
-    echo "Database cleanup failed for $MAIN_SCRIPT."
-    exit 1
-  fi
-  echo "Database cleanup complete for $MAIN_SCRIPT."
 done
 
 # Prepare CSV header for the output file
-echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE"
+echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs,Inserts" > "$OUTPUT_FILE"
 
 # Read the input file (skip the header)
 tail -n +2 "$OUTPUT_FILE_INOFFICIAL" | while IFS=, read -r SCRIPT TIME THREADS TPS QPS READS WRITES OTHER LATENCY ERRPS RECONNPS; do
@@ -144,9 +136,10 @@ tail -n +2 "$OUTPUT_FILE_INOFFICIAL" | while IFS=, read -r SCRIPT TIME THREADS T
             COMBINED_LATENCY=$(echo "$LATENCY + $LATENCY_SEL" | bc)
             COMBINED_ERRPS=$(echo "$ERRPS + $ERRPS_SEL" | bc)
             COMBINED_RECONNPS=$(echo "$RECONNPS + $RECONNPS_SEL" | bc)
+            COMBINED_WRITEONLY=$(echo "$QPS" | bc)
 
             # Write combined row to output CSV
-            echo "${BASE_SCRIPT},$TIME,$THREADS,$COMBINED_TPS,$COMBINED_QPS,$COMBINED_READS,$COMBINED_WRITES,$COMBINED_OTHER,$COMBINED_LATENCY,$COMBINED_ERRPS,$COMBINED_RECONNPS" >> "$OUTPUT_FILE"
+            echo "${BASE_SCRIPT},$TIME,$THREADS,$COMBINED_TPS,$COMBINED_QPS,$COMBINED_READS,$COMBINED_WRITES,$COMBINED_OTHER,$COMBINED_LATENCY,$COMBINED_ERRPS,$COMBINED_RECONNPS,$COMBINED_WRITEONLY" >> "$OUTPUT_FILE"
         fi
     fi
 done

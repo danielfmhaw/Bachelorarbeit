@@ -1,4 +1,5 @@
-local num_rows = 10000
+local num_rows = 2000
+local bestellungProKunde = 10
 
 -- Function to delete data in a safe order considering foreign key dependencies
 function delete_data()
@@ -14,7 +15,7 @@ function insert_data()
     delete_data()
     for i = 1, num_rows do
         local kunden_id = i
-        local name = string.format("Customer_%d", i)
+        local name = string.format("%d", i)
         local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
         local adresse = string.format("Address_%d", i)
         local stadt = string.format("City_%d", math.random(1, 100))
@@ -33,8 +34,8 @@ function insert_data()
         -- Execute the customer insertion
         db_query(kunden_query)
 
-        for j = 1, 5 do
-            local bestellung_id = i + j
+        for j = 1, bestellungProKunde do
+            local bestellung_id = (i-1) * bestellungProKunde + j
             local bestelldatum = string.format("2024-%02d-%02d", math.random(1, 12), math.random(1, 28))
             local artikel_id = math.random(1, 1000)
             local umsatz = math.random(100, 1000)

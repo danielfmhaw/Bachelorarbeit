@@ -1,0 +1,45 @@
+sysbench 1.0.20 (using system LuaJIT 2.1.1725453128)
+
+Running the test with following options:
+Number of threads: 8
+Report intermediate results every 3 second(s)
+Initializing random number generator from current time
+
+
+Initializing worker threads...
+
+Threads started!
+
+[ 3s ] thds: 8 tps: 381.96 qps: 381.96 (r/w/o: 381.96/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 6s ] thds: 8 tps: 386.94 qps: 386.94 (r/w/o: 386.94/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 9s ] thds: 8 tps: 387.27 qps: 387.27 (r/w/o: 387.27/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 12s ] thds: 8 tps: 387.03 qps: 387.03 (r/w/o: 387.03/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 15s ] thds: 8 tps: 387.12 qps: 387.12 (r/w/o: 387.12/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 18s ] thds: 8 tps: 387.60 qps: 387.60 (r/w/o: 387.60/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 21s ] thds: 8 tps: 387.60 qps: 387.60 (r/w/o: 387.60/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+SQL statistics:
+    queries performed:
+        read:                            8125
+        write:                           0
+        other:                           0
+        total:                           8125
+    transactions:                        8125   (386.54 per sec.)
+    queries:                             8125   (386.54 per sec.)
+    ignored errors:                      0      (0.00 per sec.)
+    reconnects:                          0      (0.00 per sec.)
+
+General statistics:
+    total time:                          21.0194s
+    total number of events:              8125
+
+Latency (ms):
+         min:                                   16.62
+         avg:                                   20.69
+         max:                                   51.33
+         95th percentile:                        0.00
+         sum:                               168073.90
+
+Threads fairness:
+    events (avg/stddev):           1015.6250/6.04
+    execution time (avg/stddev):   21.0092/0.00
+
