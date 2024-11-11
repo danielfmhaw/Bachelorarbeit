@@ -1,6 +1,20 @@
+local length = tonumber(os.getenv("VARCHAR_LENGTH")) or 0
+
 local num_rows = 2000
 local bestellungProKunde = 10
 
+-- Function to generate a random string of a given length
+local function randomString(length)
+    local charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    local result = ""
+    for i = 1, length do
+        local randIndex = math.random(1, #charset)
+        result = result .. charset:sub(randIndex, randIndex)
+    end
+    return result
+end
+
+-- Function to delete existing data from tables
 function delete_data()
     local delete_bestellung_query = "DELETE FROM BESTELLUNGMITVARCHAR;"
     local delete_kunden_query = "DELETE FROM KUNDENMITVARCHAR;"
@@ -15,7 +29,7 @@ function insert_data()
     delete_data()
     for i = 1, num_rows do
         -- Random data generation for KUNDENMITVARCHAR fields
-        local name = string.format("%d", i)
+        local name = randomString(length) .. string.format("%d", i)  -- Use dynamic length
         local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
         local adresse = string.format("Address_%d", i)
         local stadt = string.format("City_%d", math.random(1, 100))
@@ -35,7 +49,7 @@ function insert_data()
         db_query(kunden_query)
 
         for j = 1, bestellungProKunde do
-            local bestellung_id = (i-1) * bestellungProKunde + j
+            local bestellung_id = (i - 1) * bestellungProKunde + j
             local bestelldatum = string.format("2024-%02d-%02d", math.random(1, 12), math.random(1, 28))
             local artikel_id = math.random(1, 1000)
             local umsatz = math.random(100, 1000)

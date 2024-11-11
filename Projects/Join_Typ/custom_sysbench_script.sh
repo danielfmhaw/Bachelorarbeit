@@ -2,16 +2,15 @@
 
 # File Paths
 GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pandas/generateplot.py"
-OUTPUT_FILE_INOFFICIAL="output/sysbench_output_inofficial.csv"
-OUTPUT_FILE="output/sysbench_output.csv"
 OUTPUT_DIR="output"
-STATISTICS_OUTPUT_FILE="output/statistics.csv"
+OUTPUT_FILE="$OUTPUT_DIR/sysbench_output.csv"
+OUTPUT_FILE_INOFFICIAL="$OUTPUT_DIR/sysbench_output_inofficial.csv"
+STATISTICS_OUTPUT_FILE="$OUTPUT_DIR/statistics.csv"
 
-# Lua script directories for int_queries and varchar_queries "scripts/varchar_queries_length"
+# Lua script directories for int_queries and varchar_queries
 SCRIPT_PATHS=(
   "scripts/int_queries"
   "scripts/varchar_queries"
-  "scripts/varchar_queries_length"
 )
 
 # Connection parameters
@@ -22,10 +21,10 @@ DB_PASS="password"
 DB_NAME="sbtest"
 
 # Sysbench configuration
-TIME=21
+TIME=32
 THREADS=8
 EVENTS=0
-REPORT_INTERVAL=3
+REPORT_INTERVAL=4
 
 # Ensure output directories exist
 rm -rf "$OUTPUT_DIR"
@@ -57,80 +56,124 @@ run_sysbench() {
   return $?
 }
 
-# Loop through each query path
+# Function to extract and save run data
+extract_run_data() {
+  local RAW_RESULTS_FILE="$1"
+  local SCRIPT_NAME="$2"
+
+  grep '^\[ ' "$RAW_RESULTS_FILE" | while read -r line; do
+    time=$(echo "$line" | awk '{print $2}' | sed 's/s//')
+    threads=$(echo "$line" | awk -F 'thds: ' '{print $2}' | awk '{print $1}')
+    tps=$(echo "$line" | awk -F 'tps: ' '{print $2}' | awk '{print $1}')
+    qps=$(echo "$line" | awk -F 'qps: ' '{print $2}' | awk '{print $1}')
+    read_write_other=$(echo "$line" | sed -E 's/.*\(r\/w\/o: ([0-9.]+)\/([0-9.]+)\/([0-9.]+)\).*/\1,\2,\3/')
+    reads=$(echo "$read_write_other" | cut -d',' -f1)
+    writes=$(echo "$read_write_other" | cut -d',' -f2)
+    other=$(echo "$read_write_other" | cut -d',' -f3)
+    latency=$(echo "$line" | awk -F 'lat \\(ms,95%\\): ' '{print $2}' | awk '{print $1}')
+    err_per_sec=$(echo "$line" | awk -F 'err/s: ' '{print $2}' | awk '{print $1}')
+    reconn_per_sec=$(echo "$line" | awk -F 'reconn/s: ' '{print $2}' | awk '{print $1}')
+
+    echo "$SCRIPT_NAME,$time,$threads,$tps,$qps,$reads,$writes,$other,$latency,$err_per_sec,$reconn_per_sec" >> "$OUTPUT_FILE_INOFFICIAL"
+  done
+}
+
+run_benchmark() {
+  local SCRIPT_PATH="$1"
+  local MODE="$2"
+  local OUTPUT_FILE="$3"
+  local SCRIPT_NAME="$4"
+
+  run_sysbench "$SCRIPT_PATH" "$MODE" "$OUTPUT_FILE"
+  if [ $? -ne 0 ]; then
+    echo "Benchmark failed for script $SCRIPT_PATH. Exiting."
+    exit 1
+  fi
+
+  echo "Benchmark complete for $SCRIPT_PATH"
+
+  # Only extract data if the mode is "run"
+  if [ "$MODE" == "run" ]; then
+    extract_run_data "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
+    extract_statistics "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
+    echo "Results for $SCRIPT saved to $OUTPUT_FILE_INOFFICIAL and $STATISTICS_OUTPUT_FILE"
+  fi
+}
+
+# Function to extract statistics from sysbench results
+extract_statistics() {
+  local RAW_RESULTS_FILE="$1"
+  local SCRIPT_NAME="$2"
+
+  # Extract SQL statistics and append to statistics.csv
+  read=$(awk '/read:/ {print $2}' "$RAW_RESULTS_FILE")
+  write=$(awk '/write:/ {print $2}' "$RAW_RESULTS_FILE")
+  other=$(awk '/other:/ {print $2}' "$RAW_RESULTS_FILE")
+  total=$(awk '/total:/ {print $2}' "$RAW_RESULTS_FILE")
+  transactions=$(awk '/transactions:/ {print $2}' "$RAW_RESULTS_FILE")
+  queries=$(awk '/queries:/ {print $2}' "$RAW_RESULTS_FILE")
+  ignored_errors=$(awk '/ignored errors:/ {print $3}' "$RAW_RESULTS_FILE")
+  reconnects=$(awk '/reconnects:/ {print $2}' "$RAW_RESULTS_FILE")
+  total_time=$(awk '/total time:/ {print $3}' "$RAW_RESULTS_FILE")
+  total_events=$(awk '/total number of events:/ {print $5}' "$RAW_RESULTS_FILE")
+  latency_min=$(awk '/min:/ {print $2}' "$RAW_RESULTS_FILE")
+  latency_avg=$(awk '/avg:/ {print $2}' "$RAW_RESULTS_FILE")
+  latency_max=$(awk '/max:/ {print $2}' "$RAW_RESULTS_FILE")
+  latency_95th=$(awk '/95th percentile:/ {print $3}' "$RAW_RESULTS_FILE")
+  latency_sum=$(awk '/sum:/ {print $2}' "$RAW_RESULTS_FILE")
+
+  # Append the extracted data to the statistics output file
+  echo "$SCRIPT_NAME,$read,$write,$other,$total,$transactions,$queries,$ignored_errors,$reconnects,$total_time,$total_events,$latency_min,$latency_avg,$latency_max,$latency_95th,$latency_sum" >> "$STATISTICS_OUTPUT_FILE"
+}
+
+# Main benchmark loop
 for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
   MAIN_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH").lua"
   INSERT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_insert.lua"
   SELECT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_select.lua"
   LOG_DIR="$OUTPUT_DIR/logs/$(basename "$QUERY_PATH")"
 
-  # Prepare phase
-  mkdir -p "$LOG_DIR"
-  RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_prepare.log"
-  echo "Preparing database for $MAIN_SCRIPT..."
-  run_sysbench "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
-  if [ $? -ne 0 ]; then
-    echo "Database preparation failed for $MAIN_SCRIPT. Exiting."
-    exit 1
-  fi
-  echo "Database prepared for $MAIN_SCRIPT."
+  # Specific actions for varchar_queries
+  if [[ "$QUERY_PATH" == "scripts/varchar_queries" ]]; then
+    for LENGTH in 1 64; do
+      export VARCHAR_LENGTH=$((LENGTH - 1))
 
-  # Run benchmarks for INSERT and SELECT
-  for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT"; do
-    SCRIPT_NAME=$(basename "$SCRIPT" .lua)
-    RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}_sysbench.log"
+      LOG_DIR_LENGTH="$LOG_DIR/length_$LENGTH"
+      mkdir -p "$LOG_DIR_LENGTH"
 
-    echo "Running benchmark for $SCRIPT..."
-    run_sysbench "$SCRIPT" "run" "$RAW_RESULTS_FILE"
-    if [ $? -ne 0 ]; then
-      echo "Benchmark failed for script $SCRIPT. Exiting."
-      exit 1
-    fi
-    echo "Benchmark complete for $SCRIPT."
+      echo "Preparing database for $MAIN_SCRIPT with LENGTH $LENGTH..."
+      RAW_RESULTS_FILE="${LOG_DIR_LENGTH}/$(basename "$QUERY_PATH")_${LENGTH}_prepare.log"
+      run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
 
-    # Extract run data and format it as CSV
-    grep '^\[ ' "$RAW_RESULTS_FILE" | while read -r line; do
-      time=$(echo "$line" | awk '{print $2}' | sed 's/s//')
-      threads=$(echo "$line" | awk -F 'thds: ' '{print $2}' | awk '{print $1}')
-      tps=$(echo "$line" | awk -F 'tps: ' '{print $2}' | awk '{print $1}')
-      qps=$(echo "$line" | awk -F 'qps: ' '{print $2}' | awk '{print $1}')
+      # Run INSERT and SELECT benchmarks
+      for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT"; do
+        SCRIPT_NAME="${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
+        RAW_RESULTS_FILE="$LOG_DIR_LENGTH/${SCRIPT_NAME}.log"
+        run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
+      done
 
-      read_write_other=$(echo "$line" | sed -E 's/.*\(r\/w\/o: ([0-9.]+)\/([0-9.]+)\/([0-9.]+)\).*/\1,\2,\3/')
-      reads=$(echo "$read_write_other" | cut -d',' -f1)
-      writes=$(echo "$read_write_other" | cut -d',' -f2)
-      other=$(echo "$read_write_other" | cut -d',' -f3)
+      RAW_RESULTS_FILE="${LOG_DIR_LENGTH}/length_${LENGTH}_cleanup.log"
+      run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
+    done
+  else
+    # Process int_queries normally
+    mkdir -p "$LOG_DIR"
+    echo "Preparing database for $MAIN_SCRIPT..."
+    RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_prepare.log"
+    run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
 
-      latency=$(echo "$line" | awk -F 'lat \\(ms,95%\\): ' '{print $2}' | awk '{print $1}')
-      err_per_sec=$(echo "$line" | awk -F 'err/s: ' '{print $2}' | awk '{print $1}')
-      reconn_per_sec=$(echo "$line" | awk -F 'reconn/s: ' '{print $2}' | awk '{print $1}')
-
-      echo "$SCRIPT_NAME,$time,$threads,$tps,$qps,$reads,$writes,$other,$latency,$err_per_sec,$reconn_per_sec" >> "$OUTPUT_FILE_INOFFICIAL"
+    # Run INSERT and SELECT benchmarks
+    for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT"; do
+      SCRIPT_NAME=$(basename "$SCRIPT" .lua)
+      RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
+      run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
     done
 
-    # Extract SQL statistics and append to statistics.csv
-    {
-      read=$(awk '/read:/ {print $2}' "$RAW_RESULTS_FILE")
-      write=$(awk '/write:/ {print $2}' "$RAW_RESULTS_FILE")
-      other=$(awk '/other:/ {print $2}' "$RAW_RESULTS_FILE")
-      total=$(awk '/total:/ {print $2}' "$RAW_RESULTS_FILE")
-      transactions=$(awk '/transactions:/ {print $2}' "$RAW_RESULTS_FILE")
-      queries=$(awk '/queries:/ {print $2}' "$RAW_RESULTS_FILE")
-      ignored_errors=$(awk '/ignored errors:/ {print $3}' "$RAW_RESULTS_FILE")
-      reconnects=$(awk '/reconnects:/ {print $2}' "$RAW_RESULTS_FILE")
-      total_time=$(awk '/total time:/ {print $3}' "$RAW_RESULTS_FILE")
-      total_events=$(awk '/total number of events:/ {print $5}' "$RAW_RESULTS_FILE")
-
-      latency_min=$(awk '/min:/ {print $2}' "$RAW_RESULTS_FILE")
-      latency_avg=$(awk '/avg:/ {print $2}' "$RAW_RESULTS_FILE")
-      latency_max=$(awk '/max:/ {print $2}' "$RAW_RESULTS_FILE")
-      latency_95th=$(awk '/95th percentile:/ {print $3}' "$RAW_RESULTS_FILE")
-      latency_sum=$(awk '/sum:/ {print $2}' "$RAW_RESULTS_FILE")
-
-      echo "$SCRIPT_NAME,$read,$write,$other,$total,$transactions,$queries,$ignored_errors,$reconnects,$total_time,$total_events,$latency_min,$latency_avg,$latency_max,$latency_95th,$latency_sum" >> "$STATISTICS_OUTPUT_FILE"
-    }
-
-    echo "Results for $SCRIPT saved to $OUTPUT_FILE_INOFFICIAL and $STATISTICS_OUTPUT_FILE"
-  done
+    # Cleanup phase
+    echo "Cleaning up database for $MAIN_SCRIPT..."
+    RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_cleanup.log"
+    run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
+  fi
 done
 
 # Prepare CSV header for the output file

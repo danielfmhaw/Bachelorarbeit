@@ -108,6 +108,16 @@ for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
     done
     echo "Results for $SCRIPT saved to $OUTPUT_FILE_INOFFICIAL."
   done
+
+  # Cleanup phase
+  RAW_RESULTS_FILE="$OUTPUT_DIR/$(basename "$QUERY_PATH")_cleanup.log"
+  echo "Cleaning up database for $MAIN_SCRIPT..."
+  run_sysbench "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
+  if [ $? -ne 0 ]; then
+    echo "Database cleanup failed for $MAIN_SCRIPT."
+    exit 1
+  fi
+  echo "Database cleanup complete for $MAIN_SCRIPT."
 done
 
 # Prepare CSV header for the output file
