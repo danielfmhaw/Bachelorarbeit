@@ -10,37 +10,36 @@ Initializing worker threads...
 
 Threads started!
 
-[ 3s ] thds: 8 tps: 0.00 qps: 22792.94 (r/w/o: 0.00/8717.64/14075.30) lat (ms,95%): 0.00 err/s: 27.99 reconn/s: 0.00
-[ 6s ] thds: 8 tps: 0.00 qps: 23990.33 (r/w/o: 0.00/11396.32/12594.01) lat (ms,95%): 0.00 err/s: 4.00 reconn/s: 0.00
-[ 9s ] thds: 8 tps: 0.67 qps: 28620.48 (r/w/o: 0.00/9751.84/18868.64) lat (ms,95%): 0.00 err/s: 8.67 reconn/s: 0.00
-[ 12s ] thds: 8 tps: 0.00 qps: 29551.95 (r/w/o: 0.00/10837.35/18714.60) lat (ms,95%): 0.00 err/s: 1.33 reconn/s: 0.00
-[ 15s ] thds: 8 tps: 0.67 qps: 25350.75 (r/w/o: 0.00/9706.40/15644.35) lat (ms,95%): 0.00 err/s: 4.67 reconn/s: 0.00
-[ 18s ] thds: 8 tps: 0.67 qps: 26893.91 (r/w/o: 0.00/9461.68/17432.23) lat (ms,95%): 0.00 err/s: 2.00 reconn/s: 0.00
-[ 21s ] thds: 8 tps: 0.67 qps: 24753.73 (r/w/o: 0.00/9919.28/14834.45) lat (ms,95%): 0.00 err/s: 1.33 reconn/s: 0.00
-[ 24s ] thds: 8 tps: 0.67 qps: 23935.89 (r/w/o: 0.00/9967.15/13968.74) lat (ms,95%): 0.00 err/s: 1.33 reconn/s: 0.00
+[ 3s ] thds: 8 tps: 0.00 qps: 25387.00 (r/w/o: 0.00/8010.42/17376.58) lat (ms,95%): 0.00 err/s: 30.99 reconn/s: 0.00
+[ 6s ] thds: 8 tps: 0.00 qps: 25482.73 (r/w/o: 0.00/10033.70/15449.03) lat (ms,95%): 0.00 err/s: 1.33 reconn/s: 0.00
+[ 9s ] thds: 8 tps: 0.67 qps: 26845.58 (r/w/o: 0.00/9550.54/17295.04) lat (ms,95%): 0.00 err/s: 2.33 reconn/s: 0.00
+[ 12s ] thds: 8 tps: 0.67 qps: 25806.69 (r/w/o: 0.00/9178.74/16627.95) lat (ms,95%): 0.00 err/s: 2.00 reconn/s: 0.00
+[ 15s ] thds: 8 tps: 0.67 qps: 26084.99 (r/w/o: 0.00/9808.24/16276.76) lat (ms,95%): 0.00 err/s: 0.67 reconn/s: 0.00
+[ 18s ] thds: 8 tps: 0.67 qps: 24528.75 (r/w/o: 0.00/9685.44/14843.31) lat (ms,95%): 0.00 err/s: 2.66 reconn/s: 0.00
+[ 21s ] thds: 8 tps: 0.00 qps: 26231.52 (r/w/o: 0.00/10264.22/15967.30) lat (ms,95%): 0.00 err/s: 2.67 reconn/s: 0.00
 SQL statistics:
     queries performed:
         read:                            0
-        write:                           252477
-        other:                           434365
-        total:                           686842
-    transactions:                        16     (0.61 per sec.)
-    queries:                             686842 (26160.72 per sec.)
-    ignored errors:                      154    (5.87 per sec.)
+        write:                           221361
+        other:                           403257
+        total:                           624618
+    transactions:                        16     (0.67 per sec.)
+    queries:                             624618 (26033.93 per sec.)
+    ignored errors:                      128    (5.34 per sec.)
     reconnects:                          0      (0.00 per sec.)
 
 General statistics:
-    total time:                          26.2545s
+    total time:                          23.9922s
     total number of events:              16
 
 Latency (ms):
-         min:                                 5205.30
-         avg:                                12567.66
-         max:                                25275.66
+         min:                                 5949.61
+         avg:                                11415.04
+         max:                                23711.78
          95th percentile:                        0.00
-         sum:                               201082.63
+         sum:                               182640.57
 
 Threads fairness:
-    events (avg/stddev):           2.0000/0.71
-    execution time (avg/stddev):   25.1353/1.00
+    events (avg/stddev):           2.0000/0.87
+    execution time (avg/stddev):   22.8301/1.04
 

@@ -15,7 +15,7 @@ function insert_data()
     delete_data()
     for i = 1, num_rows do
         -- Random data generation for KUNDENMITVARCHAR fields
-        local name = string.format("Customer_%d", i)
+        local name = string.format("%d", i)
         local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
         local adresse = string.format("Address_%d", i)
         local stadt = string.format("City_%d", math.random(1, 100))

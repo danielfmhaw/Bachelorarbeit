@@ -5,6 +5,7 @@ GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/To
 OUTPUT_FILE_INOFFICIAL="output/sysbench_output_inofficial.csv"
 OUTPUT_FILE="output/sysbench_output.csv"
 OUTPUT_DIR="output"
+STATISTICS_OUTPUT_FILE="output/statistics.csv"
 
 # Lua script directories for int_queries and varchar_queries "scripts/varchar_queries_length"
 SCRIPT_PATHS=(
@@ -30,8 +31,9 @@ REPORT_INTERVAL=3
 rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 
-# Prepare CSV header
+# Prepare CSV headers
 echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE_INOFFICIAL"
+echo "Script,Read,Write,Other,Total,Transactions,Queries,Ignored Errors,Reconnects,Total Time,Total Events,Latency Min,Latency Avg,Latency Max,Latency 95th Percentile,Latency Sum" > "$STATISTICS_OUTPUT_FILE"
 
 # Helper function to run sysbench with specified Lua script and mode
 run_sysbench() {
@@ -86,14 +88,13 @@ for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
     fi
     echo "Benchmark complete for $SCRIPT."
 
-    # Extract data and format it as CSV
+    # Extract run data and format it as CSV
     grep '^\[ ' "$RAW_RESULTS_FILE" | while read -r line; do
       time=$(echo "$line" | awk '{print $2}' | sed 's/s//')
       threads=$(echo "$line" | awk -F 'thds: ' '{print $2}' | awk '{print $1}')
       tps=$(echo "$line" | awk -F 'tps: ' '{print $2}' | awk '{print $1}')
       qps=$(echo "$line" | awk -F 'qps: ' '{print $2}' | awk '{print $1}')
 
-      # Split read, write, and other counts
       read_write_other=$(echo "$line" | sed -E 's/.*\(r\/w\/o: ([0-9.]+)\/([0-9.]+)\/([0-9.]+)\).*/\1,\2,\3/')
       reads=$(echo "$read_write_other" | cut -d',' -f1)
       writes=$(echo "$read_write_other" | cut -d',' -f2)
@@ -103,10 +104,32 @@ for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
       err_per_sec=$(echo "$line" | awk -F 'err/s: ' '{print $2}' | awk '{print $1}')
       reconn_per_sec=$(echo "$line" | awk -F 'reconn/s: ' '{print $2}' | awk '{print $1}')
 
-      # Append to CSV file with script identifier
       echo "$SCRIPT_NAME,$time,$threads,$tps,$qps,$reads,$writes,$other,$latency,$err_per_sec,$reconn_per_sec" >> "$OUTPUT_FILE_INOFFICIAL"
     done
-    echo "Results for $SCRIPT saved to $OUTPUT_FILE_INOFFICIAL."
+
+    # Extract SQL statistics and append to statistics.csv
+    {
+      read=$(awk '/read:/ {print $2}' "$RAW_RESULTS_FILE")
+      write=$(awk '/write:/ {print $2}' "$RAW_RESULTS_FILE")
+      other=$(awk '/other:/ {print $2}' "$RAW_RESULTS_FILE")
+      total=$(awk '/total:/ {print $2}' "$RAW_RESULTS_FILE")
+      transactions=$(awk '/transactions:/ {print $2}' "$RAW_RESULTS_FILE")
+      queries=$(awk '/queries:/ {print $2}' "$RAW_RESULTS_FILE")
+      ignored_errors=$(awk '/ignored errors:/ {print $3}' "$RAW_RESULTS_FILE")
+      reconnects=$(awk '/reconnects:/ {print $2}' "$RAW_RESULTS_FILE")
+      total_time=$(awk '/total time:/ {print $3}' "$RAW_RESULTS_FILE")
+      total_events=$(awk '/total number of events:/ {print $5}' "$RAW_RESULTS_FILE")
+
+      latency_min=$(awk '/min:/ {print $2}' "$RAW_RESULTS_FILE")
+      latency_avg=$(awk '/avg:/ {print $2}' "$RAW_RESULTS_FILE")
+      latency_max=$(awk '/max:/ {print $2}' "$RAW_RESULTS_FILE")
+      latency_95th=$(awk '/95th percentile:/ {print $3}' "$RAW_RESULTS_FILE")
+      latency_sum=$(awk '/sum:/ {print $2}' "$RAW_RESULTS_FILE")
+
+      echo "$SCRIPT_NAME,$read,$write,$other,$total,$transactions,$queries,$ignored_errors,$reconnects,$total_time,$total_events,$latency_min,$latency_avg,$latency_max,$latency_95th,$latency_sum" >> "$STATISTICS_OUTPUT_FILE"
+    }
+
+    echo "Results for $SCRIPT saved to $OUTPUT_FILE_INOFFICIAL and $STATISTICS_OUTPUT_FILE"
   done
 done
 
