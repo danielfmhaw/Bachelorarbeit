@@ -15,5 +15,5 @@ fi
 mv "$filename.pdf" "$output_dir/"
 rm "$filename".aux "$filename".log "$filename".bcf "$filename".bbl "$filename".blg "$filename".run.xml
 rm "$filename".lof "$filename".lot "$filename".out "$filename".toc
-rm appendix.aux benchmarks.aux chap1.aux chap2.aux chap3.aux title.aux toc.aux
+rm appendix.aux benchmarks.aux indexing.aux chap1.aux chap2.aux chap3.aux title.aux toc.aux
 echo "Finished"
