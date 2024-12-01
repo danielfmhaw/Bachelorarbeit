@@ -1,17 +1,21 @@
 #!/bin/bash
 
+# Parse arguments
+if [ "$#" -lt 3 ]; then
+    echo "Usage: $0 <output_dir> <custom_lengths> <query_info> ..."
+    echo "Example: $0 output \"1,64\" \"dir_path/int_queries:false\" \"dir_path/varchar_queries:true\""
+    exit 1
+fi
+
+OUTPUT_DIR="$1"
+CUSTOM_LENGTHS="$2"
+QUERY_INFO=("${@:3}")
+
 # File Paths
-GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pandas/generateplot.py"
-OUTPUT_DIR="output"
+PYHTON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Python"
 OUTPUT_FILE="$OUTPUT_DIR/sysbench_output.csv"
 OUTPUT_FILE_INOFFICIAL="$OUTPUT_DIR/sysbench_output_inofficial.csv"
 STATISTICS_OUTPUT_FILE="$OUTPUT_DIR/statistics.csv"
-
-# Lua script directories for int_queries and varchar_queries
-SCRIPT_PATHS=(
-  "scripts/int_queries"
-  "scripts/varchar_queries"
-)
 
 # Connection parameters
 DB_HOST="127.0.0.1"
@@ -33,6 +37,34 @@ mkdir -p "$OUTPUT_DIR"
 # Prepare CSV headers
 echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE_INOFFICIAL"
 echo "Script,Read,Write,Other,Total,Transactions,Queries,Ignored Errors,Reconnects,Total Time,Total Events,Latency Min,Latency Avg,Latency Max,Latency 95th Percentile,Latency Sum" > "$STATISTICS_OUTPUT_FILE"
+
+run_benchmark() {
+  local SCRIPT_PATH="$1"
+  local MODE="$2"
+  local OUTPUT_FILE="$3"
+  local SCRIPT_NAME="$4"
+
+  if [[ "$SCRIPT_NAME" == *_insert || "$SCRIPT_NAME" == *_select ]]; then
+      echo "Running $(basename "$SCRIPT_PATH")..."
+  fi
+  if [[ "$MODE" == "prepare" ]]; then
+      length=$(basename "$OUTPUT_FILE" | grep -o '[0-9]*')
+      echo "Preparing database for $(basename "$SCRIPT_PATH")${length:+ with length $length}"
+  fi
+  [[ "$MODE" == "cleanup" ]] && echo -e "Cleaning up database for $(basename "$SCRIPT_PATH")\n"
+
+  run_sysbench "$SCRIPT_PATH" "$MODE" "$OUTPUT_FILE"
+  if [ $? -ne 0 ]; then
+    echo "Benchmark failed for script $SCRIPT_PATH. Exiting."
+    exit 1
+  fi
+
+  # Only extract data if the mode is "run"
+  if [ "$MODE" == "run" ]; then
+    extract_run_data "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
+    extract_statistics "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
+  fi
+}
 
 # Helper function to run sysbench with specified Lua script and mode
 run_sysbench() {
@@ -78,28 +110,6 @@ extract_run_data() {
   done
 }
 
-run_benchmark() {
-  local SCRIPT_PATH="$1"
-  local MODE="$2"
-  local OUTPUT_FILE="$3"
-  local SCRIPT_NAME="$4"
-
-  run_sysbench "$SCRIPT_PATH" "$MODE" "$OUTPUT_FILE"
-  if [ $? -ne 0 ]; then
-    echo "Benchmark failed for script $SCRIPT_PATH. Exiting."
-    exit 1
-  fi
-
-  echo "Benchmark complete for $SCRIPT_PATH"
-
-  # Only extract data if the mode is "run"
-  if [ "$MODE" == "run" ]; then
-    extract_run_data "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
-    extract_statistics "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
-    echo "Results for $SCRIPT saved to $OUTPUT_FILE_INOFFICIAL and $STATISTICS_OUTPUT_FILE"
-  fi
-}
-
 # Function to extract statistics from sysbench results
 extract_statistics() {
   local RAW_RESULTS_FILE="$1"
@@ -127,21 +137,23 @@ extract_statistics() {
 }
 
 # Main benchmark loop
-for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
+for INFO in "${QUERY_INFO[@]}"; do
+  IFS=: read -r QUERY_PATH MULTIPLE_LENGTHS <<< "$INFO"
+
   MAIN_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH").lua"
   INSERT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_insert.lua"
   SELECT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_select.lua"
   LOG_DIR="$OUTPUT_DIR/logs/$(basename "$QUERY_PATH")"
 
-  # Specific actions for varchar_queries
-  if [[ "$QUERY_PATH" == "scripts/varchar_queries" ]]; then
-    for LENGTH in 1 64; do
-      export VARCHAR_LENGTH=$((LENGTH - 1))
+  if [[ "$MULTIPLE_LENGTHS" == "true" ]]; then
+    IFS=',' read -r -a LENGTHS <<< "$CUSTOM_LENGTHS"
+
+    for LENGTH in "${LENGTHS[@]}"; do
+      export CUSTOM_LENGTH=$((LENGTH - 1))
 
       LOG_DIR_LENGTH="$LOG_DIR/length_$LENGTH"
       mkdir -p "$LOG_DIR_LENGTH"
 
-      echo "Preparing database for $MAIN_SCRIPT with LENGTH $LENGTH..."
       RAW_RESULTS_FILE="${LOG_DIR_LENGTH}/$(basename "$QUERY_PATH")_${LENGTH}_prepare.log"
       run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
 
@@ -156,9 +168,8 @@ for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
       run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
     done
   else
-    # Process int_queries normally
+    # Process normally : condition false
     mkdir -p "$LOG_DIR"
-    echo "Preparing database for $MAIN_SCRIPT..."
     RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_prepare.log"
     run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
 
@@ -170,56 +181,14 @@ for QUERY_PATH in "${SCRIPT_PATHS[@]}"; do
     done
 
     # Cleanup phase
-    echo "Cleaning up database for $MAIN_SCRIPT..."
     RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_cleanup.log"
     run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
   fi
 done
 
-# Prepare CSV header for the output file
-echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs,Inserts" > "$OUTPUT_FILE"
-
-# Read the input file (skip the header)
-tail -n +2 "$OUTPUT_FILE_INOFFICIAL" | while IFS=, read -r SCRIPT TIME THREADS TPS QPS READS WRITES OTHER LATENCY ERRPS RECONNPS; do
-    # Determine the base script name by removing _insert or _select suffix
-    BASE_SCRIPT=$(echo "$SCRIPT" | sed -E 's/_(insert|select)$//')
-
-    # Check if it's an insert script row, in which case we try to find matching select
-    if [[ "$SCRIPT" == *_insert ]]; then
-        # Read corresponding select row with the same base script and time
-        MATCHING_SELECT=$(grep "${BASE_SCRIPT}_select,$TIME," "$OUTPUT_FILE_INOFFICIAL")
-
-        if [[ -n "$MATCHING_SELECT" ]]; then
-            # Extract values from matching select row
-            IFS=, read -r _ _ _ TPS_SEL QPS_SEL READS_SEL WRITES_SEL OTHER_SEL LATENCY_SEL ERRPS_SEL RECONNPS_SEL <<< "$MATCHING_SELECT"
-
-            # Sum up values from insert and select rows
-            COMBINED_TPS=$(echo "$TPS + $TPS_SEL" | bc)
-            COMBINED_QPS=$(echo "$QPS + $QPS_SEL" | bc)
-            COMBINED_READS=$(echo "$READS + $READS_SEL" | bc)
-            COMBINED_WRITES=$(echo "$WRITES + $WRITES_SEL" | bc)
-            COMBINED_OTHER=$(echo "$OTHER + $OTHER_SEL" | bc)
-            COMBINED_LATENCY=$(echo "$LATENCY + $LATENCY_SEL" | bc)
-            COMBINED_ERRPS=$(echo "$ERRPS + $ERRPS_SEL" | bc)
-            COMBINED_RECONNPS=$(echo "$RECONNPS + $RECONNPS_SEL" | bc)
-            COMBINED_WRITEONLY=$(echo "$QPS" | bc)
-
-            # Write combined row to output CSV
-            echo "${BASE_SCRIPT},$TIME,$THREADS,$COMBINED_TPS,$COMBINED_QPS,$COMBINED_READS,$COMBINED_WRITES,$COMBINED_OTHER,$COMBINED_LATENCY,$COMBINED_ERRPS,$COMBINED_RECONNPS,$COMBINED_WRITEONLY" >> "$OUTPUT_FILE"
-        fi
-    fi
-done
-
+python3 "$PYHTON_PATH/generateCombinedCSV.py" "$OUTPUT_FILE_INOFFICIAL" "$OUTPUT_FILE"
 echo "Combined CSV file created at $OUTPUT_FILE"
 
 # Generate plot after all tasks are completed
 echo "Generating plots..."
-python3 "$GENERATE_PLOT_SCRIPT" "$OUTPUT_FILE"
-
-# Check if the plot generation was successful
-if [ $? -eq 0 ]; then
-    echo "Plots generated successfully."
-else
-    echo "Plot generation failed."
-    exit 1
-fi
+python3 "$PYHTON_PATH/generatePlot.py" "$OUTPUT_FILE"

@@ -44,3 +44,24 @@ Untersucht werden:
 - **Insert-Performance**: Wie wirken sich FK-Typen auf die Geschwindigkeit von Insert-Operationen aus?
 
 Die Ergebnisse helfen, fundierte Entscheidungen zur Datenbankgestaltung zu treffen.
+
+## Durchführung: Ausführung des Benchmarks
+
+Führe das folgende Script aus, um die Benchmarks mit den korrekten Pfaden und Parametern auszuführen.
+
+### Schritte:
+
+1. Navigiere in das Verzeichnis `Tools`, wo sich das Script befindet.
+2. Führe das Script `custom_sysbench_script.sh` aus und übergebe die erforderlichen Parameter.
+
+### Beispiel:
+
+```bash
+cd ../..
+cd Tools
+./custom_sysbench_script.sh \
+  /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Output \
+  "1,64" \
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Scripts/int_queries:false" \
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Scripts/varchar_queries:true"
+```
