@@ -1,15 +1,36 @@
 #!/bin/bash
 
 # Parse arguments
-if [ "$#" -lt 3 ]; then
-    echo "Usage: $0 <output_dir> <custom_lengths> <query_info> ..."
-    echo "Example: $0 output \"1,64\" \"dir_path/int_queries:false\" \"dir_path/varchar_queries:true\""
-    exit 1
+if [ "$#" -lt 2 ]; then
+    echo "Usage: $0 <output_dir> [custom_lengths] <query_info> ..."
+    echo "Example 1: $0 output \"1,64\" \"dir_path/int_queries:false\" \"dir_path/varchar_queries:true\""
+    echo "Example 2: $0 output \"dir_path/int_queries\" \"dir_path/varchar_queries\""
 fi
 
 OUTPUT_DIR="$1"
-CUSTOM_LENGTHS="$2"
-QUERY_INFO=("${@:3}")
+CUSTOM_LENGTHS=""
+QUERY_INFO=("${@:2}")
+
+if [[ ! "${QUERY_INFO[0]}" == *:* ]]; then
+    CUSTOM_LENGTHS="${QUERY_INFO[0]}"
+    QUERY_INFO=("${@:3}")
+fi
+
+# Process QUERY_INFO to detect if lengths are required
+NEEDS_CUSTOM_LENGTHS=false
+for INFO in "${QUERY_INFO[@]}"; do
+    if [[ "$INFO" != *:* ]]; then
+        INFO="${INFO}:false"
+    fi
+    if [[ "$INFO" == *":true"* ]]; then
+        NEEDS_CUSTOM_LENGTHS=true
+    fi
+done
+
+if $NEEDS_CUSTOM_LENGTHS && [ -z "$CUSTOM_LENGTHS" ]; then
+    echo "Error: CUSTOM_LENGTHS is required because at least one QUERY_INFO has :true"
+    exit 1
+fi
 
 # File Paths
 PYHTON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Python"
@@ -44,7 +65,7 @@ run_benchmark() {
   local OUTPUT_FILE="$3"
   local SCRIPT_NAME="$4"
 
-  if [[ "$SCRIPT_NAME" == *_insert || "$SCRIPT_NAME" == *_select ]]; then
+  if [[ -n "$SCRIPT_NAME" ]]; then
       echo "Running $(basename "$SCRIPT_PATH")..."
   fi
   if [[ "$MODE" == "prepare" ]]; then
@@ -136,13 +157,44 @@ extract_statistics() {
   echo "$SCRIPT_NAME,$read,$write,$other,$total,$transactions,$queries,$ignored_errors,$reconnects,$total_time,$total_events,$latency_min,$latency_avg,$latency_max,$latency_95th,$latency_sum" >> "$STATISTICS_OUTPUT_FILE"
 }
 
+# Helper function to process and run scripts
+process_and_run_scripts_with_length() {
+  local insert_script=$1
+  local select_script=$2
+  local log_dir=$3
+  local query_path=$4
+  local length=$5
+
+  if [ -f "$select_script.lua" ]; then
+    echo "File $select_script.lua exists. Processing this file."
+    for script in "$insert_script" "$select_script.lua"; do
+      script_name="${query_path##*/}_${length}_$(basename "$script" .lua | sed "s/^${query_path##*/}_//")"
+      raw_results_file="$log_dir/${script_name}.log"
+      run_benchmark "$script" "run" "$raw_results_file" "$script_name"
+    done
+  else
+    echo "File $select_script.lua does not exist. Checking if $select_script is a directory."
+    for script in "$insert_script" "$select_script"/*; do
+      if [ -f "$script" ]; then
+        if [[ "$script" == "$select_script"/* ]]; then
+          script_name="$(basename "$select_script")_${query_path##*/}_${length}_$(basename "$script" .lua | sed "s/^${query_path##*/}_//")"
+        else
+          script_name="${query_path##*/}_${length}_$(basename "$script" .lua | sed "s/^${query_path##*/}_//")"
+        fi
+        raw_results_file="$log_dir/${script_name}.log"
+        run_benchmark "$script" "run" "$raw_results_file" "$script_name"
+      fi
+    done
+  fi
+}
+
 # Main benchmark loop
 for INFO in "${QUERY_INFO[@]}"; do
   IFS=: read -r QUERY_PATH MULTIPLE_LENGTHS <<< "$INFO"
 
   MAIN_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH").lua"
   INSERT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_insert.lua"
-  SELECT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_select.lua"
+  SELECT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_select"
   LOG_DIR="$OUTPUT_DIR/logs/$(basename "$QUERY_PATH")"
 
   if [[ "$MULTIPLE_LENGTHS" == "true" ]]; then
@@ -164,6 +216,29 @@ for INFO in "${QUERY_INFO[@]}"; do
         run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
       done
 
+
+      if [ -f "$SELECT_SCRIPT.lua" ]; then
+        # If SELECT_SCRIPT is a Lua file
+        for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT.lua"; do
+          SCRIPT_NAME="${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
+          RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
+          run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
+        done
+      else
+        # If SELECT_QUERY is a directory
+        for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT"/*; do
+          if [ -f "$SCRIPT" ]; then
+            if [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
+              SCRIPT_NAME="$(basename "$SELECT_SCRIPT")_${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
+            else
+              SCRIPT_NAME="${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
+            fi
+            RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
+            run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
+          fi
+        done
+      fi
+
       RAW_RESULTS_FILE="${LOG_DIR_LENGTH}/length_${LENGTH}_cleanup.log"
       run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
     done
@@ -173,12 +248,27 @@ for INFO in "${QUERY_INFO[@]}"; do
     RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_prepare.log"
     run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
 
-    # Run INSERT and SELECT benchmarks
-    for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT"; do
-      SCRIPT_NAME=$(basename "$SCRIPT" .lua)
-      RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
-      run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
-    done
+    if [ -f "$SELECT_SCRIPT.lua" ]; then
+      # If SELECT_SCRIPT is a Lua file
+      for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT.lua"; do
+        SCRIPT_NAME=$(basename "$SCRIPT" .lua)
+        RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
+        run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
+      done
+    else
+      # If SELECT_QUERY is a directory
+      for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT"/*; do
+        if [ -f "$SCRIPT" ]; then
+          if [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
+            SCRIPT_NAME=$(basename "$SELECT_SCRIPT")_$(basename "$SCRIPT" .lua)
+          else
+            SCRIPT_NAME=$(basename "$SCRIPT" .lua)
+          fi
+          RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
+          run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
+        fi
+      done
+    fi
 
     # Cleanup phase
     RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_cleanup.log"

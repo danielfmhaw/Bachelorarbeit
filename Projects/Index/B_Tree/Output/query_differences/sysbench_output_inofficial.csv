@@ -1,0 +1,23 @@
+Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs
+query_differences_insert,4,8,13.99,30875.95,0.00,4029.10,26846.85,0.00,25.99,0.00
+query_differences_insert,8,8,16.00,32234.43,0.00,4134.86,28099.57,0.00,12.50,0.00
+query_differences_insert,12,8,15.99,32333.03,0.00,4173.46,28159.58,0.00,17.99,0.00
+query_differences_insert,16,8,16.01,32283.24,0.00,4188.47,28094.77,0.00,26.26,0.00
+query_differences_insert,20,8,15.99,32156.39,0.00,4085.29,28071.09,0.00,9.49,0.00
+query_differences_insert,24,8,16.00,32661.79,0.00,4078.72,28583.06,0.00,0.00,0.00
+query_differences_insert,28,8,18.00,32470.38,0.00,4163.30,28307.07,0.00,16.00,0.00
+query_differences_insert,32,8,16.00,32461.49,0.00,4171.08,28290.41,0.00,13.75,0.00
+query_differences_select_range_from_left_index,4,8,51171.65,51171.65,51171.65,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_left_index,8,8,51299.62,51299.62,51299.62,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_left_index,12,8,51779.11,51779.11,51779.11,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_left_index,16,8,51826.57,51826.57,51826.57,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_left_index,20,8,51511.02,51511.02,51511.02,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_left_index,24,8,51776.81,51776.81,51776.81,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_left_index,28,8,51895.40,51895.40,51895.40,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_right_index,4,8,8898.04,8898.04,8898.04,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_right_index,8,8,8979.94,8979.94,8979.94,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_right_index,12,8,8975.29,8975.29,8975.29,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_right_index,16,8,8930.09,8930.09,8930.09,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_right_index,20,8,8983.72,8983.72,8983.72,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_right_index,24,8,8987.35,8987.35,8987.35,0.00,0.00,0.00,0.00,0.00
+query_differences_select_range_from_right_index,28,8,8985.55,8985.55,8985.55,0.00,0.00,0.00,0.00,0.00

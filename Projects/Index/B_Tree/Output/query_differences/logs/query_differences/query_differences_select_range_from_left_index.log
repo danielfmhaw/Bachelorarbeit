@@ -1,0 +1,45 @@
+sysbench 1.0.20 (using system LuaJIT 2.1.1725453128)
+
+Running the test with following options:
+Number of threads: 8
+Report intermediate results every 4 second(s)
+Initializing random number generator from current time
+
+
+Initializing worker threads...
+
+Threads started!
+
+[ 4s ] thds: 8 tps: 51171.65 qps: 51171.65 (r/w/o: 51171.65/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 8s ] thds: 8 tps: 51299.62 qps: 51299.62 (r/w/o: 51299.62/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 12s ] thds: 8 tps: 51779.11 qps: 51779.11 (r/w/o: 51779.11/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 16s ] thds: 8 tps: 51826.57 qps: 51826.57 (r/w/o: 51826.57/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 20s ] thds: 8 tps: 51511.02 qps: 51511.02 (r/w/o: 51511.02/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 24s ] thds: 8 tps: 51776.81 qps: 51776.81 (r/w/o: 51776.81/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 28s ] thds: 8 tps: 51895.40 qps: 51895.40 (r/w/o: 51895.40/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+SQL statistics:
+    queries performed:
+        read:                            1651853
+        write:                           0
+        other:                           0
+        total:                           1651853
+    transactions:                        1651853 (51617.26 per sec.)
+    queries:                             1651853 (51617.26 per sec.)
+    ignored errors:                      0      (0.00 per sec.)
+    reconnects:                          0      (0.00 per sec.)
+
+General statistics:
+    total time:                          32.0017s
+    total number of events:              1651853
+
+Latency (ms):
+         min:                                    0.06
+         avg:                                    0.15
+         max:                                   34.81
+         95th percentile:                        0.00
+         sum:                               255610.97
+
+Threads fairness:
+    events (avg/stddev):           206481.6250/179.52
+    execution time (avg/stddev):   31.9514/0.00
+

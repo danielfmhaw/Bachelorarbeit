@@ -1,7 +1,7 @@
+# Performance von Join-Abfragen
+## Beschreibung
 
-# Projektbeschreibung
-
-Dieses Projekt untersucht die **Performance von Join-Abfragen** und **Insert-Operationen** unter Verwendung unterschiedlicher Datentypen für den Join-Operator. Ziel ist es, die Auswirkungen verschiedener Designs auf die Effizienz dieser Operationen zu analysieren.
+Es wird die **Performance von Join-Abfragen** und **Insert-Operationen** unter Verwendung unterschiedlicher Datentypen für den Join-Operator untersucht. Ziel ist es, die Auswirkungen verschiedener Designs auf die Effizienz dieser Operationen zu analysieren.
 
 ## Datenbankstruktur
 
