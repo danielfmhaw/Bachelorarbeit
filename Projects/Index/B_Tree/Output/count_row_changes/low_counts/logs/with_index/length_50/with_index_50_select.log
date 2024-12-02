@@ -1,0 +1,45 @@
+sysbench 1.0.20 (using system LuaJIT 2.1.1725453128)
+
+Running the test with following options:
+Number of threads: 8
+Report intermediate results every 4 second(s)
+Initializing random number generator from current time
+
+
+Initializing worker threads...
+
+Threads started!
+
+[ 4s ] thds: 8 tps: 18424.82 qps: 55276.95 (r/w/o: 55276.95/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 8s ] thds: 8 tps: 18850.68 qps: 56551.29 (r/w/o: 56551.29/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 12s ] thds: 8 tps: 18628.24 qps: 55884.72 (r/w/o: 55884.72/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 16s ] thds: 8 tps: 19022.89 qps: 57069.92 (r/w/o: 57069.92/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 20s ] thds: 8 tps: 18548.06 qps: 55643.18 (r/w/o: 55643.18/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 24s ] thds: 8 tps: 18784.53 qps: 56353.10 (r/w/o: 56353.10/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+[ 28s ] thds: 8 tps: 18699.44 qps: 56099.83 (r/w/o: 56099.83/0.00/0.00) lat (ms,95%): 0.00 err/s: 0.00 reconn/s: 0.00
+SQL statistics:
+    queries performed:
+        read:                            1799772
+        write:                           0
+        other:                           0
+        total:                           1799772
+    transactions:                        599924 (18746.36 per sec.)
+    queries:                             1799772 (56239.09 per sec.)
+    ignored errors:                      0      (0.00 per sec.)
+    reconnects:                          0      (0.00 per sec.)
+
+General statistics:
+    total time:                          32.0019s
+    total number of events:              599924
+
+Latency (ms):
+         min:                                    0.21
+         avg:                                    0.43
+         max:                                   32.48
+         95th percentile:                        0.00
+         sum:                               255822.33
+
+Threads fairness:
+    events (avg/stddev):           74990.5000/59.79
+    execution time (avg/stddev):   31.9778/0.00
+
