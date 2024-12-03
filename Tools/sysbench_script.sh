@@ -219,7 +219,7 @@ for INFO in "${QUERY_INFO[@]}"; do
       RAW_RESULTS_FILE="${LOG_DIR_LENGTH}/$(basename "$QUERY_PATH")_${LENGTH}_prepare.log"
       run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
 
-      process_script_benchmark "$QUERY_PATH" "$LOG_DIR" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$LENGTH"
+      process_script_benchmark "$QUERY_PATH" "$LOG_DIR_LENGTH" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$LENGTH"
 
       RAW_RESULTS_FILE="${LOG_DIR_LENGTH}/length_${LENGTH}_cleanup.log"
       run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
