@@ -157,35 +157,45 @@ extract_statistics() {
   echo "$SCRIPT_NAME,$read,$write,$other,$total,$transactions,$queries,$ignored_errors,$reconnects,$total_time,$total_events,$latency_min,$latency_avg,$latency_max,$latency_95th,$latency_sum" >> "$STATISTICS_OUTPUT_FILE"
 }
 
-# Helper function to process and run scripts
-process_and_run_scripts_with_length() {
-  local insert_script=$1
-  local select_script=$2
-  local log_dir=$3
-  local query_path=$4
-  local length=$5
+process_script_benchmark() {
+  local QUERY_PATH="$1"
+  local LOG_DIR="$2"
+  local INSERT_SCRIPT="$3"
+  local SELECT_SCRIPT="$4"
+  local LENGTH="${5:-}"
 
-  if [ -f "$select_script.lua" ]; then
-    echo "File $select_script.lua exists. Processing this file."
-    for script in "$insert_script" "$select_script.lua"; do
-      script_name="${query_path##*/}_${length}_$(basename "$script" .lua | sed "s/^${query_path##*/}_//")"
-      raw_results_file="$log_dir/${script_name}.log"
-      run_benchmark "$script" "run" "$raw_results_file" "$script_name"
-    done
+  local SCRIPTS=()
+  local IS_FROM_SELECT_DIR=false
+
+  if [ -f "$SELECT_SCRIPT.lua" ]; then
+    # SELECT_SCRIPT is a Lua file
+    SCRIPTS=("$INSERT_SCRIPT" "$SELECT_SCRIPT.lua")
   else
-    echo "File $select_script.lua does not exist. Checking if $select_script is a directory."
-    for script in "$insert_script" "$select_script"/*; do
-      if [ -f "$script" ]; then
-        if [[ "$script" == "$select_script"/* ]]; then
-          script_name="$(basename "$select_script")_${query_path##*/}_${length}_$(basename "$script" .lua | sed "s/^${query_path##*/}_//")"
-        else
-          script_name="${query_path##*/}_${length}_$(basename "$script" .lua | sed "s/^${query_path##*/}_//")"
-        fi
-        raw_results_file="$log_dir/${script_name}.log"
-        run_benchmark "$script" "run" "$raw_results_file" "$script_name"
-      fi
-    done
+    # SELECT_SCRIPT is a directory
+    SCRIPTS=("$INSERT_SCRIPT" "$SELECT_SCRIPT"/*)
+    IS_FROM_SELECT_DIR=true
   fi
+
+  for SCRIPT in "${SCRIPTS[@]}"; do
+    if [ -f "$SCRIPT" ]; then
+      local SCRIPT_NAME
+      if [ -n "$LENGTH" ]; then
+        if $IS_FROM_SELECT_DIR && [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
+          SCRIPT_NAME="$(basename "$SELECT_SCRIPT")_${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
+        else
+          SCRIPT_NAME="${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
+        fi
+      else
+        if $IS_FROM_SELECT_DIR && [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
+          SCRIPT_NAME="$(basename "$SELECT_SCRIPT")_$(basename "$SCRIPT" .lua)"
+        else
+          SCRIPT_NAME=$(basename "$SCRIPT" .lua)
+        fi
+      fi
+      local RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
+      run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
+    fi
+  done
 }
 
 # Main benchmark loop
@@ -209,35 +219,7 @@ for INFO in "${QUERY_INFO[@]}"; do
       RAW_RESULTS_FILE="${LOG_DIR_LENGTH}/$(basename "$QUERY_PATH")_${LENGTH}_prepare.log"
       run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
 
-      # Run INSERT and SELECT benchmarks
-      for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT"; do
-        SCRIPT_NAME="${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
-        RAW_RESULTS_FILE="$LOG_DIR_LENGTH/${SCRIPT_NAME}.log"
-        run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
-      done
-
-
-      if [ -f "$SELECT_SCRIPT.lua" ]; then
-        # If SELECT_SCRIPT is a Lua file
-        for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT.lua"; do
-          SCRIPT_NAME="${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
-          RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
-          run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
-        done
-      else
-        # If SELECT_QUERY is a directory
-        for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT"/*; do
-          if [ -f "$SCRIPT" ]; then
-            if [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
-              SCRIPT_NAME="$(basename "$SELECT_SCRIPT")_${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
-            else
-              SCRIPT_NAME="${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
-            fi
-            RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
-            run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
-          fi
-        done
-      fi
+      process_script_benchmark "$QUERY_PATH" "$LOG_DIR" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$LENGTH"
 
       RAW_RESULTS_FILE="${LOG_DIR_LENGTH}/length_${LENGTH}_cleanup.log"
       run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
@@ -248,27 +230,7 @@ for INFO in "${QUERY_INFO[@]}"; do
     RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_prepare.log"
     run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
 
-    if [ -f "$SELECT_SCRIPT.lua" ]; then
-      # If SELECT_SCRIPT is a Lua file
-      for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT.lua"; do
-        SCRIPT_NAME=$(basename "$SCRIPT" .lua)
-        RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
-        run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
-      done
-    else
-      # If SELECT_QUERY is a directory
-      for SCRIPT in "$INSERT_SCRIPT" "$SELECT_SCRIPT"/*; do
-        if [ -f "$SCRIPT" ]; then
-          if [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
-            SCRIPT_NAME=$(basename "$SELECT_SCRIPT")_$(basename "$SCRIPT" .lua)
-          else
-            SCRIPT_NAME=$(basename "$SCRIPT" .lua)
-          fi
-          RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
-          run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
-        fi
-      done
-    fi
+    process_script_benchmark "$QUERY_PATH" "$LOG_DIR" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$LENGTH"
 
     # Cleanup phase
     RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_cleanup.log"

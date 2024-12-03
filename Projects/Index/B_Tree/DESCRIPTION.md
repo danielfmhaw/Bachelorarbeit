@@ -25,7 +25,7 @@ Ein Index aus Last_Name, First_Name and B_Day
 ```bash
 cd ../../..
 cd Tools
-./custom_sysbench_script.sh \
+./sysbench_script.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Output/count_row_changes/high_counts \
   "5000,50000" \
   "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true" \
@@ -36,7 +36,7 @@ cd Tools
 ```bash
 cd ../../..
 cd Tools
-./custom_sysbench_script.sh \
+./sysbench_script.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Output/count_row_changes/low_counts \
   "10,50" \
   "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true" \
@@ -47,7 +47,16 @@ cd Tools
 ```bash
 cd ../../..
 cd Tools
-./custom_sysbench_script.sh \
+./sysbench_script.sh \
+  /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Output/query_differences \
+ "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/query_differences:false" 
+```
+
+### Nur Graphen erstellen für Select - Queries (log und csv- files müssen schon bestehen)
+```bash
+cd ../../..
+cd Tools
+./generateGraph.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Output/query_differences \
  "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/query_differences:false" 
 ```

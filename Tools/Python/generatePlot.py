@@ -19,7 +19,7 @@ def plot_metrics(data, measures, output_dir, detailed_pngs_dir):
         scripts = [None]
 
     try:
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(12, 6))
 
         for measure in measures:
             if has_script_column:
@@ -34,10 +34,18 @@ def plot_metrics(data, measures, output_dir, detailed_pngs_dir):
         plt.title('Metrics over Time' + (' by Script' if has_script_column else ''))
         plt.xlabel('Time (s)')
         plt.ylabel('Values')
-        plt.legend(title="Script and Measure" if has_script_column else "Measure")
-        plt.grid(True)
 
-        # Save the combined plot
+        plt.legend(
+            title="Script and Measure" if has_script_column else "Measure",
+            bbox_to_anchor=(1.01, 1),
+            loc='upper left'
+        )
+        plt.grid(True)
+        plt.tight_layout(rect=[0, 0, 0.99, 1])
+
+
+
+# Save the combined plot
         output_final_path = os.path.join(output_dir, 'output_final.png')
         plt.savefig(output_final_path)
         plt.close()

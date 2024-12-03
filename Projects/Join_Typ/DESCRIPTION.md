@@ -52,14 +52,14 @@ Führe das folgende Script aus, um die Benchmarks mit den korrekten Pfaden und P
 ### Schritte:
 
 1. Navigiere in das Verzeichnis `Tools`, wo sich das Script befindet.
-2. Führe das Script `custom_sysbench_script.sh` aus und übergebe die erforderlichen Parameter.
+2. Führe das Script `sysbench_script.sh` aus und übergebe die erforderlichen Parameter.
 
 ### Code - Beispiel:
 
 ```bash
 cd ../..
 cd Tools
-./custom_sysbench_script.sh \
+./sysbench_script.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Output \
   "1,64" \
   "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Scripts/int_queries:false" \
