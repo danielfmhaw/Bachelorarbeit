@@ -94,3 +94,56 @@ Beispielsweise ist ein Index, der aus Nachname, Vorname und Geburtsdatum besteht
 
 Für optimale Leistung sollten Indizes mit den gleichen Spalten, jedoch in unterschiedlicher Reihenfolge erstellt werden, um die häufigsten Abfragen zu optimieren.
 Eine Analyse der am häufigsten verwendeten Abfragen kann dabei helfen zu entscheiden, ob zusätzliche Indizes erforderlich sind.
+
+\section{Hash - Index}
+Ein weiterer Indextyp, den wir betrachten, ist der Hash-Index.
+Dieser basiert auf einer Hash-Tabelle und ist daher nur für exakte Suchanfragen geeignet, die alle Spalten im Index verwenden.
+Die Funktionsweise der Storage-Engine lässt sich wie folgt beschreiben: Für jede Zeile wird mithilfe einer Hash-Funktion ein Hash-Wert der indexierten Spalte berechnet.
+Der Hash-Wert (engl.\textit{hash code}) ist eine kleine Zahl, die sich in der Regel von den Hash-Werten anderer Zeilen mit unterschiedlichen Schlüsselwerten unterscheidet.
+
+
+In MySQL unterstützt nur die Memory-Storage-Engine explizite Hash-Indizes.
+Der bereits besprochene Standard-Indextyp für Memory-Tabellen, der B-Baum-Index, ist jedoch ebenfalls möglich.
+Außerdem unterstützt die Memory-Engine keine eindeutigen Hash-Indizes.
+Das bedeutet, wenn mehrere Werte denselben Hash-Wert besitzen, speichert der Index die Zeiger auf die Zeilen (engl. \textit{row pointers}) in demselben Hash-Tabelleneintrag, typischerweise mithilfe einer verketteten Liste (z.B. einer \textit{Linked List}).
+Im Gegensatz dazu stellen eindeutige Hash-Indizes sicher, dass für jeden Hash-Wert nur ein einziger Eintrag existiert.
+Bei Konflikten wird ein Mechanismus wie die \textit{Open Addressing}-Strategie (z.B. \textit{Linear Probing} oder \textit{Quadratic Probing}) eingesetzt, um Konflikte zu lösen und den Speicherplatz effizient zu verwalten.
+Hierbei wird versucht, Konflikte direkt innerhalb der Hash-Tabelle zu bewältigen, anstatt auf zusätzliche Datenstrukturen wie verkettete Listen zurückzugreifen.
+
+Um die Berechnung der Hash-Funktion genauer zu erläutern, folgt ein Beispiel:
+
+\begin{lstlisting}[language=SQL,caption=Variationen,label=kperms]
+SELECT lname FROM testhash WHERE fname = 'Peter';
+\end{lstlisting}
+
+Zunächst berechnet MySQL den Hash-Wert für \texttt{'Peter'} und verwendet diesen, um den entsprechenden Zeiger im Index zu finden.
+Angenommen, die Hash-Funktion liefert für \texttt{'Peter'} den Wert \textbf{7654}.
+MySQL sucht nun im Index an der Position 7654 und findet einen Zeiger auf Zeile 3.
+Im letzten Schritt wird der Wert in Zeile 3 mit \texttt{'Peter'} verglichen, um sicherzustellen, dass es sich um die richtige Zeile handelt.
+Da die Indizes nur kompakte Hash-Werte speichern, sind Hash-Indizes äußerst platzsparend, und Suchvorgänge erfolgen in hoher Geschwindigkeit.
+
+Ähnlich wie der B-Baum-Index hat auch der Hash-Index einige Einschränkungen, auf die wir nun eingehen:
+
+Da der Index nur Hash-Werte und Zeiger auf Zeilen (engl. \textit{row pointers}) enthält, jedoch nicht die Werte selbst, kann MySQL den Index nicht verwenden, um das Einlesen der Zeilen zu vermeiden.
+Da der Zugriff auf die in den Speicher geladenen Zeilen jedoch sehr schnell ist, wird die Leistung dadurch nicht wesentlich beeinträchtigt.
+
+Ein wesentlicher Nachteil von Hash-Indizes ist, dass sie nicht für Sortierungen verwendet werden können, da die Werte nicht in einer geordneten Reihenfolge gespeichert sind.
+Im Gegensatz dazu können B-Baum-Indizes Sortierungen unterstützen, wenn sie entsprechend erstellt und genutzt werden.
+
+Darüber hinaus ermöglichen Hash-Indizes keine partiellen Schlüsselübereinstimmungen (engl. \textit{partial key matching}).
+Da der Hash-Wert aus dem gesamten indexierten Wert berechnet wird, hilft ein Hash-Index beispielsweise nicht, wenn ein Index aus den Spalten (A, B) besteht und die \texttt{WHERE}-Klausel nur auf A verweist.
+
+
+Ein weiterer Nachteil besteht darin, dass Hash-Indizes keine Bereichsabfragen (engl. \textit{range queries}) unterstützen.
+Sie eignen sich lediglich für Gleichheitsvergleiche, wie die Operatoren \texttt{=} (gleich), \texttt{<=>} (null-sicher gleich) und \texttt{IN()}.
+
+
+Obwohl Hash-Indizes sehr performant sind, können Hash-Kollisionen ihre Leistung beeinträchtigen.
+Wenn viele Werte denselben Hash-Wert aufweisen, muss die Storage-Engine jeden Zeiger in der verketteten Liste durchlaufen und die entsprechenden Werte mit dem Suchwert vergleichen, um die richtige(n) Zeile(n) zu finden.
+
+
+Auch Index-Wartungsoperationen können bei vielen Kollisionen langsamer werden.
+Wenn beispielsweise ein Index auf einer Spalte mit sehr geringer Selektivität erstellt wird und eine Zeile gelöscht werden soll, kann das Finden des entsprechenden Zeigers im Index sehr aufwendig sein, was auch das Löschen der Zeile verzögert.
+
+
+Einige Speicher-Engines, wie beispielsweise InnoDB, können zudem erkennen, wenn bestimmte Index-Werte besonders häufig verwendet werden, und automatisch einen Hash-Index für diese Werte im Speicher (engl.\textit{memory}) erstellen, der zusätzlich zu den vorhandenen B-Baum-Indizes genutzt wird.
