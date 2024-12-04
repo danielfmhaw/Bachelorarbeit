@@ -7,30 +7,39 @@ parser.add_argument('input_file', type=str, help="Path to the input CSV file")
 parser.add_argument('output_file', type=str, help="Path to the output CSV file")
 
 args = parser.parse_args()
-
-# Load and preprocess data
 df = pd.read_csv(args.input_file)
-df['Base_Script'] = df['Script'].str.replace(r'_(insert|select)$', '', regex=True)
 
+df['Base_Script'] = df['Script'].str.extract(r'(.*?)(?:_(insert|select))')[0]
 insert_rows = df[df['Script'].str.endswith('_insert')].assign(WriteOnly=lambda x: x['QPS'])
-select_rows = df[df['Script'].str.endswith('_select')]
-combined = pd.merge(
-    insert_rows,
-    select_rows,
-    on=['Base_Script', 'Time (s)'],
-    suffixes=('_insert', '_select')
-)
+select_rows = df[df['Script'].str.contains('_select')]
 
-# Aggregate metrics
-metrics = ['TPS', 'QPS', 'Reads', 'Writes', 'Other', 'Latency (ms;95%)', 'ErrPs', 'ReconnPs']
-combined = combined.assign(**{m: combined[f'{m}_insert'] + combined[f'{m}_select'] for m in metrics})
+combined = []
 
-output_df = combined.rename(columns={'Base_Script': 'Script', 'Threads_insert': 'Threads'})[
-    ['Script', 'Time (s)', 'Threads', 'TPS', 'QPS', 'Reads', 'Writes',
-     'Other', 'Latency (ms;95%)', 'ErrPs', 'ReconnPs', 'WriteOnly']
-]
+# Multiple selects
+for base_script in insert_rows['Base_Script'].unique():
+    insert_data = insert_rows[insert_rows['Base_Script'] == base_script]
+    matching_selects = select_rows[select_rows['Base_Script'] == base_script]
 
-float_columns = ['TPS', 'QPS', 'Reads', 'Writes', 'Other', 'Latency (ms;95%)', 'ErrPs', 'ReconnPs', 'WriteOnly']
-output_df[float_columns] = output_df[float_columns].apply(lambda x: x.map(lambda y: f"{y:.2f}" if isinstance(y, float) else y))
+    for select_script in matching_selects['Script'].unique():
+        select_data = matching_selects[matching_selects['Script'] == select_script]
+        merged = pd.merge(insert_data, select_data, on=['Base_Script', 'Time (s)'], suffixes=('_insert', '_select'))
 
-output_df.to_csv(args.output_file, index=False)
+        if not merged.empty:
+            metrics = ['TPS', 'QPS', 'Reads', 'Writes', 'Other', 'Latency (ms;95%)', 'ErrPs', 'ReconnPs']
+            merged = merged.assign(
+                **{m: merged[f'{m}_insert'] + merged[f'{m}_select'] for m in metrics}
+            )
+            merged['Script'] = select_script.replace('query_differences_', '').replace('_select', '')
+            merged = merged.drop(columns=['Base_Script'])
+            combined.append(merged)
+# One select per insert
+if combined:
+    final_combined_df = pd.concat(combined)
+    output_df = final_combined_df.rename(columns={'Threads_insert': 'Threads'})[
+        ['Script', 'Time (s)', 'Threads', 'TPS', 'QPS', 'Reads', 'Writes',
+         'Other', 'Latency (ms;95%)', 'ErrPs', 'ReconnPs', 'WriteOnly']
+    ]
+    float_columns = ['TPS', 'QPS', 'Reads', 'Writes', 'Other', 'Latency (ms;95%)', 'ErrPs', 'ReconnPs', 'WriteOnly']
+    for col in float_columns:
+        output_df[col] = output_df[col].map(lambda x: f"{x:.2f}" if isinstance(x, float) else x)
+    output_df.to_csv(args.output_file, index=False)

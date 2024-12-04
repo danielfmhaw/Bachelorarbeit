@@ -12,12 +12,12 @@ set output WORK_DIR . "/output/gnuplot/sysbench_output.png"
 set yrange [0:*]
 
 # Plot each attribute on its own line
-plot WORK_DIR . "/output/sysbench_output.csv" using 1:2 title "Threads" lt 1 lc rgb "black" with lines, \
-     "" using 1:3 title "TPS" lt 2 lc rgb "green" with lines, \
-     "" using 1:4 title "QPS" lt 3 lc rgb "blue" with lines, \
-     "" using 1:5 title "Reads" lt 4 lc rgb "red" with lines, \
-     "" using 1:6 title "Writes" lt 5 lc rgb "orange" with lines, \
-     "" using 1:7 title "Other" lt 6 lc rgb "purple" with lines, \
-     "" using 1:8 title "Latency (ms)" lt 7 lc rgb "cyan" with lines, \
-     "" using 1:9 title "Err/s" lt 8 lc rgb "magenta" with lines, \
-     "" using 1:10 title "Reconn/s" lt 9 lc rgb "brown" with lines
+plot WORK_DIR . "/output/sysbench_output.csv" using 2:3 title "Threads" lt 1 lc rgb "black" with lines, \
+     "" using 2:4 title "TPS" lt 2 lc rgb "green" with lines, \
+     "" using 2:5 title "QPS" lt 3 lc rgb "blue" with lines, \
+     "" using 2:6 title "Reads" lt 4 lc rgb "red" with lines, \
+     "" using 2:7 title "Writes" lt 5 lc rgb "orange" with lines, \
+     "" using 2:8 title "Other" lt 6 lc rgb "purple" with lines, \
+     "" using 2:9 title "Latency (ms)" lt 7 lc rgb "cyan" with lines, \
+     "" using 2:10 title "Err/s" lt 8 lc rgb "magenta" with lines, \
+     "" using 2:11 title "Reconn/s" lt 9 lc rgb "brown" with lines

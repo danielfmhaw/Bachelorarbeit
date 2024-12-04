@@ -1,7 +1,7 @@
+# Performance von Join-Abfragen
+## Beschreibung
 
-# Projektbeschreibung
-
-Dieses Projekt untersucht die **Performance von Join-Abfragen** und **Insert-Operationen** unter Verwendung unterschiedlicher Datentypen für den Join-Operator. Ziel ist es, die Auswirkungen verschiedener Designs auf die Effizienz dieser Operationen zu analysieren.
+Es wird die **Performance von Join-Abfragen** und **Insert-Operationen** unter Verwendung unterschiedlicher Datentypen für den Join-Operator untersucht. Ziel ist es, die Auswirkungen verschiedener Designs auf die Effizienz dieser Operationen zu analysieren.
 
 ## Datenbankstruktur
 
@@ -52,14 +52,14 @@ Führe das folgende Script aus, um die Benchmarks mit den korrekten Pfaden und P
 ### Schritte:
 
 1. Navigiere in das Verzeichnis `Tools`, wo sich das Script befindet.
-2. Führe das Script `custom_sysbench_script.sh` aus und übergebe die erforderlichen Parameter.
+2. Führe das Script `sysbench_script.sh` aus und übergebe die erforderlichen Parameter.
 
-### Beispiel:
+### Code - Beispiel:
 
 ```bash
 cd ../..
 cd Tools
-./custom_sysbench_script.sh \
+./sysbench_script.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Output \
   "1,64" \
   "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Scripts/int_queries:false" \

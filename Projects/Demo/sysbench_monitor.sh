@@ -1,22 +1,20 @@
 #!/bin/bash
 
+# Load DB Config
+source /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/db.env
+
 # File Paths
-GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pandas/generateplot.py"
+GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Python/generatePlot.py"
 OUTPUT_DIR="output"
 OUTPUT_FILE="output/sysbench_output.csv"
 RAW_RESULTS_FILE="output/sysbench.log"
 GNUPLOT_SCRIPT="plot_sysbench.gp"
 
-# Connection parameters
-DB_HOST="localhost"
-DB_USER="root"
-DB_PASS="password"
-DB_NAME="sbtest"
+# Benchmark Settings
 TABLES=10
 TABLE_SIZE=10000
 DURATION=10
 
-# Ensure output directories exist
 rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 
@@ -49,7 +47,7 @@ run_sysbench "run" "--time=$DURATION --threads=1 --report-interval=1" "$RAW_RESU
 echo "Benchmark complete. Results saved to $OUTPUT_FILE."
 
 # Format the results into CSV
-echo "Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE"
+echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE"
 grep '^\[ ' $RAW_RESULTS_FILE | while read -r line; do
     time=$(echo $line | awk '{print $2}' | sed 's/s//')
     threads=$(echo $line | awk -F 'thds: ' '{print $2}' | awk '{print $1}')
@@ -63,7 +61,7 @@ grep '^\[ ' $RAW_RESULTS_FILE | while read -r line; do
     err_per_sec=$(echo $line | awk -F 'err/s: ' '{print $2}' | awk '{print $1}')
     reconn_per_sec=$(echo $line | awk -F 'reconn/s: ' '{print $2}' | awk '{print $1}')
 
-    echo "$time,$threads,$tps,$qps,$reads,$writes,$other,$latency,$err_per_sec,$reconn_per_sec" >> "$OUTPUT_FILE"
+    echo "demo,$time,$threads,$tps,$qps,$reads,$writes,$other,$latency,$err_per_sec,$reconn_per_sec" >> "$OUTPUT_FILE"
 done
 
 echo "Cleaning up..."
@@ -75,16 +73,15 @@ rm -rf "$OUTPUT_DIR/gnuplot"
 mkdir -p "$OUTPUT_DIR/gnuplot"
 echo "Generating plot with gnuplot..."
 gnuplot $GNUPLOT_SCRIPT
+echo "Plots generated with gnuplot"
 
 # Generate plot with pandas and move objects
 echo "Generating plots with pandas..."
 python3 "$GENERATE_PLOT_SCRIPT" "$OUTPUT_FILE"
-SOURCE_DIR="output/detailed_pngs"
+SOURCE_DIR="output/pngs"
 DEST_DIR="output/pandas"
-FILE_TO_MOVE="output/output_final.png"
+FILE_TO_MOVE="output/pngs/script_comparison/demo.png"
 mkdir -p "$DEST_DIR"
-mv "$SOURCE_DIR"/* "$DEST_DIR"
+mv "$SOURCE_DIR/metric_comparison"/* "$DEST_DIR"
 mv "$FILE_TO_MOVE" "$DEST_DIR/Summary.png"
 rm -rf "$SOURCE_DIR"
-
-echo "Plots generated."
