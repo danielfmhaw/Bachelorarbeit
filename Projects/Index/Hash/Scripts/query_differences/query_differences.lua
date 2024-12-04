@@ -14,6 +14,7 @@ function prepare()
         )ENGINE=MEMORY;
     ]]
 
+    -- Create indices for faster lookups (on name, vorname, geburtstag)
     local create_indices = [[
         CREATE INDEX combined_index
         ON KUNDEN (NAME, VORNAME, GEBURTSTAG);
@@ -28,6 +29,7 @@ end
 function cleanup()
     db_query("DROP INDEX combined_index ON KUNDEN;")
 
+    -- Drop the table
     local drop_kunden_query = "DROP TABLE IF EXISTS KUNDEN;"
     db_query(drop_kunden_query)
 
