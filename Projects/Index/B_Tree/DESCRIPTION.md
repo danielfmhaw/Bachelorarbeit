@@ -12,14 +12,9 @@ Das Projekt verwendet die gleiche Tabelle **KUNDE**, wie auch für den Integer-F
 Untersucht werden:
 - Performance – Unterschied mit **unterschiedlichen Zeilenanzahl**
 - Veranschaulichung der Performanceunterschiede, **je nach Sortierung** des Index usw.
-
-
-Eine riesige Tabelle erstellen mit unterschiedlicher Anzahl an Zeilen (4 unterschiedliche)
-
-Nptizen
-Ein Index aus Last_Name, First_Name and B_Day
-
-
+  - Index sollte funktionieren für: [column_prefix.lua](Scripts/query_differences/query_differences_select/column_prefix.lua), [combined_match_with_range.lua](Scripts/query_differences/query_differences_select/combined_match_with_range.lua), [exact_with_prefix.lua](Scripts/query_differences/query_differences_select/exact_with_prefix.lua), [full_match.lua](Scripts/query_differences/query_differences_select/full_match.lua),[leftmost_prefix.lua](Scripts/query_differences/query_differences_select/leftmost_prefix.lua), [range_values.lua](Scripts/query_differences/query_differences_select/range_values.lua)
+  - Nicht funktionieren für: [not_leftmost.lua](Scripts/query_differences/query_differences_select/not_leftmost.lua), [range_with_like.lua](Scripts/query_differences/query_differences_select/range_with_like.lua), [skip_columns.lua](Scripts/query_differences/query_differences_select/skip_columns.lua)
+    
 ### Code für High Count Vergleich:
 
 ```bash
@@ -56,7 +51,7 @@ cd Tools
 ```bash
 cd ../../..
 cd Tools
-./generateGraph.sh \
+./generate_graph.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Output/query_differences \
  "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/query_differences:false" 
 ```

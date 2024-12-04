@@ -13,7 +13,6 @@ function prepare()
         );
     ]]
 
-    -- Create indices for faster lookups
     local create_indices = [[
         CREATE INDEX idx_stadt ON KUNDEN(STADT);
         CREATE INDEX idx_postleitzahl ON KUNDEN(POSTLEITZAHL);
@@ -30,7 +29,6 @@ function cleanup()
     db_query("DROP INDEX idx_postleitzahl ON KUNDEN;")
     db_query("DROP INDEX idx_geburtstag ON KUNDEN;")
 
-    -- Drop the table
     local drop_kunden_query = "DROP TABLE IF EXISTS KUNDEN;"
     db_query(drop_kunden_query)
 

@@ -14,7 +14,6 @@ local function randomString(length)
     return result
 end
 
--- Function to delete existing data from tables
 function delete_data()
     local delete_bestellung_query = "DELETE FROM BESTELLUNGMITVARCHAR;"
     local delete_kunden_query = "DELETE FROM KUNDENMITVARCHAR;"
@@ -28,7 +27,6 @@ end
 function insert_data()
     delete_data()
     for i = 1, num_rows do
-        -- Random data generation for KUNDENMITVARCHAR fields
         local name = randomString(length) .. string.format("%d", i)  -- Use dynamic length
         local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
         local adresse = string.format("Address_%d", i)
@@ -45,7 +43,6 @@ function insert_data()
             VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
         ]], name, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
 
-        -- Execute the customer insertion
         db_query(kunden_query)
 
         for j = 1, bestellungProKunde do
@@ -61,7 +58,6 @@ function insert_data()
               VALUES (%d,'%s', %d, '%s', %d);
             ]],bestellung_id, bestelldatum, artikel_id, name, umsatz)
 
-            -- Execute the order insertion
             db_query(bestellung_query)
         end
     end

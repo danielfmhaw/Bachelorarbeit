@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Load DB Config
+source /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/db.env
+
 # Parse arguments
 if [ "$#" -lt 2 ]; then
     echo "Usage: $0 <output_dir> [custom_lengths] <query_info> ..."
@@ -37,13 +40,6 @@ PYHTON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Pytho
 OUTPUT_FILE="$OUTPUT_DIR/sysbench_output.csv"
 OUTPUT_FILE_INOFFICIAL="$OUTPUT_DIR/sysbench_output_inofficial.csv"
 STATISTICS_OUTPUT_FILE="$OUTPUT_DIR/statistics.csv"
-
-# Connection parameters
-DB_HOST="127.0.0.1"
-DB_PORT="3306"
-DB_USER="root"
-DB_PASS="password"
-DB_NAME="sbtest"
 
 # Sysbench configuration
 TIME=32

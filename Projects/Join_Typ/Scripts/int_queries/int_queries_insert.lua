@@ -1,7 +1,6 @@
 local num_rows = 2000
 local bestellungProKunde = 10
 
--- Function to delete data in a safe order considering foreign key dependencies
 function delete_data()
     local delete_bestellung_query = "DELETE FROM BESTELLUNGMITID;"
     local delete_kunden_query = "DELETE FROM KUNDENMITID;"

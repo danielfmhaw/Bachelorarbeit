@@ -1,6 +1,5 @@
 local num_rows = tonumber(os.getenv("CUSTOM_LENGTH")) or 0
 
--- Function to delete existing data from tables
 function delete_data()
     local delete_kunden_query = "DELETE FROM KUNDEN;"
     db_query("START TRANSACTION")
@@ -22,7 +21,6 @@ function insert_data()
         local email = string.format("customer%d@example.com", i)
         local telefonnummer = string.format("+49157%07d", math.random(1000000, 9999999))
 
-        -- Insert into KUNDEN, ignoring duplicates
         local kunden_query = string.format([[
             INSERT IGNORE INTO KUNDEN
             (KUNDEN_ID, NAME, GEBURTSTAG, ADRESSE, STADT, POSTLEITZAHL, LAND, EMAIL, TELEFONNUMMER)

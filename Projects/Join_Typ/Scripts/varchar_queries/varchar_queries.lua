@@ -1,4 +1,5 @@
 function prepare()
+    -- Create Table Kunden with varchar as PK
     local create_kunden_query = [[
         CREATE TABLE IF NOT EXISTS KUNDENMITVARCHAR (
             NAME          VARCHAR(255) PRIMARY KEY,

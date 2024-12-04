@@ -26,13 +26,11 @@ function prepare()
         );
     ]]
 
-    -- Execute the table creation queries
     db_query(create_kunden_query)
     db_query(create_bestellung_query)
     print("Tables KUNDENMITID and BESTELLUNGMITID have been successfully created.")
 end
 
--- Cleanup function to drop tables
 function cleanup()
     local drop_bestellung_query = "DROP TABLE IF EXISTS BESTELLUNGMITID;"
     local drop_kunden_query = "DROP TABLE IF EXISTS KUNDENMITID;"

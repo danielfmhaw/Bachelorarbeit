@@ -11,18 +11,19 @@ function prepare()
             LAND          VARCHAR(100),
             EMAIL         VARCHAR(255) UNIQUE,
             TELEFONNUMMER VARCHAR(20)
-        );
+        )ENGINE=MEMORY;
     ]]
 
     local create_indices = [[
-        CREATE INDEX combined_index ON KUNDEN(NAME, VORNAME, GEBURTSTAG);
+        CREATE INDEX combined_index
+        ON KUNDEN (NAME, VORNAME, GEBURTSTAG);
+        USING HASH;
     ]]
 
     db_query(create_kunden_query)
     db_query(create_indices)
     print("Table 'KUNDEN' and index have been successfully created.")
 end
-
 
 function cleanup()
     db_query("DROP INDEX combined_index ON KUNDEN;")
