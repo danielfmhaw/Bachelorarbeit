@@ -1,5 +1,6 @@
 import pandas as pd
 import argparse
+import re
 
 # Argument Parser
 parser = argparse.ArgumentParser(description="Process sysbench output CSV file")
@@ -29,7 +30,13 @@ for base_script in insert_rows['Base_Script'].unique():
             merged = merged.assign(
                 **{m: merged[f'{m}_insert'] + merged[f'{m}_select'] for m in metrics}
             )
-            merged['Script'] = select_script.replace('query_differences_', '').replace('_select', '')
+
+            match = re.match(r'.*?(?:_(\d+))?_select_(.*)', select_script)
+            if match:
+                number, core_name = match.groups()
+                script_name = f"{core_name}_{number}" if number else core_name
+
+            merged['Script'] = script_name
             merged = merged.drop(columns=['Base_Script'])
             combined.append(merged)
 # One select per insert

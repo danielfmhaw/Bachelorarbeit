@@ -177,7 +177,7 @@ process_script_benchmark() {
       local SCRIPT_NAME
       if [ -n "$LENGTH" ]; then
         if $IS_FROM_SELECT_DIR && [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
-          SCRIPT_NAME="$(basename "$SELECT_SCRIPT")_${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
+          SCRIPT_NAME="${QUERY_PATH##*/}_${LENGTH}_select_$(basename "$SCRIPT" .lua)"
         else
           SCRIPT_NAME="${QUERY_PATH##*/}_${LENGTH}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
         fi
