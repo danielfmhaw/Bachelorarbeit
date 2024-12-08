@@ -1,13 +1,25 @@
 #!/bin/bash
 
-# Load DB Config
-source /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/db.env
+if [ -n "$GITHUB_ACTIONS" ]; then
+    ENV_PATH="./db.env"
+    GENERATE_PLOT_SCRIPT="./Tools/Python/generatePlot.py"
+else
+    ENV_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/db.env"
+    GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Python/generatePlot.py"
+fi
 
-# File Paths
-GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Python/generatePlot.py"
+if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ]; then
+    if [ -f "$ENV_PATH" ]; then
+        # shellcheck source=/path/to/your/env/file
+        source "$ENV_PATH"
+    fi
+fi
+
 OUTPUT_DIR="output"
-OUTPUT_FILE="output/sysbench_output.csv"
-RAW_RESULTS_FILE="output/sysbench.log"
+[[ "$1" == "-out" ]] && OUTPUT_DIR="$2" && shift 2
+
+OUTPUT_FILE="$OUTPUT_DIR/sysbench_output.csv"
+RAW_RESULTS_FILE="$OUTPUT_DIR/sysbench.log"
 GNUPLOT_SCRIPT="plot_sysbench.gp"
 
 # Benchmark Settings

@@ -54,14 +54,14 @@ Führe das folgende Script aus, um die Benchmarks mit den korrekten Pfaden und P
 1. Navigiere in das Verzeichnis `Tools`, wo sich das Script befindet.
 2. Führe das Script `sysbench_script.sh` aus und übergebe die erforderlichen Parameter.
 
-### Code - Beispiel:
+### Code für Join Type - Vergleich:
 
 ```bash
 cd ../..
 cd Tools
 ./sysbench_script.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Output \
-  "1,64" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Scripts/int_queries:false" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Scripts/varchar_queries:true"
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Output" \
+  -len "1,64" \
+  -script:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Scripts/int_queries:false" \
+  -script:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Scripts/varchar_queries:true"
 ```
