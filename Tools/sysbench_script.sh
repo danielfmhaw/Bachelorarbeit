@@ -1,51 +1,68 @@
-#!/bin/bash
+which bash
 
-# Load DB Config
-source /Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/db.env
+if [ -n "$GITHUB_ACTIONS" ]; then
+    ENV_PATH="./db.env"
+    PYTHON_PATH="./Tools/Python"
+else
+    ENV_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/db.env"
+    PYTHON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Python"
+fi
+
+# Load environment variables
+if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ]; then
+    if [ -f "$ENV_PATH" ]; then
+        # shellcheck source=/path/to/your/env/file
+        source "$ENV_PATH"
+    fi
+fi
+
+# Display usage instructions
+usage() {
+    echo "Usage: $0 -out <output_dir> [-len <custom_lengths>] -script:\"<query_info>\" [...]"
+    exit 1
+}
+
+# Initialize variables
+OUTPUT_DIR=""
+CUSTOM_LENGTHS=""
+QUERY_INFO=()
+NEEDS_CUSTOM_LENGTHS=false
 
 # Parse arguments
-if [ "$#" -lt 2 ]; then
-    echo "Usage: $0 <output_dir> [custom_lengths] <query_info> ..."
-    echo "Example 1: $0 output \"1,64\" \"dir_path/int_queries:false\" \"dir_path/varchar_queries:true\""
-    echo "Example 2: $0 output \"dir_path/int_queries\" \"dir_path/varchar_queries\""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -out) OUTPUT_DIR="$2"; shift 2 ;;
+        -len) CUSTOM_LENGTHS="$2"; shift 2 ;;
+        -script:*) QUERY_INFO+=("${1#-script:}"); shift ;;
+        *) usage ;;
+    esac
+done
+
+# Validate required arguments
+if [ -z "$OUTPUT_DIR" ] || [ "${#QUERY_INFO[@]}" -eq 0 ]; then
+    usage
 fi
 
-OUTPUT_DIR="$1"
-CUSTOM_LENGTHS=""
-QUERY_INFO=("${@:2}")
-
-if [[ ! "${QUERY_INFO[0]}" == *:* ]]; then
-    CUSTOM_LENGTHS="${QUERY_INFO[0]}"
-    QUERY_INFO=("${@:3}")
-fi
-
-# Process QUERY_INFO to detect if lengths are required
-NEEDS_CUSTOM_LENGTHS=false
+# Handle queries with ":true" flag (requires custom lengths)
 for INFO in "${QUERY_INFO[@]}"; do
-    if [[ "$INFO" != *:* ]]; then
-        INFO="${INFO}:false"
-    fi
-    if [[ "$INFO" == *":true"* ]]; then
-        NEEDS_CUSTOM_LENGTHS=true
-    fi
+    [[ "$INFO" == *":true"* ]] && NEEDS_CUSTOM_LENGTHS=true
 done
 
 if $NEEDS_CUSTOM_LENGTHS && [ -z "$CUSTOM_LENGTHS" ]; then
-    echo "Error: CUSTOM_LENGTHS is required because at least one QUERY_INFO has :true"
+    echo "Error: -len is required for queries marked with :true"
     exit 1
 fi
 
-# File Paths
-PYHTON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Python"
+# Define file paths
 OUTPUT_FILE="$OUTPUT_DIR/sysbench_output.csv"
 OUTPUT_FILE_INOFFICIAL="$OUTPUT_DIR/sysbench_output_inofficial.csv"
 STATISTICS_OUTPUT_FILE="$OUTPUT_DIR/statistics.csv"
 
 # Sysbench configuration
-TIME=32
-THREADS=8
-EVENTS=0
-REPORT_INTERVAL=4
+TIME=${TIME:-32}
+THREADS=${THREADS:-8}
+EVENTS=${EVENTS:-0}
+REPORT_INTERVAL=${REPORT_INTERVAL:-4}
 
 # Ensure output directories exist
 rm -rf "$OUTPUT_DIR"
@@ -62,7 +79,7 @@ run_benchmark() {
   local SCRIPT_NAME="$4"
 
   if [[ -n "$SCRIPT_NAME" ]]; then
-      echo "Running $(basename "$SCRIPT_PATH")..."
+      echo "Running $(basename "$SCRIPT_PATH") for $TIME seconds ..."
   fi
   if [[ "$MODE" == "prepare" ]]; then
       length=$(basename "$OUTPUT_FILE" | grep -o '[0-9]*')
@@ -234,9 +251,9 @@ for INFO in "${QUERY_INFO[@]}"; do
   fi
 done
 
-python3 "$PYHTON_PATH/generateCombinedCSV.py" "$OUTPUT_FILE_INOFFICIAL" "$OUTPUT_FILE"
+python3 "$PYTHON_PATH/generateCombinedCSV.py" "$OUTPUT_FILE_INOFFICIAL" "$OUTPUT_FILE"
 echo "Combined CSV file created at $OUTPUT_FILE"
 
 # Generate plot after all tasks are completed
 echo "Generating plots..."
-python3 "$PYHTON_PATH/generatePlot.py" "$OUTPUT_FILE"
+python3 "$PYTHON_PATH/generatePlot.py" "$OUTPUT_FILE"

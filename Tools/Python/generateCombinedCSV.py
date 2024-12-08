@@ -31,14 +31,15 @@ for base_script in insert_rows['Base_Script'].unique():
                 **{m: merged[f'{m}_insert'] + merged[f'{m}_select'] for m in metrics}
             )
 
-            match = re.match(r'.*?(?:_(\d+))?_select_(.*)', select_script)
-            if match:
-                number, core_name = match.groups()
-                script_name = f"{core_name}_{number}" if number else core_name
-
+        match = re.match(r'(?:.*?_select_)?(.*?)(?:_select)?$', select_script)
+        if match:
+            script_name = match.group(1)
             merged['Script'] = script_name
+
             merged = merged.drop(columns=['Base_Script'])
             combined.append(merged)
+        else:
+            raise ValueError(f"Failed to parse script name from '{select_script}'")
 # One select per insert
 if combined:
     final_combined_df = pd.concat(combined)
