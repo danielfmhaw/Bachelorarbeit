@@ -4,8 +4,9 @@ on:
   push:
     paths:
       - 'Projects/**'
-      - 'Tools/**'
       - '.github/**'
+      - 'Tools/Python'
+      - 'Tools/sysbench_script.sh'
   workflow_dispatch:
 
 jobs:
@@ -25,20 +26,57 @@ jobs:
       THREADS: 1
       EVENTS: 0
       REPORT_INTERVAL: 1
+      GENERAL_PATHS: "./.github ./Tools/Python ./Tools/sysbench_script.sh"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Load configuration from JSON
+        run: |
+          CONFIG_FILE=".github/pattern.json"
+          TEST_TYPE="${{ matrix.test-type }}"
+          OUTPUT_DIR="Output/${TEST_TYPE}"          
+          DIRS=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/:.*$//' | paste -sd " ")                  
+          DIRS_STRING=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/$/\"/;s/^/\"/g' | paste -sd " \" ")
+          LEN=$(jq -r --arg test "$TEST_TYPE" '.[$test].len' "$CONFIG_FILE")                    
+          
+          echo "dirs=$DIRS" >> $GITHUB_ENV
+          echo "dirs_string=$DIRS_STRING" >> $GITHUB_ENV
+          echo "len=\"$LEN\"" >> $GITHUB_ENV
+          echo "output_dir=\"$OUTPUT_DIR\"" >> $GITHUB_ENV
+
+      - name: Calculate hash of directories
+        run: |
+          HASH=$(find ${{ env.dirs }} -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')          
+          echo "hash=$HASH" >> $GITHUB_ENV
+          
+          LAST_COMMIT=$(git rev-parse HEAD || git rev-parse origin/main)          
+          GENERAL_HASH=$(git ls-tree -r $LAST_COMMIT -- $GENERAL_PATHS | awk '{print $3}' | xargs -I {} git show {} | sha256sum | awk '{print $1}')
+          echo "general_hash=$GENERAL_HASH" >> $GITHUB_ENV
+
+      - name: Check existence and handle outputs
+        run: |
+          git fetch origin saved_outputs      
+          OUTPUT_DIR="${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}"
+          
+          if git ls-tree -r --name-only origin/saved_outputs | grep -q "^$OUTPUT_DIR"; then
+            mkdir -p Output/
+            git checkout origin/saved_outputs -- "$OUTPUT_DIR" && cp -r "$OUTPUT_DIR/." Output/
+            echo "should_run=false" >> $GITHUB_ENV
+          else
+            echo "should_run=true" >> $GITHUB_ENV
+          fi
+
       - name: Cache pip dependencies
+        if: env.should_run == 'true'
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
 
       - name: Install dependencies
+        if: env.should_run == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y sysbench
@@ -46,6 +84,7 @@ jobs:
           pip install pandas matplotlib
 
       - name: Start MySQL container
+        if: env.should_run == 'true'
         run: |
           docker run --name mysql-${{ matrix.test-type }} -d \
             -e MYSQL_ROOT_PASSWORD=$DB_PASS \
@@ -57,49 +96,35 @@ jobs:
           echo "MySQL is ready!"
 
       - name: Run sysbench script
+        if: env.should_run == 'true'
         run: |
           chmod +x Tools/sysbench_script.sh
-          if [ "${{ matrix.test-type }}" == "high-count" ]; then
-            Tools/sysbench_script.sh \
-              -out "./Output/B_Tree/high_counts" \
-              -len "500,5000" \
-              -script:"./Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true" \
-              -script:"./Projects/Index/B_Tree/Scripts/count_row_changes/without_index:true"
-          elif [ "${{ matrix.test-type }}" == "low-count" ]; then
-            Tools/sysbench_script.sh \
-              -out "./Output/B_Tree/low_counts" \
-              -len "10,50" \
-              -script:"./Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true" \
-              -script:"./Projects/Index/B_Tree/Scripts/count_row_changes/without_index:true"
-          elif [ "${{ matrix.test-type }}" == "b-tree-query-differences" ]; then
-            Tools/sysbench_script.sh \
-            -out "./Output/B_Tree/query_differences" \
-            -script:"./Projects/Index/B_Tree/Scripts/query_differences:false"
-          elif [ "${{ matrix.test-type }}" == "selectivity-change" ]; then
-            Tools/sysbench_script.sh \
-              -out "./Output/Hash/selectivity_changes" \
-              -len "10,100,500" \
-              -script:"./Projects/Index/Hash/Scripts/selectivity_changes:true"         
-          elif [ "${{ matrix.test-type }}" == "hash-query-differences" ]; then
-            Tools/sysbench_script.sh \
-              -out "./Output/Hash/query_differences" \
-              -script:"./Projects/Index/Hash/Scripts/query_differences:false"
-          elif [ "${{ matrix.test-type }}" == "join-type" ]; then
-            Tools/sysbench_script.sh \
-              -out "./Output/Join_Typ" \
-              -len "1,64" \
-              -script:"./Projects/Join_Typ/Scripts/int_queries:false" \
-              -script:"./Projects/Join_Typ/Scripts/varchar_queries:true"          
-          fi
+          Tools/sysbench_script.sh \
+            -out ${{ env.output_dir }} \
+            -len ${{ env.len }} \
+            -scripts:${{ env.dirs_string }}
 
       - name: Stop MySQL container
+        if: env.should_run == 'true'
         run: |
           docker stop mysql-${{ matrix.test-type }}
           docker rm mysql-${{ matrix.test-type }}
 
-      - name: Upload output
-        if: always()
+      - name: Commit outputs to saved_outputs branch
+        if: env.should_run == 'true'
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git checkout saved_outputs
+          git pull --rebase origin saved_outputs
+          mkdir -p ${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
+          cp -r ./Output/${{ matrix.test-type }} ./${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
+          git add ./${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
+          git commit -m "Add ${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}"
+          git push origin saved_outputs
+
+      - name: Upload all
         uses: actions/upload-artifact@v3
         with:
-          name: combined_output
+          name: combined-output
           path: Output

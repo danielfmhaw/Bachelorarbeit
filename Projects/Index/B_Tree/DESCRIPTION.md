@@ -23,8 +23,8 @@ cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Output/count_row_changes/high_counts" \
   -len "500,5000" \
-  -script:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true" \
-  -script:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/count_row_changes/without_index:true"
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true" \
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/count_row_changes/without_index:true"
 ```
 
 ### Code für Low Count Vergleich:
@@ -34,8 +34,8 @@ cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Output/count_row_changes/low_counts" \
   -len "10,50" \
-  -script:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true" \
-  -script:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/count_row_changes/without_index:true"  
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true" \
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/count_row_changes/without_index:true"  
 ```
 
 ### Code unterschiedliche Select - Queries
@@ -44,7 +44,7 @@ cd ../../..
 cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Output/query_differences" \
-  -script:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/query_differences:false" 
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/B_Tree/Scripts/query_differences:false" 
 ```
 
 ### Nur Graphen erstellen für Select - Queries (log und csv- files müssen schon bestehen)

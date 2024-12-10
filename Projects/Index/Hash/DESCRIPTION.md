@@ -25,7 +25,7 @@ cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/Hash/Output/selectivity_changes" \
   -len "10,100,500" \
-  -script:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/Hash/Scripts/selectivity_changes:true" 
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/Hash/Scripts/selectivity_changes:true" 
 ```
 
 ### Code unterschiedliche Select - Queries
@@ -34,5 +34,5 @@ cd ../../..
 cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/Hash/Output/query_differences" \
-  -script:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/Hash/Scripts/query_differences:false" 
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Index/Hash/Scripts/query_differences:false" 
 ```
