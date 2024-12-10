@@ -1,0 +1,41 @@
+{
+  "high-count": {
+    "dirs": [
+      "./Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true",
+      "./Projects/Index/B_Tree/Scripts/count_row_changes/without_index:true"
+    ],
+    "len": "500,5000"
+  },
+  "low-count": {
+    "dirs": [
+      "./Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true",
+      "./Projects/Index/B_Tree/Scripts/count_row_changes/without_index:true"
+    ],
+    "len": "10,50"
+  },
+  "b-tree-query-differences": {
+    "dirs": [
+      "./Projects/Index/B_Tree/Scripts/query_differences:false"
+    ],
+    "len": ""
+  },
+  "selectivity-change": {
+    "dirs": [
+      "./Projects/Index/Hash/Scripts/selectivity_changes:true"
+    ],
+    "len": "10,100,500"
+  },
+  "hash-query-differences": {
+    "dirs": [
+      "./Projects/Index/Hash/Scripts/query_differences:false"
+    ],
+    "len": ""
+  },
+  "join-type": {
+    "dirs": [
+      "./Projects/Join_Typ/Scripts/int_queries:false",
+      "./Projects/Join_Typ/Scripts/varchar_queries:true"
+    ],
+    "len": "1,64"
+  }
+}

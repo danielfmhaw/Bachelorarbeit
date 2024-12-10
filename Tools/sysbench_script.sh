@@ -18,7 +18,7 @@ fi
 
 # Display usage instructions
 usage() {
-    echo "Usage: $0 -out <output_dir> [-len <custom_lengths>] -script:\"<query_info>\" [...]"
+    echo "Usage: $0 -out <output_dir> [-len <custom_lengths>] -scripts:<query_info1> <query_info2> ..."
     exit 1
 }
 
@@ -33,7 +33,14 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         -out) OUTPUT_DIR="$2"; shift 2 ;;
         -len) CUSTOM_LENGTHS="$2"; shift 2 ;;
-        -script:*) QUERY_INFO+=("${1#-script:}"); shift ;;
+        -scripts:*)
+            QUERY_INFO+=("${1#-scripts:}")
+            shift
+            while [[ $# -gt 0 && "$1" != -* ]]; do
+                QUERY_INFO+=("$1")
+                shift
+            done
+            ;;
         *) usage ;;
     esac
 done
