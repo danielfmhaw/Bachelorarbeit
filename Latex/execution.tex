@@ -1,0 +1,25 @@
+%! Author = danielmendes
+%! Date = 11.12.24
+\chapter{Projektdurchführung}\label{ch:projektdurchfuhrung}
+
+\section{GitHub Action}\label{sec:github-action}
+
+Tried these here:
+- GitHub Artifacts
+- GitHub Cache => deprecated after 7 days and only works
+- (GitHub Repo) or dedicated feature branch => give github action write permission so push is allowed
+- (Google Cloud Storage (GSC), AWS S3 or Azure Storage)
+
+
+Im Laufe des Projekts hat sich herausgestellt, dass viele Bash\_Befehle ausgeführt werden müssen.
+Da das Ausführen des Scripts und damit das Durchführen der Benchmarks führen zu hohen Lasten auf dem lokalen Rechner, weshalb ich nicht jedes Mal alle Skripte ausführen konnte, ohne erhebliche Wärmeveränderungen an meinem Rechner zu spüren.
+Außerdem hat sich herausgestellt, dass jede Erweiterung an meinen Hauptskripten \texttt{generateCombinedCSV.py}, \texttt{generatePlot.py} und \texttt{sysbench\_script.sh} Auswirkungen auf alle auszuführenden Skripten haben kann.
+Mit zunehmender Skriptanzahl, war es nicht immer auf dem ersten Blick erkennbar, welches Outputdateien der Skripte fehlerbehaftet geworden sind im Vergleich zu dem Lauf davor.
+Deshalb hat es für mich Sinn ergeben, das Ganze auszulagern.
+Als sinnvolle Alternative zu dem lokalen Ausführen, haben sich GitHub Actions für mich angeboten.
+(TODO: Erklärung GitHub Action)
+Vereinfacht gesagt soll die GitHub Action alle Skripts ausführen und am Ende alle Outputdateien in einen Ordner zusammen als GitHub Artifact hochladen.
+Anschließend kann ich die Zip-Datei einfach herunterladen, entzippen und anschließend überprüfen, ob alle Dateien noch stimmen.
+
+Man hätte das Ganze noch weiterführen können, in dem man bestimme Tests durchführt die betimmte Werte beispielweise in den CSV - Dateien erwarten.
+

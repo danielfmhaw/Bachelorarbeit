@@ -58,9 +58,9 @@ Letztlich stellt die Storage-Engine fest, ob der gewünschte Wert existiert, ode
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=.8\textwidth]{PNGs/B-Tree}
+    \includegraphics[width=.8\textwidth]{PNGs/Index/B-Tree/B_Tree_Visualisation}
     \caption[Binärbaum - Grafik]{Darstellung des binären Baums mit Knoten und Blättern}
-    \label{fig-bad}
+    \label{fig:b-tree-visualisation}
 \end{figure}
 
 Blattseiten sind besonders, da sie Zeiger auf die indexierten Daten enthalten, anstatt auf andere Seiten zu verweisen.
@@ -94,6 +94,49 @@ Beispielsweise ist ein Index, der aus Nachname, Vorname und Geburtsdatum besteht
 
 Für optimale Leistung sollten Indizes mit den gleichen Spalten, jedoch in unterschiedlicher Reihenfolge erstellt werden, um die häufigsten Abfragen zu optimieren.
 Eine Analyse der am häufigsten verwendeten Abfragen kann dabei helfen zu entscheiden, ob zusätzliche Indizes erforderlich sind.
+
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Index/B-Tree/High_Reads}
+        \label{high-reads}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Index/B-Tree/High_Writes}
+        \label{high-writes}
+    \end{subfigure}
+    \caption[High-Counts: Reads und Writes]{Grafik zeigt die verschiedenen Zeiten (in ms) für Readsabfragen (links) und Schreibbefehle (rechts) mit 500 bzw. 5000 Zeilen}
+    \label{fig:high-b-tree-columns}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Index/B-Tree/Low_Reads}
+        \label{low-reads}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Index/B-Tree/Low_Writes}
+        \label{low-writes}
+    \end{subfigure}
+    \caption[Low-Counts: Reads und Writes]{Grafik zeigt die verschiedenen Zeiten (in ms) für Readsabfragen (links) und Schreibbefehle (rechts) mit 10 bzw. 100 Zeilen dar}
+    \label{fig:low-b-tree-columns}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=.8\textwidth]{PNGs/Index/B-Tree/Query_Reads}
+    \caption[B - Tree - Selects - Ergebnis]{Grafik visualisiert die Unterschiede von verschieden Select - Queries auf dieselben Daten. Je nach Gewschiwndikeit greift der Index besser oder nicht }
+    \label{fig:b-tree-query-reads}
+\end{figure}
+
 
 \section{Hash - Index}
 Ein weiterer Indextyp, den wir betrachten, ist der Hash-Index.
@@ -147,3 +190,30 @@ Wenn beispielsweise ein Index auf einer Spalte mit sehr geringer Selektivität e
 
 
 Einige Speicher-Engines, wie beispielsweise InnoDB, können zudem erkennen, wenn bestimmte Index-Werte besonders häufig verwendet werden, und automatisch einen Hash-Index für diese Werte im Speicher (engl.\textit{memory}) erstellen, der zusätzlich zu den vorhandenen B-Baum-Indizes genutzt wird.
+
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Index/Hash/Hashcol_Reads}
+        \caption[Hash - Kollisionen - Reads - Ergebnis]{Unterschiede von Readsabfragen}
+        \label{hash-collision-reads}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Index/Hash/Hashcol_Writes}
+        \caption[Hash - Kollisionen - Writes - Ergebnis]{Unterschiede von Schreibbefehlen}
+        \label{hash-collision-writes}
+    \end{subfigure}
+    \caption[Hash-Kollisionen: Reads und Writes]{Vergleich der Auswirkungen von Hashkollisionen auf Lese- und Schreibvorgänge in Abhängigkeit von der Anzahl an Hashkollisionen.}
+    \label{fig:hash-collision-comparison}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=.8\textwidth]{PNGs/Index/Hash/Query_Reads}
+    \caption[Hash - Selects - Ergebnis]{Grafik visualisiert die Unterschiede von verschieden Select - Queries auf dieselben Daten. Je nach Gewschiwndikeit greift der Index besser oder nicht }
+    \label{fig:hash-query-reads}
+\end{figure}
