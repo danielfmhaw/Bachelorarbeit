@@ -13,7 +13,6 @@ if [ ! -d "$output_dir" ]; then
 fi
 
 mv "$filename.pdf" "$output_dir/"
-rm "$filename".aux "$filename".log "$filename".bcf "$filename".bbl "$filename".blg "$filename".run.xml
-rm "$filename".lof "$filename".lot "$filename".out "$filename".toc
-rm appendix.aux benchmarks.aux execution.aux indexing.aux title.aux toc.aux
+rm "$filename".{aux,log,bcf,bbl,blg,run.xml,lof,lot,out,toc}
+rm *.aux
 echo "Finished"
