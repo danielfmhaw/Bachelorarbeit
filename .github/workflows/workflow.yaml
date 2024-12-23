@@ -36,10 +36,13 @@ jobs:
         run: |
           CONFIG_FILE=".github/pattern.json"
           TEST_TYPE="${{ matrix.test-type }}"
-          OUTPUT_DIR="Output/${TEST_TYPE}"          
+           
           DIRS=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/:.*$//' | paste -sd " ")                  
           DIRS_STRING=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/$/\"/;s/^/\"/g' | paste -sd " \" ")
           LEN=$(jq -r --arg test "$TEST_TYPE" '.[$test].len' "$CONFIG_FILE")                    
+          
+          SUBFOLDER=$(echo "$DIRS" | awk -F'/' '{for (i=1; i<=NF; i++) if ($i ~ /^[A-Z]/) {print $i; exit}}')
+          OUTPUT_DIR="Output/${SUBFOLDER}/${TEST_TYPE}"
           
           echo "dirs=$DIRS" >> $GITHUB_ENV
           echo "dirs_string=$DIRS_STRING" >> $GITHUB_ENV
