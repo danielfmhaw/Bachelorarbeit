@@ -4,8 +4,8 @@ if [ -n "$GITHUB_ACTIONS" ]; then
     ENV_PATH="./db.env"
     GENERATE_PLOT_SCRIPT="./Tools/Python/generatePlot.py"
 else
-    ENV_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/db.env"
-    GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Python/generatePlot.py"
+    ENV_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/db.env"
+    GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Tools/Python/generatePlot.py"
 fi
 
 if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ]; then

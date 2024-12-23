@@ -60,8 +60,8 @@ Führe das folgende Script aus, um die Benchmarks mit den korrekten Pfaden und P
 cd ../..
 cd Tools
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Output" \
   -len "1,64" \
-  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Scripts/int_queries:false" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Projects/Join_Typ/Scripts/varchar_queries:true"
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/int_queries:false" \
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/varchar_queries:true"
 ```

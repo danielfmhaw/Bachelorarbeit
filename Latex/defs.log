@@ -3,8 +3,8 @@ entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Bachelorarbeit_Entwurf/Dateien/defs.tex
-(/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Bachelorarbeit_Entwurf/Dateien/defs.tex
+**/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Bachelorarbeit_Entwurf/Dateien/defs.tex
+(/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Bachelorarbeit_Entwurf/Dateien/defs.tex
 LaTeX2e <2023-06-01> patch level 1
 L3 programming layer <2023-10-23>
 (/Users/danielmendes/Library/Application Support/MiKTeX/texmfs/install/tex/latex/koma-script/scrreprt.cls
@@ -754,7 +754,7 @@ Package: ltxcmds 2020-05-10 v1.25 LaTeX kernel commands for general use (HO)
 ) (/Users/danielmendes/Library/Application Support/MiKTeX/texmfs/install/tex/latex/kvsetkeys/kvsetkeys.sty
 Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
 )))
-/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Bachelorarbeit_Entwurf/Dateien/defs.tex:53: Undefined control sequence.
+/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Bachelorarbeit_Entwurf/Dateien/defs.tex:53: Undefined control sequence.
 <recently read> \setmonofont 
                              
 l.53 \setmonofont
@@ -766,7 +766,7 @@ spelling (e.g., `I\hbox'). Otherwise just continue,
 and I'll forget about whatever was undefined.
 
 
-/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Bachelorarbeit_Entwurf/Dateien/defs.tex:53: LaTeX Error: Missing \begin{document}.
+/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Bachelorarbeit_Entwurf/Dateien/defs.tex:53: LaTeX Error: Missing \begin{document}.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
