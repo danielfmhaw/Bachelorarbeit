@@ -33,7 +33,7 @@ if $NEEDS_CUSTOM_LENGTHS && [ -z "$CUSTOM_LENGTHS" ]; then
 fi
 
 # File Paths
-PYHTON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Ausarbeitung/Tools/Python"
+PYHTON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Tools/Python"
 OUTPUT_FILE="$OUTPUT_DIR/sysbench_output.csv"
 
 # Generate plot after all tasks are completed
