@@ -37,5 +37,26 @@
       "./Projects/Join_Typ/Scripts/varchar_queries:true"
     ],
     "len": "1,64"
+  },
+  "null-check": {
+    "dirs": [
+      "./Projects/Data_Types/Null/Scripts/null:true",
+      "./Projects/Data_Types/Null/Scripts/not_null:false"
+    ],
+    "len": "2,25"
+  },
+  "int-char": {
+    "dirs": [
+      "./Projects/Data_Types/Simpler/Scripts/int_column:false",
+      "./Projects/Data_Types/Simpler/Scripts/char_column:false"
+    ],
+    "len": ""
+  },
+  "data-size": {
+    "dirs": [
+      "./Projects/Data_Types/Smaller/Scripts/char:true",
+      "./Projects/Data_Types/Smaller/Scripts/int:true"
+    ],
+    "len": "10,255"
   }
 }

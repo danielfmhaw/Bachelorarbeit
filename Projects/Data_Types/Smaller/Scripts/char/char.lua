@@ -1,7 +1,11 @@
+local size = tonumber(os.getenv("CUSTOM_LENGTH")) or 0
+
 function prepare()
-    local create_kunden_query = [[
+    local kunden_id_size = size > 0 and size or 255
+
+    local create_kunden_query = string.format([[
         CREATE TABLE IF NOT EXISTS KUNDEN (
-            KUNDEN_ID     INT PRIMARY KEY,
+            KUNDEN_ID     CHAR(%d) PRIMARY KEY,
             NAME          VARCHAR(255),
             GEBURTSTAG    DATE,
             ADRESSE       VARCHAR(255),
@@ -11,10 +15,10 @@ function prepare()
             EMAIL         VARCHAR(255) UNIQUE,
             TELEFONNUMMER VARCHAR(20)
         );
-    ]]
+    ]], kunden_id_size)
 
     db_query(create_kunden_query)
-    print("Table 'KUNDEN' has been successfully created.")
+    print(string.format("Table 'KUNDEN' has been successfully created with KUNDEN_ID size: %d.", kunden_id_size))
 end
 
 function cleanup()

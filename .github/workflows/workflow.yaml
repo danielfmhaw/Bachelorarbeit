@@ -1,12 +1,12 @@
 name: Benchmark Workflow
 
 on:
-  #  push:
-  #    paths:
-  #      - 'Projects/**'
-  #      - '.github/**'
-  #      - 'Tools/Python'
-  #      - 'Tools/sysbench_script.sh'
+  push:
+    paths:
+      - 'Projects/**'
+      - '.github/**'
+      - 'Tools/Python'
+      - 'Tools/sysbench_script.sh'
   workflow_dispatch:
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test-type: [high-count, low-count, b-tree-query-differences, selectivity-change, hash-query-differences, join-type]
+        test-type: [high-count, low-count, b-tree-query-differences, selectivity-change, hash-query-differences, join-type, null-check, int-char, data-size]
 
     env:
       DB_HOST: ${{ secrets.DB_HOST }}
@@ -36,15 +36,21 @@ jobs:
         run: |
           CONFIG_FILE=".github/pattern.json"
           TEST_TYPE="${{ matrix.test-type }}"
-          OUTPUT_DIR="Output/${TEST_TYPE}"          
           DIRS=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/:.*$//' | paste -sd " ")                  
           DIRS_STRING=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/$/\"/;s/^/\"/g' | paste -sd " \" ")
-          LEN=$(jq -r --arg test "$TEST_TYPE" '.[$test].len' "$CONFIG_FILE")                    
+          LEN=$(jq -r --arg test "$TEST_TYPE" '.[$test].len' "$CONFIG_FILE")
           
+          if [[ $(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[0]' "$CONFIG_FILE") =~ /Projects\/(.*)\/Scripts/ ]]; then
+            EXTRACTED_WORD="${BASH_REMATCH[1]}"
+            OUTPUT_DIR="Output/${EXTRACTED_WORD}/${TEST_TYPE}"
+          fi
+          
+    
           echo "dirs=$DIRS" >> $GITHUB_ENV
           echo "dirs_string=$DIRS_STRING" >> $GITHUB_ENV
           echo "len=\"$LEN\"" >> $GITHUB_ENV
           echo "output_dir=\"$OUTPUT_DIR\"" >> $GITHUB_ENV
+          echo "extracted_word=\"$EXTRACTED_WORD\"" >> $GITHUB_ENV
 
       - name: Calculate hash of directories
         run: |
@@ -61,8 +67,8 @@ jobs:
           OUTPUT_DIR="${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}"
           
           if git ls-tree -r --name-only origin/saved_outputs | grep -q "^$OUTPUT_DIR"; then
-            mkdir -p Output/
-            git checkout origin/saved_outputs -- "$OUTPUT_DIR" && cp -r "$OUTPUT_DIR/." Output/
+            mkdir -p Output/${{env.extracted_word}}
+            git checkout origin/saved_outputs -- "$OUTPUT_DIR" && cp -r "$OUTPUT_DIR/." Output/${{env.extracted_word}}
             echo "should_run=false" >> $GITHUB_ENV
           else
             echo "should_run=true" >> $GITHUB_ENV
@@ -116,9 +122,10 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git checkout saved_outputs
-          git pull --rebase origin saved_outputs
+          git fetch origin saved_outputs
+          git rebase origin/saved_outputs
           mkdir -p ${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
-          cp -r ./Output/${{ matrix.test-type }} ./${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
+          cp -r ./Output/${{env.extracted_word}}/${{ matrix.test-type }} ./${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
           git add ./${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
           git commit -m "Add ${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}"
           git push origin saved_outputs

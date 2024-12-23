@@ -129,6 +129,9 @@ run_sysbench() {
     --report-interval=$REPORT_INTERVAL \
     "$LUA_SCRIPT_PATH" "$MODE" >> "$LOG_FILE" 2>&1
 
+  echo "Log File Content:"
+  cat "$LOG_FILE"
+
   return $?
 }
 
