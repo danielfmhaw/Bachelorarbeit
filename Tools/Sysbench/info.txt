@@ -1,4 +1,4 @@
-TODO(Daniel):
+TODO (Daniel):
 1.	Sysbench ✅
 2.	htop, iostat, and vmstat
 3.	BenchBase
