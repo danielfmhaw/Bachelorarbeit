@@ -1,4 +1,4 @@
-local num_rows = 1000
+local num_rows = 800
 local selectivity = tonumber(os.getenv("CUSTOM_LENGTH")) or 0
 
 function delete_data()
