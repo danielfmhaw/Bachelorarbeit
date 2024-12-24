@@ -5,7 +5,7 @@ on:
     paths:
       - 'Projects/**'
       - '.github/**'
-      - 'Tools/Python'
+      - 'Tools/Python/**'
       - 'Tools/sysbench_script.sh'
   workflow_dispatch:
 
@@ -37,7 +37,7 @@ jobs:
           CONFIG_FILE=".github/pattern.json"
           TEST_TYPE="${{ matrix.test-type }}"
           DIRS=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/:.*$//' | paste -sd " ")                  
-          DIRS_STRING=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/$/\"/;s/^/\"/g' | paste -sd " \" ")
+          DIRS_STRING=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | paste -sd " ")
           LEN=$(jq -r --arg test "$TEST_TYPE" '.[$test].len' "$CONFIG_FILE")
           
           if [[ $(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[0]' "$CONFIG_FILE") =~ /Projects\/(.*)\/Scripts/ ]]; then
@@ -108,7 +108,7 @@ jobs:
           Tools/sysbench_script.sh \
             -out ${{ env.output_dir }} \
             -len ${{ env.len }} \
-            -scripts:${{ env.dirs_string }}
+            -scripts:$(echo "${{ env.dirs_string }}" | sed 's/ / /g')
 
       - name: Stop MySQL container
         if: env.should_run == 'true'
@@ -122,8 +122,8 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git checkout saved_outputs
-          git fetch origin saved_outputs
-          git rebase origin/saved_outputs
+          git pull --rebase origin saved_outputs
+          
           mkdir -p ${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
           cp -r ./Output/${{env.extracted_word}}/${{ matrix.test-type }} ./${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
           git add ./${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}

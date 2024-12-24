@@ -1,5 +1,5 @@
-local num_rows = 2000
-local bestellungProKunde = 10
+local num_rows = 700
+local bestellungProKunde = 3
 
 function delete_data()
     local delete_bestellung_query = "DELETE FROM BESTELLUNGMITID;"

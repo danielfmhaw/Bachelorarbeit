@@ -33,9 +33,13 @@ if $NEEDS_CUSTOM_LENGTHS && [ -z "$CUSTOM_LENGTHS" ]; then
 fi
 
 # File Paths
-PYHTON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Tools/Python"
+PYTHON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Tools/Python"
 OUTPUT_FILE="$OUTPUT_DIR/sysbench_output.csv"
+OUTPUT_FILE_INOFFICIAL="$OUTPUT_DIR/sysbench_output_inofficial.csv"
+
+python3 "$PYTHON_PATH/generateCombinedCSV.py" "$OUTPUT_FILE_INOFFICIAL" "$OUTPUT_FILE"
+echo "Combined CSV file created at $OUTPUT_FILE"
 
 # Generate plot after all tasks are completed
 echo "Generating plots..."
-python3 "$PYHTON_PATH/generatePlot.py" "$OUTPUT_FILE"
+python3 "$PYTHON_PATH/generatePlot.py" "$OUTPUT_FILE"

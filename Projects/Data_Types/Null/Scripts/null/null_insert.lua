@@ -1,4 +1,4 @@
-local num_rows = 5000
+local num_rows = 4000
 local every_n_is_null = tonumber(os.getenv("CUSTOM_LENGTH")) or 0
 
 function delete_data()

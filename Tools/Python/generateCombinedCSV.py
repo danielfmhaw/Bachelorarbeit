@@ -31,11 +31,22 @@ for base_script in insert_rows['Base_Script'].unique():
                 **{m: merged[f'{m}_insert'] + merged[f'{m}_select'] for m in metrics}
             )
 
-        match = re.match(r'(?:.*?_select_)?(.*?)(?:_select)?$', select_script)
+        # 1) no multiple selects and no multiple lens => ex.: int_queries_select => int_queries
+        # 2) multiple selects but no multiple lens => ex.: query_differences_select_column_prefix => column_prefix
+        # 3) multiple lens but no multiple selects => ex.: with_index_500_select => with_index_500
+        # 4) multiple selects and multiple lens => ex.: null_2_select_default_null_count_null => default_null_count_null_2
+        match = re.match(r'^(?:(?:[a-zA-Z]*_)*?(\d+)_select_)?(.*?)(?:_select)?$', select_script)
         if match:
-            script_name = match.group(1)
-            merged['Script'] = script_name
+            group1 = match.group(1)
+            group2 = match.group(2)
 
+            if group1 is not None:
+                script_name = f"{group2}_{group1}"
+            else:
+                parts = group2.split("_select")
+                script_name = parts[-1].lstrip("_") if parts else group2
+
+            merged['Script'] = script_name
             merged = merged.drop(columns=['Base_Script'])
             combined.append(merged)
         else:

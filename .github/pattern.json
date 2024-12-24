@@ -4,14 +4,14 @@
       "./Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true",
       "./Projects/Index/B_Tree/Scripts/count_row_changes/without_index:true"
     ],
-    "len": "500,5000"
+    "len": "400,4000"
   },
   "low-count": {
     "dirs": [
       "./Projects/Index/B_Tree/Scripts/count_row_changes/with_index:true",
       "./Projects/Index/B_Tree/Scripts/count_row_changes/without_index:true"
     ],
-    "len": "10,50"
+    "len": "10,40"
   },
   "b-tree-query-differences": {
     "dirs": [
@@ -55,7 +55,8 @@
   "data-size": {
     "dirs": [
       "./Projects/Data_Types/Smaller/Scripts/char:true",
-      "./Projects/Data_Types/Smaller/Scripts/int:true"
+      "./Projects/Data_Types/Smaller/Scripts/int:true",
+      "./Projects/Data_Types/Smaller/Scripts/varchar:true"
     ],
     "len": "10,255"
   }

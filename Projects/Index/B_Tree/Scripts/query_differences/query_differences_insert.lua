@@ -1,4 +1,4 @@
-local num_rows = 5000
+local num_rows = 4000
 
 local last_names = {
     "Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meier", "Wagner", "Becker", "Hoffmann", "Schulz", "Zimmermann", "Schwarz", "Koch", "Richter", "Bauer"
