@@ -1,4 +1,4 @@
-local num_rows = tonumber(os.getenv("CUSTOM_LENGTH")) or 0
+local num_rows = tonumber(os.getenv("LENGTH")) or 0
 
 function delete_data()
     local delete_kunden_query = "DELETE FROM KUNDEN;"

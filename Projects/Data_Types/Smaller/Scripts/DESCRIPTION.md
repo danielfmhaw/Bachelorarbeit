@@ -21,10 +21,10 @@ cd ../../..
 cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Smaller" \
-  -len "10,255" \
-  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/char:true" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/int:true" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/varchar:true"
+  -var '{"length":[10,255]}' \
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/char:length" \
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/int:length" \
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/varchar:length"
 ```
 
 ### Nur Graphen erstellen für Data Type Größenvergleich (log und csv- files müssen schon bestehen)
@@ -32,13 +32,8 @@ cd Tools
 cd ../../..
 cd Tools
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Smaller \
-  10,255 \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/char:true" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/int:true" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/varchar:true"
+  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Smaller
 ```
-
 
 #### Notes
 Allgemein gilt bei Datentypen, dass kleiner besser ist, weshalb man den kleinstmöglichen Datentypen wählen sollte, den man speichern kann und der die vorhandenen Daten entsprechend repräsentieren kann.

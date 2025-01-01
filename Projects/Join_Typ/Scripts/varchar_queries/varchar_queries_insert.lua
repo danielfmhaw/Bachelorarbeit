@@ -1,4 +1,4 @@
-local length = tonumber(os.getenv("CUSTOM_LENGTH")) or 0
+local length = tonumber(os.getenv("LENGTH")) or 0
 
 local num_rows = 700
 local bestellungProKunde = 3

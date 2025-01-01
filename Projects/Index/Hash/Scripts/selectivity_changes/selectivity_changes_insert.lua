@@ -1,5 +1,5 @@
 local num_rows = 800
-local selectivity = tonumber(os.getenv("CUSTOM_LENGTH")) or 0
+local selectivity = tonumber(os.getenv("LENGTH")) or 0
 
 function delete_data()
     local delete_kunden_query = "DELETE FROM KUNDEN;"

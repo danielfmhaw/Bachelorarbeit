@@ -61,7 +61,14 @@ cd ../..
 cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Output" \
-  -len "1,64" \
-  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/int_queries:false" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/varchar_queries:true"
+  -var '{"length":[1,64]}' \
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/int_queries" \
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/varchar_queries:length"
+```
+
+```bash
+cd ../..
+cd Tools
+./generate_graph.sh \
+  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Output
 ```

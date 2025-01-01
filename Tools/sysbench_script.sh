@@ -1,5 +1,7 @@
 which bash
 
+#!/bin/bash
+
 if [ -n "$GITHUB_ACTIONS" ]; then
     ENV_PATH="./db.env"
     PYTHON_PATH="./Tools/Python"
@@ -104,6 +106,7 @@ run_benchmark() {
     exit 1
   fi
 
+  # Only extract data if the mode is "run"
   if [ "$MODE" == "run" ]; then
     extract_run_data "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
     extract_statistics "$RAW_RESULTS_FILE" "$SCRIPT_NAME"
@@ -159,6 +162,7 @@ extract_statistics() {
   local RAW_RESULTS_FILE="$1"
   local SCRIPT_NAME="$2"
 
+  # Extract SQL statistics and append to statistics_inofficial.csv
   read=$(awk '/read:/ {print $2}' "$RAW_RESULTS_FILE")
   write=$(awk '/write:/ {print $2}' "$RAW_RESULTS_FILE")
   other=$(awk '/other:/ {print $2}' "$RAW_RESULTS_FILE")
@@ -175,6 +179,7 @@ extract_statistics() {
   latency_95th=$(awk '/95th percentile:/ {print $3}' "$RAW_RESULTS_FILE")
   latency_sum=$(awk '/sum:/ {print $2}' "$RAW_RESULTS_FILE")
 
+  # Append the extracted data to the statistics output file
   echo "$SCRIPT_NAME,$read,$write,$other,$total,$transactions,$queries,$ignored_errors,$reconnects,$total_time,$total_events,$latency_min,$latency_avg,$latency_max,$latency_95th,$latency_sum" >> "$STATISTICS_FILE_TEMP"
 }
 
@@ -238,7 +243,7 @@ generate_combinations() {
     done
 }
 
-# Main loop
+# Main benchmark loop
 for INFO in "${QUERY_INFO[@]}"; do
   IFS=: read -r QUERY_PATH MULTIPLE_KEYS <<< "$INFO"
 
@@ -252,6 +257,7 @@ for INFO in "${QUERY_INFO[@]}"; do
 
     # Generate all combinations of key-value pairs
     combinations=$(generate_combinations "" "${KEYS[@]}")
+    # Process each combination
     while IFS=',' read -r combination; do
         # Export key-value pairs for the current combination
         IFS=',' read -ra key_value_pairs <<< "$combination"
@@ -261,15 +267,19 @@ for INFO in "${QUERY_INFO[@]}"; do
             export "$(echo "$key" | tr '[:lower:]' '[:upper:]')=$value"
         done
 
+        # Create a directory name for the combination
         combination_name=$(echo "$combination" | tr ',' '_' | tr '=' '_')
         LOG_DIR_KEY_VALUE="$LOG_DIR/$combination_name"
         mkdir -p "$LOG_DIR_KEY_VALUE"
 
+        # Prepare benchmark
         RAW_RESULTS_FILE="${LOG_DIR_KEY_VALUE}/$(basename "$QUERY_PATH")_${combination_name}_prepare.log"
         run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE" "" "$combination_name"
 
+        # Process script benchmark
         process_script_benchmark "$QUERY_PATH" "$LOG_DIR_KEY_VALUE" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$combination_name"
 
+        # Cleanup benchmark
         RAW_RESULTS_FILE="${LOG_DIR_KEY_VALUE}/$(basename "$QUERY_PATH")_${combination_name}_cleanup.log"
         run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
     done <<< "$combinations"
@@ -281,19 +291,20 @@ for INFO in "${QUERY_INFO[@]}"; do
 
     process_script_benchmark "$QUERY_PATH" "$LOG_DIR" "$INSERT_SCRIPT" "$SELECT_SCRIPT"
 
+    # Cleanup phase
     RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_cleanup.log"
     run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
   fi
 done
 
-# final statistics csv generated
+# Statistics csv generated
 python3 "$PYTHON_PATH/generateCombinedCSV.py" "$STATISTICS_FILE_TEMP" "$STATISTICS_FILE" --insert_columns "Total Time"
 echo "Combined CSV file created at $STATISTICS_FILE"
 
-# final runtime csv generated
+# Outputfile csv generated
 python3 "$PYTHON_PATH/generateCombinedCSV.py" "$RUNTIME_FILE_TEMP" "$RUNTIME_FILE" --select_columns "Time (s),Threads"
 echo "Combined CSV file created at $RUNTIME_FILE"
 
-# generate plots
+# Generate plot after all tasks are completed
 echo "Generating plots..."
 python3 "$PYTHON_PATH/generatePlot.py" "$RUNTIME_FILE" "$STATISTICS_FILE"

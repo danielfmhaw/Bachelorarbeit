@@ -1,13 +1,13 @@
-local size = tonumber(os.getenv("CUSTOM_LENGTH")) or 0
+local size = tonumber(os.getenv("LENGTH")) or 0
 
 function prepare()
     local kunden_id_type
     if size <= 32 then
-        kunden_id_type = string.format("INT(%d)", size)  -- Use INT with the specified size
+        kunden_id_type = string.format("INT(%d)", size)
     elseif size <= 64 then
-        kunden_id_type = string.format("BIGINT(%d)", size)  -- Use BIGINT with the specified size
+        kunden_id_type = string.format("BIGINT(%d)", size)
     else
-        kunden_id_type = "BIGINT(64)"  -- Use BIGINT with a fixed size of 64 if size > 64
+        kunden_id_type = "BIGINT(64)"
     end
 
 
