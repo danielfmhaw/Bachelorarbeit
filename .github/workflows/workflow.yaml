@@ -38,17 +38,16 @@ jobs:
           TEST_TYPE="${{ matrix.test-type }}"
           DIRS=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/:.*$//' | paste -sd " ")                  
           DIRS_STRING=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | paste -sd " ")
-          LEN=$(jq -r --arg test "$TEST_TYPE" '.[$test].len' "$CONFIG_FILE")
+          VAR=$(jq -c --arg test "$TEST_TYPE" '.[$test].var // {}' "$CONFIG_FILE")      
           
           if [[ $(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[0]' "$CONFIG_FILE") =~ /Projects\/(.*)\/Scripts/ ]]; then
             EXTRACTED_WORD="${BASH_REMATCH[1]}"
             OUTPUT_DIR="Output/${EXTRACTED_WORD}/${TEST_TYPE}"
           fi
           
-    
           echo "dirs=$DIRS" >> $GITHUB_ENV
           echo "dirs_string=$DIRS_STRING" >> $GITHUB_ENV
-          echo "len=\"$LEN\"" >> $GITHUB_ENV
+          echo "var=$VAR" >> $GITHUB_ENV
           echo "output_dir=\"$OUTPUT_DIR\"" >> $GITHUB_ENV
           echo "extracted_word=\"$EXTRACTED_WORD\"" >> $GITHUB_ENV
 
@@ -105,9 +104,10 @@ jobs:
         if: env.should_run == 'true'
         run: |
           chmod +x Tools/sysbench_script.sh
+          
           Tools/sysbench_script.sh \
             -out ${{ env.output_dir }} \
-            -len ${{ env.len }} \
+            -var '${{ env.var }}' \
             -scripts:$(echo "${{ env.dirs_string }}" | sed 's/ / /g')
 
       - name: Stop MySQL container
@@ -121,14 +121,17 @@ jobs:
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
+          git fetch origin saved_outputs
           git checkout saved_outputs
           git pull --rebase origin saved_outputs
           
           mkdir -p ${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
           cp -r ./Output/${{env.extracted_word}}/${{ matrix.test-type }} ./${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
           git add ./${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
-          git commit -m "Add ${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}"
-          git push origin saved_outputs
+          git commit -m "Add ${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}" || true
+
+          for i in {1..3}; do git push --force-with-lease origin saved_outputs && exit 0 || { git fetch origin saved_outputs && git rebase origin/saved_outputs; sleep 5; }; done
+          echo "Max retries reached, exiting with failure." && exit 1
 
       - name: Upload all
         uses: actions/upload-artifact@v3

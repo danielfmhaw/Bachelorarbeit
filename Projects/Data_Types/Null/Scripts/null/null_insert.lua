@@ -1,5 +1,5 @@
 local num_rows = 4000
-local every_n_is_null = tonumber(os.getenv("CUSTOM_LENGTH")) or 0
+local every_n_is_null = tonumber(os.getenv("LENGTH")) or 0
 
 function delete_data()
     local delete_kunden_query = "DELETE FROM KUNDEN;"

@@ -21,19 +21,16 @@ cd ../../..
 cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Null" \
-  -len "2,25" \
-  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/null:true" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/not_null:false"
+  -var '{"length":[2,25]}' \
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/null:length" \
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/not_null"
 ```
 ### Nur Graphen erstellen für Null (log und csv- files müssen schon bestehen)
 ```bash
 cd ../../..
 cd Tools
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Null \
-  2,25 \
- "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/null:true" \
- "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/not_null:false" 
+  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Null
 ```
 
 #### Notes

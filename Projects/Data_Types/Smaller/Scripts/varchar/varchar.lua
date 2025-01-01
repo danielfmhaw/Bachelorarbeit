@@ -1,4 +1,4 @@
-local size = tonumber(os.getenv("CUSTOM_LENGTH")) or 0
+local size = tonumber(os.getenv("LENGTH")) or 0
 
 function prepare()
     local kunden_id_size = size > 0 and size or 255
