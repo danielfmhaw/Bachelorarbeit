@@ -7,9 +7,9 @@ import sys
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Generate plots from CSV data.')
-    parser.add_argument('datafile', type=str, help='Path to the input CSV data file for time-based metrics')
+    parser.add_argument('runtime_file', type=str, help='Path to the input CSV data file for runtime data')
+    parser.add_argument('statistic_file', type=str, nargs='?', default=None, help='Path to the input CSV data file for statistics (optional)')
     parser.add_argument('metrics', type=str, nargs='*', help='List of metrics to plot (e.g., QPS Reads Writes). If empty, all metrics will be used.')
-    parser.add_argument('radarfile', type=str, help='Path to the input CSV data file for radar chart metrics')
     return parser.parse_args()
 
 def plot_metrics(args, datafile, detailed_pngs_dir, combined_pngs_dir):
@@ -111,28 +111,28 @@ def plot_radar_chart(radar_datafile, output_dir):
 
 def main():
     args = parse_arguments()
+    runtime = args.runtime_file
 
-    # Load CSV data
-    datafile = args.datafile
-    if not os.path.isfile(datafile):
-        print(f"Error: The file {datafile} does not exist.")
+    if not os.path.isfile(runtime):
+        print(f"Error: The file {runtime} does not exist.")
         sys.exit(1)
 
-    # Load CSV data for radar chart metrics
-    radarfile = args.radarfile
-    if not os.path.isfile(radarfile):
-        print(f"Error: The radar file {radarfile} does not exist.")
-        sys.exit(1)
-
-    png_dir = os.path.join(os.path.dirname(datafile),'pngs')
+    # Process CSV data for time-based metrics
+    png_dir = os.path.join(os.path.dirname(runtime), 'pngs')
     detailed_pngs_dir = os.path.join(png_dir, 'metric_comparison')
     combined_pngs_dir = os.path.join(png_dir, 'script_comparison')
-
     os.makedirs(detailed_pngs_dir, exist_ok=True)
     os.makedirs(combined_pngs_dir, exist_ok=True)
 
-    plot_metrics(args, datafile, detailed_pngs_dir, combined_pngs_dir)
-    plot_radar_chart(radarfile, png_dir)
+    plot_metrics(args, runtime, detailed_pngs_dir, combined_pngs_dir)
+
+    # Process radar chart metrics (if radarfile is provided)
+    statistic = args.statistic_file
+    if statistic:
+        if not os.path.isfile(statistic):
+            print(f"Error: The radar file {statistic} does not exist.")
+            sys.exit(1)
+        plot_radar_chart(statistic, png_dir)
 
     print("Plots generated successfully.")
     sys.exit(0)
