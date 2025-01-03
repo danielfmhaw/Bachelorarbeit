@@ -56,7 +56,7 @@ echo "Database prepared."
 
 echo "Running benchmark..."
 run_sysbench "run" "--time=$DURATION --threads=1 --report-interval=1" "$RAW_RESULTS_FILE"
-echo "Benchmark complete. Results saved to $OUTPUT_FILE."
+echo "Benchmark complete."
 
 # Format the results into CSV
 echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,ReconnPs" > "$OUTPUT_FILE"
@@ -75,6 +75,7 @@ grep '^\[ ' $RAW_RESULTS_FILE | while read -r line; do
 
     echo "demo,$time,$threads,$tps,$qps,$reads,$writes,$other,$latency,$err_per_sec,$reconn_per_sec" >> "$OUTPUT_FILE"
 done
+echo "Results saved to $OUTPUT_FILE."
 
 echo "Cleaning up..."
 run_sysbench "cleanup" "" "$RAW_RESULTS_FILE"
