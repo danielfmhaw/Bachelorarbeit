@@ -23,7 +23,7 @@ In MySQL verwendet die Storage-Engine Indizes auf ähnliche Weise.
 Sie durchsucht die Datenstruktur des Indexes nach einem Wert.
 Wird ein Treffer gefunden, kann die Engine die Zeile ermitteln, die den Treffer enthält.
 Betrachten wir dazu folgendes Beispiel:
-\begin{lstlisting}[language=SQL,caption=Variationen,label=kperms]
+\begin{lstlisting}[language=SQL,caption=Variationen,label=select-query-customer]
 SELECT name FROM customer WHERE cust_id = 7;
 \end{lstlisting}
 
@@ -155,7 +155,7 @@ Hierbei wird versucht, Konflikte direkt innerhalb der Hash-Tabelle zu bewältige
 
 Um die Berechnung der Hash-Funktion genauer zu erläutern, folgt ein Beispiel:
 
-\begin{lstlisting}[language=SQL,caption=Variationen,label=kperms]
+\begin{lstlisting}[language=SQL,caption=Variationen,label=select-query-hash]
 SELECT lname FROM testhash WHERE fname = 'Peter';
 \end{lstlisting}
 

@@ -45,27 +45,77 @@ Diese Aliase können verwirrend sein, sie beeinflussen aber nicht die Performanc
 Erkennen kann das an, wenn man eine Tabelle mit einem aliasierten Datentyp erstellt und dann mit SHOW CREATE TABLE die Tabelle untersucht.
 Denn tatsächlich würde man anstelle des aliasierten Datentypen den Basistyp angezeigt bekommen, da intern der aliasierte Datentyp gegen diesen umgewandelt wird.
 
-
+Grafiken für Null
 \begin{figure}[!ht]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{PNGs/Index/B-Tree/High_Reads}
-        \label{high-reads}
+        \includegraphics[width=\textwidth]{PNGs/Data_Types/Null/Reads}
+        \label{data-types-null-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{PNGs/Index/B-Tree/High_Writes}
-        \label{high-writes}
+        \includegraphics[width=\textwidth]{PNGs/Data_Types/Null/Writes}
+        \label{data-types-null-writes}
     \end{subfigure}
-    \caption[High-Counts: Reads und Writes]{Grafik zeigt die verschiedenen Zeiten (in ms) für Readsabfragen (links) und Schreibbefehle (rechts) mit 500 bzw. 5000 Zeilen}
-    \label{fig:high-b-tree-columns}
+    \caption[Data-Types-Null: Reads und Writes]{Grafik zeigt die verschiedenen Zeiten (in ms) für Readsabfragen (links) und Schreibbefehle (rechts)}
+    \label{fig:data-types-null-measures}
 \end{figure}
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=.8\textwidth]{PNGs/Index/B-Tree/Query_Reads}
-    \caption[B - Tree - Selects - Ergebnis]{Grafik visualisiert die Unterschiede von verschieden Select - Queries auf dieselben Daten. Je nach Gewschiwndikeit greift der Index besser oder nicht }
-    \label{fig:b-tree-query-reads}
+    \includegraphics[width=.6\textwidth]{PNGs/Data_Types/Null/statistics}
+    \caption[Data-Types-Null: Statistiken]{Grafik visualisiert die unterschiedlichen Skripte und 6 Metriken in einem Hexagon}
+    \label{fig:data-types-null-statistics}
+\end{figure}
+
+Grafiken für Simple
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Data_Types/Simpler/Reads}
+        \label{data-types-simpler-reads}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Data_Types/Simpler/Writes}
+        \label{data-types-simpler-writes}
+    \end{subfigure}
+    \caption[Data-Types-Simpler: Reads und Writes]{Grafik zeigt die verschiedenen Zeiten (in ms) für Readsabfragen (links) und Schreibbefehle (rechts)}
+    \label{fig:data-types-simpler-measures}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{PNGs/Data_Types/Simpler/statistics}
+    \caption[Data-Types-Simpler: Statistiken]{Grafik visualisiert die unterschiedlichen Skripte und 6 Metriken in einem Hexagon}
+    \label{fig:data-types-simpler-statistics}
+\end{figure}
+
+Grafiken für Smaller
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Data_Types/Smaller/Reads}
+        \label{data-types-smaller-reads}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Data_Types/Smaller/Writes}
+        \label{data-types-smaller-writes}
+    \end{subfigure}
+    \caption[Data-Types-Smaller: Reads und Writes]{Grafik zeigt die verschiedenen Zeiten (in ms) für Readsabfragen (links) und Schreibbefehle (rechts)}
+    \label{fig:data-types-smaller-measures}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=.6\textwidth]{PNGs/Data_Types/Smaller/statistics}
+    \caption[Data-Types-Smaller: Statistiken]{Grafik visualisiert die unterschiedlichen Skripte und 6 Metriken in einem Hexagon}
+    \label{fig:data-types-smaller-statistics}
 \end{figure}

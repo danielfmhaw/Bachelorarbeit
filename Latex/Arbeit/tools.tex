@@ -77,7 +77,7 @@ Darunter gehören:
 
 Neben den sieben aufgelisteten Argumenten gibt es zwei weitere wichtige Optionen:
 \begin{enumerate}
-    \item Wie im Abschnitt~\ref{sec:einfuhrung}(TODO(Daniel): Abschnitt einfügen) erwähnt, kann ein Lua-Skript angegeben werden, um eigene
+    \item Wie im Abschnitt (\ref{itm:mehrere_selects}) erwähnt, kann ein Lua-Skript angegeben werden, um eigene
     Tabellen zu erstellen, Beispieldaten einzufügen und bestimmte Abfragen durchzuführen.
     Dazu muss am Ende der Sysbench-Befehlszeile lediglich der Pfad zur Lua-Datei hinzugefügt werden.
     Ein erklärendes Beispiel dazu folgt weiter unten in diesem Abschnitt.
@@ -348,6 +348,7 @@ Die Parameter haben folgende Funktion:
     \item \texttt{-scripts}: Angabe der Pfade zu den Ordnern, die die Lua-Skripte enthalten. Nach dem Doppelpunkt wird angegeben, welche Variable das Skript benötigt. \texttt{Int\_queries} benötigt keine Variablen, deshalb gibt es auch keinen Doppelpunkt.
 \end{itemize}
 
+\label{itm:mehrere_selects}
 Die letzte Besonderheit ist es, dass man mehrere Select – Abfragen ohne unterschiedliche Insert - Befehle definieren kann.
 Zu einem späteren Punkt in der Bachelorarbeit werden wir zu unterschiedliche Indextypen kommen.
 Um zu untersuchen, ob ein bestimmter Indextyp bei Abfragen verwendet wird, müssen wir nur unterschiedliche Selects abfragen.
@@ -427,13 +428,13 @@ PNGs
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Scripts/Join_Type/PNGs/int_queries}
+        \includegraphics[width=\textwidth]{PNGs/Join_Type/int_queries}
         \label{join-typ-int_queries}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Scripts/Join_Type/PNGs/varchar_queries_length_1}
+        \includegraphics[width=\textwidth]{PNGs/Join_Type/varchar_queries_length_1}
         \label{join-typ-varchar_queries_length_1}
     \end{subfigure}
     \caption[Join-Typ: Skriptvergleich]{Die Grafik zeigt alle Metriken für die Skripte \texttt{int\_queries} (links) und \texttt{varchar\_queries\_length\_1} (rechts)}
@@ -444,13 +445,13 @@ PNGs
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Scripts/Join_Type/PNGs/Reads}
+        \includegraphics[width=\textwidth]{PNGs/Join_Type/Reads}
         \label{join-typ-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Scripts/Join_Type/PNGs/Writes}
+        \includegraphics[width=\textwidth]{PNGs/Join_Type/Writes}
         \label{join-typ-writes}
     \end{subfigure}
     \caption[Join-Typ: Metrikvergleich]{Die Grafik zeigt den Vergleich zwischen allen Skripten für die Metriken Reads (links) und Writes (rechts)}
@@ -459,7 +460,7 @@ PNGs
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=.7\textwidth]{Scripts/Join_Type/PNGs/statistics}
+    \includegraphics[width=.7\textwidth]{PNGs/Join_Type/statistics}
     \caption[Join-Typ: Hexagon-Diagramm]{Darstellung der Skripte und 6 Metriken in einem Hexagon}
     \label{fig:join-typ-hex}
 \end{figure}
