@@ -4,22 +4,49 @@
 
 \section{GitHub Action}\label{sec:github-action}
 
-Tried these here:
-- GitHub Artifacts
-- GitHub Cache => deprecated after 7 days and only works
-- (GitHub Repo) or dedicated feature branch => give github action write permission so push is allowed
-- (Google Cloud Storage (GSC), AWS S3 or Azure Storage)
+Im Laufe der Bachelorarbeit sind immer mehr unterschiedliche Projekte dazugekommen, die alle das Orchestrator-Skript benutzen.
+Dadurch sind immer mehr Fallunterscheidungen in diesem Skript erforderlich geworden, und man hat schnell den Überblick verloren, wenn man Änderungen vorgenommen hat.
+Um zu überprüfen, ob diese Änderungen negative Nebeneffekte haben, mussten jedes Mal alle Skripte nacheinander ausgeführt werden, was nicht nur zeitintensiv war, sondern auch hohe Lasten für den lokalen Rechner bedeutete.
+Eine Möglichkeit wäre es gewesen, die Skripte parallel durchlaufen zu lassen, um Zeit zu sparen, aber damit wäre das Lastenproblem nicht gelöst worden.
+Eine deutlich bessere Variante ist die Auslagerung in eine Pipeline.
+In meinem Fall habe ich mich für GitHub Actions entschieden.
+Vereinfacht gesagt sollen in der GitHub Action alle Skripte parallel ausgeführt und am Ende alle Output-Dateien in einen Ordner zusammen als GitHub Artifact hochgeladen werden.
+Anschließend kann man die Zip-Datei herunterladen und überprüfen, ob alle Ergebnisse noch mit der Erwartung übereinstimmen.
+Wenn fehlerhafte Änderungen hochgeladen wurden, scheitert der Workflow-Run direkt, und man hat einen guten Überblick über alle Projekte.
 
+Damit dies funktioniert, muss eine YAML-Datei im Ordner \texttt{.github/workflows/} erstellt werden.
+Anschließend bekommt der Workflow einen Namen und man kann definieren, wann er getriggert werden soll.
+In meinem Fall, wenn sich etwas im \texttt{./github}-Ordner verändert, im \texttt{Projects/}-Ordner, in dem sich alle Lua-Skripte befinden, oder wenn sich das Orchestrator-Skript und die in diesem Skript benutzten Python-Dateien ändern.
+Als Nächstes muss man eine JSON-Datei mit den Informationen zu den exportierten Variablen und den verwendeten Skripten befüllen und den einzelnen Projekten einen Namen geben.
+Diesen Namen muss man auch in der Matrix definieren, damit die Informationen parallel aus der JSON-Datei entnommen und die Befehle ausgeführt werden können.
 
-Im Laufe des Projekts hat sich herausgestellt, dass viele Bash\_Befehle ausgeführt werden müssen.
-Da das Ausführen des Scripts und damit das Durchführen der Benchmarks führen zu hohen Lasten auf dem lokalen Rechner, weshalb ich nicht jedes Mal alle Skripte ausführen konnte, ohne erhebliche Wärmeveränderungen an meinem Rechner zu spüren.
-Außerdem hat sich herausgestellt, dass jede Erweiterung an meinen Hauptskripten \texttt{generateCombinedCSV.py}, \texttt{generatePlot.py} und \texttt{sysbench\_script.sh} Auswirkungen auf alle auszuführenden Skripten haben kann.
-Mit zunehmender Skriptanzahl, war es nicht immer auf dem ersten Blick erkennbar, welches Outputdateien der Skripte fehlerbehaftet geworden sind im Vergleich zu dem Lauf davor.
-Deshalb hat es für mich Sinn ergeben, das Ganze auszulagern.
-Als sinnvolle Alternative zu dem lokalen Ausführen, haben sich GitHub Actions für mich angeboten.
-(TODO (Daniel): Erklärung GitHub Action)
-Vereinfacht gesagt soll die GitHub Action alle Skripts ausführen und am Ende alle Outputdateien in einen Ordner zusammen als GitHub Artifact hochladen.
-Anschließend kann ich die Zip-Datei einfach herunterladen, entzippen und anschließend überprüfen, ob alle Dateien noch stimmen.
+\lstinputlisting[
+    language=Json,
+    caption=JSON mit Konfiguration der Script,
+    label={lst:script_configuration},
+    style=custom_daniel,
+]{Scripts/Join_Type/11_Pattern.json}
 
-Man hätte das Ganze noch weiterführen können, in dem man bestimme Tests durchführt die betimmte Werte beispielweise in den CSV - Dateien erwarten.
+Anschließend muss man wie schon bei den Skripts davor die Umgebungsvariablen in der YAML – Datei definieren, wenn es sich um vertrauliche Informationen handeln sollte, bietet es sich an GitHub Secrets zu benutzen.
+Danach beginnen erst die eigentlichen Schritte, die in dem Workflow ausgeführt werden.
+Zunächst muss man das Repository auschecken und die passende Konfiguration aus der JSON – Datei laden, die dem Testtypen entspricht aus der Matrix.
+Anschließend muss man nur noch die Abhängigkeiten installieren.
+Da immer die gleichen Dependencies geladen werden, kann man auch GitHub Cache benutzen und einmal die installierten Dependencies als Cache hochladen und anschließend nur noch den Cache herunterladen.
+Danach muss man den MySQL - Container mit den korrekten Umgebungsvariablen starten und dann kann auch schon die das Orchestrator - Skript ausgeführt werden.
+Um das Ganze aufzuräumen, kann man dem MySQL Container wieder stoppen und als letzten Schritt muss man noch den Output Ordner als Artifact hochladen.
 
+\lstinputlisting[
+    language=yaml,
+    caption=Ausschnitt aus der Workflow - Datei,
+    label={lst:workflow_yaml},
+    style=custom_daniel,
+]{Scripts/Join_Type/12_Workflow.yaml}
+
+\textbf{TODO: Optimierungen, die man Durchführen kann:}
+\newline Tried these here:
+\begin{itemize}
+    \item GitHub Artifacts
+    \item GitHub Cache $\rightarrow$ deprecated after 7 days and only works
+    \item (GitHub Repo) or dedicated feature branch $\rightarrow$ give GitHub action write permission so push is allowed
+    \item (Google Cloud Storage (GCS), AWS S3 or Azure Storage)
+\end{itemize}
