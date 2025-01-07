@@ -142,6 +142,7 @@ Um sich die manuelle Ausführung dieser drei Befehl in der korrekten Reihenfolge
     caption=Process of Sysbench commands,
     label={lst:sysbench_monitor},
     style=custom_daniel,
+    basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Tools/02_process_sysbench.sh}
 
 Die Ergebnisse werden nun der Log-Datei (unter output/sysbench.log) gespeichert.
@@ -154,6 +155,7 @@ Dies geht mit dem Shell - Kommando \texttt{grep}:
     caption=Extraction from log to CSV,
     label={lst:extraction_csv},
     style=custom_daniel,
+    basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Tools/03_extraction_csv.sh}
 
 Als letzten Schritt gibt es die Erstellung der Graphen mithilfe von der Tools Gnuplot oder der Python - Library Pandas.
@@ -167,6 +169,7 @@ Messwerten übergeben, damit nur für diese die Graphen erzeugt werden.
     caption=Generation of graphs,
     label={lst:graph_generation},
     style=custom_daniel,
+    basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Tools/04_graph_generation.sh}
 
 \begin{figure}[!ht]
@@ -252,6 +255,7 @@ Dies ist ein Auszug aus der \texttt{Prepare} - Funktion:
     caption=Lua - Script für die Erstellung der Tabellen,
     label={lst:prepare_query},
     style=custom_daniel,
+    basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Join_Type/03_Prepare_Query.lua}
 
 Wenn die Datenbank beispielsweise in einer Produktivumgebung läuft, dann wollen wir, dass die Benchmarks möglichst wenig Einfluss aus sie haben.
@@ -266,6 +270,7 @@ Dafür ist die \texttt{cleanup()} – Funktion vorgesehen:
     caption=Lua - Script für das Aufräumen,
     label={lst:cleanup_query},
     style=custom_daniel,
+    basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Join_Type/04_CleanUp_Query.lua}
 
 Wichtig ist dabei, dass man keine Schlüsselintegritäten verletzt.
@@ -288,6 +293,7 @@ FATAL: cannot find the event() function in Join.lua
     caption=Lua - Script für das Einfügen von Daten,
     label={lst:insert_query},
     style=custom_daniel,
+    basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Join_Type/05_Insert_Query.lua}
 
 Die letzte Anweisung, die wir noch brauchen, ist die Select - Abfrage.
@@ -299,6 +305,7 @@ In dem Beispiel brauchen wir deswegen einen Join zwischen den beiden Tabellen ü
     caption=Lua - Script für das Abfragen von Daten,
     label={lst:select_query},
     style=custom_daniel,
+    basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Join_Type/06_Select_Query.lua}
 
 Damit haben wir für unseren Vergleich alle vier Operationen genauer definiert und müssen diese 4 Funktionen nur noch leicht anpassen für die Implementierung mit dem Namen als Fremdschlüssel und ohne die Kundennummer in der Kundentabelle.
@@ -386,6 +393,7 @@ Als nächstes muss man für alle diese Kombinationen die Schritte ausführen, di
     caption=Ausschnitt aus Orchestrator Script,
     label={lst:main_loop},
     style=custom_daniel,
+    basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Join_Type/08_Main_Loop.sh}
 
 Die Funktion \texttt{process\_script\_benchmark} überprüft noch es sich bei dem Select – Directory um einen Ordner handelt oder nicht.
@@ -396,6 +404,7 @@ Wenn es ein Ordner ist, dann werden alle Dateien in diesem Ordner mit Sysbench d
     caption=Methode Process Script Benchmark,
     label={lst:process_script_benchmark},
     style=custom_daniel,
+    basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Join_Type/09_Process_Script_Benchmark.sh}
 
 Die Methode \texttt{run\_benchmark} führt den Sysbench – Befehl aus und wenn es sich um die Methode \texttt{Run} handelt, dann müssen die Daten während der Ausführung und die Statistiken am Ende in je eine CSV - Datei speichern.
@@ -407,6 +416,7 @@ Als letzter Schritt erfolgt noch der bekannte Schritt der Grapherstellung.
     caption=Methode Run Benchmark,
     label={lst:run_benchmark},
     style=custom_daniel,
+    basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Join_Type/10_Run_Benchmark.sh}
 
 INFO: Die Shell - Ausschnitte sind zum Teil verkürzt und würden auf diese Weise nicht funktionieren.
