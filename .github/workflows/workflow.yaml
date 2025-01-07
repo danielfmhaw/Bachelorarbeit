@@ -4,7 +4,8 @@ on:
   push:
     paths:
       - 'Projects/**'
-      - '.github/**'
+      - '.github/workflows/**'
+      - '.github/pattern.json'
       - 'Tools/Python/**'
       - 'Tools/sysbench_script.sh'
   workflow_dispatch:
@@ -26,7 +27,7 @@ jobs:
       THREADS: 1
       EVENTS: 0
       REPORT_INTERVAL: 1
-      GENERAL_PATHS: "./.github ./Tools/Python ./Tools/sysbench_script.sh"
+      GENERAL_PATHS: "./.github/workflows ./.github/pattern.json ./Tools/Python ./Tools/sysbench_script.sh"
 
     steps:
       - name: Checkout repository
@@ -41,15 +42,13 @@ jobs:
           VAR=$(jq -c --arg test "$TEST_TYPE" '.[$test].var // {}' "$CONFIG_FILE")      
           
           if [[ $(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[0]' "$CONFIG_FILE") =~ /Projects\/(.*)\/Scripts/ ]]; then
-            EXTRACTED_WORD="${BASH_REMATCH[1]}"
-            OUTPUT_DIR="Output/${EXTRACTED_WORD}/${TEST_TYPE}"
+            OUTPUT_DIR="Output/${BASH_REMATCH[1]}/${TEST_TYPE}"
           fi
           
           echo "dirs=$DIRS" >> $GITHUB_ENV
           echo "dirs_string=$DIRS_STRING" >> $GITHUB_ENV
           echo "var=$VAR" >> $GITHUB_ENV
-          echo "output_dir=\"$OUTPUT_DIR\"" >> $GITHUB_ENV
-          echo "extracted_word=\"$EXTRACTED_WORD\"" >> $GITHUB_ENV
+          echo "output_dir=$OUTPUT_DIR" >> $GITHUB_ENV
 
       - name: Calculate hash of directories
         run: |
@@ -60,17 +59,26 @@ jobs:
           GENERAL_HASH=$(git ls-tree -r $LAST_COMMIT -- $GENERAL_PATHS | awk '{print $3}' | xargs -I {} git show {} | sha256sum | awk '{print $1}')
           echo "general_hash=$GENERAL_HASH" >> $GITHUB_ENV
 
-      - name: Check existence and handle outputs
+      - name: Check for and download existing artifact
         run: |
-          git fetch origin saved_outputs      
-          OUTPUT_DIR="${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}"
-          
-          if git ls-tree -r --name-only origin/saved_outputs | grep -q "^$OUTPUT_DIR"; then
-            mkdir -p Output/${{env.extracted_word}}
-            git checkout origin/saved_outputs -- "$OUTPUT_DIR" && cp -r "$OUTPUT_DIR/." Output/${{env.extracted_word}}
-            echo "should_run=false" >> $GITHUB_ENV
+          ARTIFACT_NAME="${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}"
+          echo "artifact_name=$ARTIFACT_NAME" >> $GITHUB_ENV
+
+          EXISTING=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" | \
+            jq -r --arg name "$ARTIFACT_NAME" '.artifacts[] | select(.name == $name).id')
+
+          if [[ $EXISTING ]]; then
+            echo "Artifact $ARTIFACT_NAME found. Downloading..." && echo "should_run=false" >> $GITHUB_ENV
+
+            curl -L -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$EXISTING/zip" \
+              -o artifact.zip && \
+              mkdir -p ${{ env.output_dir }} && \
+              unzip -q artifact.zip -d ${{ env.output_dir }} && \
+              rm artifact.zip
           else
-            echo "should_run=true" >> $GITHUB_ENV
+            echo "Artifact $ARTIFACT_NAME not found. Running new benchmark." && echo "should_run=true" >> $GITHUB_ENV
           fi
 
       - name: Cache pip dependencies
@@ -106,7 +114,7 @@ jobs:
           chmod +x Tools/sysbench_script.sh
           
           Tools/sysbench_script.sh \
-            -out ${{ env.output_dir }} \
+            -out "${{ env.output_dir }}" \
             -var '${{ env.var }}' \
             -scripts:$(echo "${{ env.dirs_string }}" | sed 's/ / /g')
 
@@ -116,24 +124,14 @@ jobs:
           docker stop mysql-${{ matrix.test-type }}
           docker rm mysql-${{ matrix.test-type }}
 
-      - name: Commit outputs to saved_outputs branch
+      - name: Upload individual outputs
         if: env.should_run == 'true'
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git fetch origin saved_outputs
-          git checkout saved_outputs
-          git pull --rebase origin saved_outputs
-          
-          mkdir -p ${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
-          cp -r ./Output/${{env.extracted_word}}/${{ matrix.test-type }} ./${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
-          git add ./${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}
-          git commit -m "Add ${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}" || true
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.artifact_name }}
+          path: ${{ env.output_dir }}
 
-          for i in {1..3}; do git push --force-with-lease origin saved_outputs && exit 0 || { git fetch origin saved_outputs && git rebase origin/saved_outputs; sleep 5; }; done
-          echo "Max retries reached, exiting with failure." && exit 1
-
-      - name: Upload all
+      - name: Upload combined outputs as an artifact
         uses: actions/upload-artifact@v3
         with:
           name: combined-output
