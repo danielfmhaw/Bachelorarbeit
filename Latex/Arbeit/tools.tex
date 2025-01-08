@@ -331,12 +331,12 @@ Wenn wir jetzt zwei unterschiedlichen Längen für Varchar testen wollen, dann m
 Dies würde zu extremer Redundanz führen, weshalb man beim Aufruf des Orchestrator - Scripts, Variablen definieren kann, die im Skript selbst exportiert und in der \texttt{varchar\_queries\_insert.lua} - Datei importiert werden können.
 
 Dies ist die Zeile mit der festgelegten Länge:
-\begin{lstlisting}[language={[5.0]Lua},label={lst:without_imported_length}]
+\begin{lstlisting}[language={[5.0]Lua},label={lst:without_imported_length,style=custom_daniel}]
 local length = 10
 \end{lstlisting}
 
 Die Zeile mit der importierten Länge:
-\begin{lstlisting}[language={[5.0]Lua},label={lst:with_imported_length}]
+\begin{lstlisting}[language={[5.0]Lua},label={lst:with_imported_length,style=custom_daniel}]
 local length = tonumber(os.getenv("LENGTH"))
 \end{lstlisting}
 
@@ -455,13 +455,13 @@ PNGs
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{PNGs/Join_Type/Reads}
+        \includegraphics[width=\textwidth]{PNGs/Script/Join_Typ/join-type/Reads}
         \label{join-typ-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{PNGs/Join_Type/Writes}
+        \includegraphics[width=\textwidth]{PNGs/Script/Join_Typ/join-type/Writes}
         \label{join-typ-writes}
     \end{subfigure}
     \caption[Join-Typ: Metrikvergleich]{Die Grafik zeigt den Vergleich zwischen allen Skripten für die Metriken Reads (links) und Writes (rechts)}
@@ -470,7 +470,7 @@ PNGs
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=.7\textwidth]{PNGs/Join_Type/statistics}
+    \includegraphics[width=.7\textwidth]{PNGs/Script/Join_Typ/join-type/statistics}
     \caption[Join-Typ: Hexagon-Diagramm]{Darstellung der Skripte und 6 Metriken in einem Hexagon}
     \label{fig:join-typ-hex}
 \end{figure}
