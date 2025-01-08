@@ -58,7 +58,7 @@ Letztlich stellt die Storage-Engine fest, ob der gewünschte Wert existiert, ode
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=.8\textwidth]{PNGs/Index/B-Tree/B_Tree_Visualisation}
+    \includegraphics[width=.8\textwidth]{PNGs/Index/B_Tree_Visualisation}
     \caption[Binärbaum - Grafik]{Darstellung des binären Baums mit Knoten und Blättern}
     \label{fig:b-tree-visualisation}
 \end{figure}
@@ -100,13 +100,13 @@ Eine Analyse der am häufigsten verwendeten Abfragen kann dabei helfen zu entsch
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{PNGs/Index/B-Tree/High_Reads}
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/high-count/Reads}
         \label{high-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{PNGs/Index/B-Tree/High_Writes}
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/high-count/Writes}
         \label{high-writes}
     \end{subfigure}
     \caption[High-Counts: Reads und Writes]{Grafik zeigt die verschiedenen Zeiten (in ms) für Readsabfragen (links) und Schreibbefehle (rechts) mit 500 bzw. 5000 Zeilen}
@@ -117,13 +117,13 @@ Eine Analyse der am häufigsten verwendeten Abfragen kann dabei helfen zu entsch
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{PNGs/Index/B-Tree/Low_Reads}
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/low-count/Reads}
         \label{low-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{PNGs/Index/B-Tree/Low_Writes}
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/low-count/Writes}
         \label{low-writes}
     \end{subfigure}
     \caption[Low-Counts: Reads und Writes]{Grafik zeigt die verschiedenen Zeiten (in ms) für Readsabfragen (links) und Schreibbefehle (rechts) mit 10 bzw. 100 Zeilen dar}
@@ -132,7 +132,7 @@ Eine Analyse der am häufigsten verwendeten Abfragen kann dabei helfen zu entsch
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=.8\textwidth]{PNGs/Index/B-Tree/Query_Reads}
+    \includegraphics[width=.8\textwidth]{PNGs/Script/Index/B_Tree/b-tree-query-differences/Reads}
     \caption[B - Tree - Selects - Ergebnis]{Grafik visualisiert die Unterschiede von verschieden Select - Queries auf dieselben Daten. Je nach Gewschiwndikeit greift der Index besser oder nicht }
     \label{fig:b-tree-query-reads}
 \end{figure}
@@ -196,14 +196,14 @@ Einige Speicher-Engines, wie beispielsweise InnoDB, können zudem erkennen, wenn
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{PNGs/Index/Hash/Hashcol_Reads}
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/Hash/selectivity-change/Reads}
         \caption[Hash - Kollisionen - Reads - Ergebnis]{Unterschiede von Readsabfragen}
         \label{hash-collision-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{PNGs/Index/Hash/Hashcol_Writes}
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/Hash/selectivity-change/Writes}
         \caption[Hash - Kollisionen - Writes - Ergebnis]{Unterschiede von Schreibbefehlen}
         \label{hash-collision-writes}
     \end{subfigure}
@@ -213,7 +213,7 @@ Einige Speicher-Engines, wie beispielsweise InnoDB, können zudem erkennen, wenn
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=.8\textwidth]{PNGs/Index/Hash/Query_Reads}
+    \includegraphics[width=.8\textwidth]{PNGs/Script/Index/Hash/hash-query-differences/Reads}
     \caption[Hash - Selects - Ergebnis]{Grafik visualisiert die Unterschiede von verschieden Select - Queries auf dieselben Daten. Je nach Gewschiwndikeit greift der Index besser oder nicht }
     \label{fig:hash-query-reads}
 \end{figure}

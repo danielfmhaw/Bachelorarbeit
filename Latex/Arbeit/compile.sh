@@ -2,6 +2,9 @@
 
 filename="VorlageBA"
 
+rm "$filename".{aux,log,bcf,lof,lot,out,toc,pdf}
+rm *.aux
+
 lualatex "$filename.tex"
 biber "$filename"
 lualatex "$filename.tex"

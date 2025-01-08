@@ -169,6 +169,19 @@
 \makeatother
 \newcommand\ProcessThreeDashes{\llap{\color{cyan}\mdseries-{-}-}}
 
+\lstdefinelanguage{math}{
+    keywords={SIGNED, UNSIGNED},
+    sensitive=true,
+    morekeywords={bis},
+    keywordstyle=\color{blue}\bfseries,
+    comment=[l]\%,
+    string=[b]",
+    morestring=[b]',
+    moredelim=*[s][\color{gray}]{/*}{*/},
+    morekeywords={[2]Beispiel},
+    keywordstyle={[2]\color{haw2}\bfseries},
+}
+
 % Anpassung des Erscheinungsbildes des Codeblocks; mehr dazu in der
 % Dokumentation des Pakets "listings"
 \lstdefinestyle{mystyle}{
@@ -218,3 +231,5 @@
 \hypersetup{pdftitle={Handreichung zur Formatierung von Bachelorarbeiten}}
 
 \usepackage{subcaption}
+\usepackage{float}
+\usepackage[labelfont=bf]{caption}
