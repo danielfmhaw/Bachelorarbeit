@@ -96,7 +96,7 @@ run_benchmark() {
     echo "Running $(basename "$SCRIPT_PATH") for $TIME seconds ..."
   fi
   if [[ "$MODE" == "prepare" ]]; then
-    echo "Preparing database for $(basename "$SCRIPT_PATH")${COMBINATION:+ with $(awk -F'_' '{for (i=1; i<=NF; i+=2) printf "%s: %s%s", $i, $(i+1), (i+2<=NF?" and ":"")}' <<< "$COMBINATION")}"
+    echo "Preparing database for $(basename "$SCRIPT_PATH")${COMBINATION:+ with $COMBINATION}"
   fi
   [[ "$MODE" == "cleanup" ]] && echo -e "Cleaning up database for $(basename "$SCRIPT_PATH")\n"
 
@@ -268,19 +268,19 @@ for INFO in "${QUERY_INFO[@]}"; do
         done
 
         # Create a directory name for the combination
-        combination_name=$(echo "$combination" | tr ',' '_' | tr '=' '_')
-        LOG_DIR_KEY_VALUE="$LOG_DIR/$combination_name"
+        COMBINATION_NAME=$(echo "$combination" | sed -E 's/(^|,)num_rows=[^,]*//g;s/^,//;s/,$//' | tr ',' '_' | tr '=' '_')
+        LOG_DIR_KEY_VALUE="$LOG_DIR/$COMBINATION_NAME"
         mkdir -p "$LOG_DIR_KEY_VALUE"
 
         # Prepare benchmark
-        RAW_RESULTS_FILE="${LOG_DIR_KEY_VALUE}/$(basename "$QUERY_PATH")_${combination_name}_prepare.log"
-        run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE" "" "$combination_name"
+        RAW_RESULTS_FILE="${LOG_DIR_KEY_VALUE}/$(basename "$QUERY_PATH")_${COMBINATION_NAME}_prepare.log"
+        run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE" "" "$COMBINATION_NAME"
 
         # Process script benchmark
-        process_script_benchmark "$QUERY_PATH" "$LOG_DIR_KEY_VALUE" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$combination_name"
+        process_script_benchmark "$QUERY_PATH" "$LOG_DIR_KEY_VALUE" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$COMBINATION_NAME"
 
         # Cleanup benchmark
-        RAW_RESULTS_FILE="${LOG_DIR_KEY_VALUE}/$(basename "$QUERY_PATH")_${combination_name}_cleanup.log"
+        RAW_RESULTS_FILE="${LOG_DIR_KEY_VALUE}/$(basename "$QUERY_PATH")_${COMBINATION_NAME}_cleanup.log"
         run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
     done <<< "$combinations"
   else

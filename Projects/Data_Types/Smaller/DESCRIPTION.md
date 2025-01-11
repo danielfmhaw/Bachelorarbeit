@@ -15,24 +15,50 @@ Untersucht werden:
   - Simple Where
   - With Sorting
 
-### Code für Data Type Größenvergleich:
+### Code für Number Größenvergleich:
 ```bash
-cd ../../..
+cd ../../../..
 cd Tools
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Smaller" \
-  -var '{"length":[10,255]}' \
-  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/char:length" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/int:length" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/varchar:length"
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Output" \
+  -var '{"datatyp":["smallint_13","smallint_16","mediumint_24","int_32","bigint_64","decimal_65"]}' \
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/int:datatyp"
 ```
 
-### Nur Graphen erstellen für Data Type Größenvergleich (log und csv- files müssen schon bestehen)
+### Nur Graphen erstellen für Number Größenvergleich (log und csv- files müssen schon bestehen)
 ```bash
-cd ../../..
+cd ../../../..
 cd Tools
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Smaller
+  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Output
+```
+
+### Code für String Größenvergleich:
+```bash
+cd ../../../..
+cd Tools
+./sysbench_script.sh \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Output" \
+  -var '{"typ":["char_4","char_64","varchar_4","varchar_64"],"num_rows":[250]}' \
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/String/Scripts/string:typ,num_rows"
+```
+
+### Code für Anteil der einfügten Zeichen bei Länge von 255:
+```bash
+cd ../../../..
+cd Tools
+./sysbench_script.sh \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Output" \
+  -var '{"typ":["char_64","varchar_64"],"length":[60,255],"num_rows":[250]}' \
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/string:typ,length,num_rows"
+```
+
+### Nur Graphen erstellen für String - Größenvergleich (log und csv- files müssen schon bestehen)
+```bash
+cd ../../../..
+cd Tools
+./generate_graph.sh \
+  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/String/Output
 ```
 
 #### Notes
