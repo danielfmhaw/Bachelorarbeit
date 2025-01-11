@@ -41,7 +41,7 @@
       "./Projects/Data_Types/Null/Scripts/null:length",
       "./Projects/Data_Types/Null/Scripts/not_null"
     ],
-    "var": {"length": [2, 25]}
+    "var": {"length":[0,10]}
   },
   "int-char": {
     "dirs": [
@@ -49,12 +49,22 @@
       "./Projects/Data_Types/Simpler/Scripts/char_column"
     ]
   },
-  "data-size": {
+  "number-type": {
     "dirs": [
-      "./Projects/Data_Types/Smaller/Scripts/char:length",
-      "./Projects/Data_Types/Smaller/Scripts/int:length",
-      "./Projects/Data_Types/Smaller/Scripts/varchar:length"
+      "./Projects/Data_Types/Smaller/Scripts/int:datatyp"
     ],
-    "var": {"length": [10, 255]}
+    "var": {"datatyp":["smallint_13","smallint_16","mediumint_24","int_32","bigint_64","decimal_65"]}
+  },
+  "string-type": {
+    "dirs": [
+      "./Projects/Data_Types/Smaller/Scripts/string:typ,num_rows"
+    ],
+    "var": {"typ":["char_4","char_64","varchar_4","varchar_64"],"num_rows":[2000]}
+  },
+  "string-type-length": {
+    "dirs": [
+      "./Projects/Data_Types/Smaller/Scripts/string:typ,length,num_rows"
+    ],
+    "var": {"typ":["char_64","varchar_64"],"length":[60,255],"num_rows":[2000]}
   }
 }

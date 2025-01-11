@@ -20,8 +20,8 @@ Untersucht werden:
 cd ../../..
 cd Tools
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Null" \
-  -var '{"length":[2,25]}' \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Output" \
+  -var '{"length":[0,10]}' \
   -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/null:length" \
   "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/not_null"
 ```
@@ -30,7 +30,7 @@ cd Tools
 cd ../../..
 cd Tools
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Null
+  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Output
 ```
 
 #### Notes

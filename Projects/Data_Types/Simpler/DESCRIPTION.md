@@ -20,7 +20,7 @@ Untersucht werden:
 cd ../../..
 cd Tools
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Simpler" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Simpler/Output" \
   -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Simpler/Scripts/int_column" \
   "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Simpler/Scripts/char_column"
 ```
@@ -30,7 +30,7 @@ cd Tools
 cd ../../..
 cd Tools
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Output/Simpler
+  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Simpler/Output
 ```
 
 

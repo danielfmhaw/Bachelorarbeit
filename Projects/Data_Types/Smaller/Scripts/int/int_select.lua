@@ -1,11 +1,9 @@
 function select_query()
-    local query_city = "SELECT * FROM KUNDEN WHERE STADT = 'City_7' OR STADT = 'City_10';"
-    local query_age = "SELECT NAME, GEBURTSTAG FROM KUNDEN WHERE GEBURTSTAG < '1980-01-01';"
-    local query_count_city = "SELECT STADT, COUNT(*) AS num_customers FROM KUNDEN GROUP BY STADT;"
+    local query_count = "SELECT COUNT(*) FROM KUNDEN;"
+    local query_name_order = "SELECT * FROM KUNDEN ORDER BY NAME;"
 
-    db_query(query_city)
-    db_query(query_age)
-    db_query(query_count_city)
+    db_query(query_count)
+    db_query(query_name_order)
 end
 
 function event()

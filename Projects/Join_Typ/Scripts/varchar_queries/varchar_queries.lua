@@ -1,7 +1,7 @@
 function prepare()
     -- Create Table Kunden with varchar as PK
     local create_kunden_query = [[
-        CREATE TABLE IF NOT EXISTS KUNDENMITVARCHAR (
+        CREATE TABLE IF NOT EXISTS KUNDEN (
             NAME          VARCHAR(255) PRIMARY KEY,
             GEBURTSTAG    DATE,
             ADRESSE       VARCHAR(255),
@@ -13,31 +13,14 @@ function prepare()
         );
     ]]
 
-    -- SQL query to create BESTELLUNGMITVARCHAR table
-    local create_bestellung_query = [[
-        CREATE TABLE IF NOT EXISTS BESTELLUNGMITVARCHAR (
-            BESTELLUNG_ID INT PRIMARY KEY,
-            BESTELLDATUM DATE,
-            ARTIKEL_ID   INT,
-            FK_KUNDEN    VARCHAR(255) NOT NULL,
-            UMSATZ       INT,
-            FOREIGN KEY (FK_KUNDEN) REFERENCES KUNDENMITVARCHAR (NAME)
-        );
-    ]]
-
     -- Execute the table creation queries
     db_query(create_kunden_query)
-    db_query(create_bestellung_query)
-
     -- Log message indicating tables have been created
-    print("Tables KUNDENMITVARCHAR and BESTELLUNGMITVARCHAR have been successfully created.")
+    print("Tables KUNDEN has been successfully created.")
 end
 
 function cleanup()
-    local drop_kunden_query = "DROP TABLE IF EXISTS KUNDENMITVARCHAR;"
-    local drop_bestellung_query = "DROP TABLE IF EXISTS BESTELLUNGMITVARCHAR;"
-
-    db_query(drop_bestellung_query)
+    local drop_kunden_query = "DROP TABLE IF EXISTS KUNDEN;"
     db_query(drop_kunden_query)
     print("Cleanup successfully done")
 end

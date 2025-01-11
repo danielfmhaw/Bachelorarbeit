@@ -1,4 +1,4 @@
-local num_rows = 4000
+local num_rows =  4000
 
 function delete_data()
     local delete_kunden_query = "DELETE FROM KUNDEN;"
