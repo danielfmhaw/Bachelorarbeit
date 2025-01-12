@@ -38,10 +38,11 @@
   },
   "null-check": {
     "dirs": [
-      "./Projects/Data_Types/Null/Scripts/null:length",
+      "./Projects/Data_Types/Null/Scripts/with_null:every",
+      "./Projects/Data_Types/Null/Scripts/with_null",
       "./Projects/Data_Types/Null/Scripts/not_null"
     ],
-    "var": {"length":[0,10]}
+    "var": {"every":[5]}
   },
   "int-char": {
     "dirs": [
