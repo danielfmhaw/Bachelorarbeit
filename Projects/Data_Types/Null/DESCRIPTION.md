@@ -21,8 +21,9 @@ cd ../../..
 cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Output" \
-  -var '{"length":[0,10]}' \
-  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/null:length" \
+  -var '{"every":[5]}' \
+  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/with_null:every" \
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/with_null" \
   "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/not_null"
 ```
 ### Nur Graphen erstellen für Null (log und csv- files müssen schon bestehen)
