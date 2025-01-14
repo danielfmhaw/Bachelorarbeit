@@ -38,11 +38,9 @@
   },
   "null-check": {
     "dirs": [
-      "./Projects/Data_Types/Null/Scripts/with_null:every",
       "./Projects/Data_Types/Null/Scripts/with_null",
       "./Projects/Data_Types/Null/Scripts/not_null"
-    ],
-    "var": {"every":[5]}
+    ]
   },
   "int-char": {
     "dirs": [
