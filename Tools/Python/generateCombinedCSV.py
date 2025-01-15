@@ -7,7 +7,7 @@ def main():
     parser = argparse.ArgumentParser(description="Process sysbench output CSV file")
     parser.add_argument('input_file', type=str, help="Path to the input CSV file")
     parser.add_argument('output_file', type=str, help="Path to the output CSV file")
-    parser.add_argument('--select_columns', type=str, help="Comma-separated list of columns to sum (insert + select)", default="")
+    parser.add_argument('--select_columns', type=str, help="Comma-separated list of columns where select is used", default="")
     parser.add_argument('--insert_columns', type=str, help="Comma-separated list of columns where insert is used", default="")
 
     args = parser.parse_args()
@@ -15,8 +15,8 @@ def main():
     # os.remove(args.input_file)
 
     headers = df.columns.tolist()
-    select_columns = args.select_columns.split(',') if args.select_columns else []
-    insert_columns = args.insert_columns.split(',') if args.insert_columns else []
+    select_columns = args.select_columns.split(';') if args.select_columns else []
+    insert_columns = args.insert_columns.split(';') if args.insert_columns else []
 
     df['Base_Script'] = df['Script'].str.extract(r'(.*?)(?:_(insert|select))')[0]
     insert_rows = df[df['Script'].str.endswith('_insert')]

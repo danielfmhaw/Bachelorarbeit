@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # create file "pac_gh.env" in this directory with this content: GITHUB_TOKEN=your_personal_access_token
-source pac_gh.env
+source ../../pac_gh.env
 
 chmod +x getArtifacts.sh
 ARTIFACTS=$(./getArtifacts.sh)

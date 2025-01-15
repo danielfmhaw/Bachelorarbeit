@@ -1,7 +1,5 @@
 which bash
 
-#!/bin/bash
-
 if [ -n "$GITHUB_ACTIONS" ]; then
     ENV_PATH="./db.env"
     PYTHON_PATH="./Tools/Python"
@@ -35,13 +33,9 @@ while [[ $# -gt 0 ]]; do
         -out) OUTPUT_DIR="$2"; shift 2 ;;
         -var) JSON_VARIABLES="$2"; shift 2 ;;
         -scripts:*)
-            QUERY_INFO+=("${1#-scripts:}")
-            shift
-            while [[ $# -gt 0 && "$1" != -* ]]; do
-                QUERY_INFO+=("$1")
-                shift
-            done
-            ;;
+            SCRIPT_LIST=$(echo "${1#*:}" | tr -d '\n' | sed 's/[[:space:]]*, */,/g' | sed 's/^[[:space:]]*\[//;s/\][[:space:]]*$//' | sed 's/"//g' | sed 's/^[[:space:]]*//g')
+            IFS=',' read -ra QUERY_INFO <<< "$SCRIPT_LIST"
+            shift ;;
         *) usage ;;
     esac
 done
@@ -54,7 +48,7 @@ fi
 # Validate queries against parsed JSON variables
 for INFO in "${QUERY_INFO[@]}"; do
     if [[ "$INFO" == *":"* ]]; then
-        KEYS_AFTER_COLON=$(echo "$INFO" | awk -F':' '{print $2}' | tr ',' ' ')
+        KEYS_AFTER_COLON=$(echo "$INFO" | awk -F':' '{print $2}' | tr ';' ' ')
         for KEY in $KEYS_AFTER_COLON; do
               if ! echo "$JSON_VARIABLES" | jq -e ".\"$KEY\"" >/dev/null 2>&1; then
                 echo "Error: The variable '$KEY' in query '$INFO' is not defined in JSON_VARIABLES"
@@ -64,12 +58,17 @@ for INFO in "${QUERY_INFO[@]}"; do
     fi
 done
 
-
 # Define file paths
 RUNTIME_FILE="$OUTPUT_DIR/sysbench_runtime.csv"
 RUNTIME_FILE_TEMP="$OUTPUT_DIR/sysbench_runtime_temp.csv"
 STATISTICS_FILE="$OUTPUT_DIR/sysbench_statistics.csv"
 STATISTICS_FILE_TEMP="$OUTPUT_DIR/sysbench_statistics_temp.csv"
+
+# Default values for select_columns and insert_columns
+STATS_SELECT_COLUMNS_DEFAULT="Total Time"
+STATS_INSERT_COLUMNS_DEFAULT=""
+RUNTIME_SELECT_COLUMNS_DEFAULT="Time (s);Threads"
+RUNTIME_INSERT_COLUMNS_DEFAULT=""
 
 # Sysbench configuration
 TIME=${TIME:-32}
@@ -102,7 +101,7 @@ run_benchmark() {
 
   run_sysbench "$SCRIPT_PATH" "$MODE" "$OUTPUT_FILE"
   if [ $? -ne 0 ]; then
-    echo "Benchmark failed for script $SCRIPT_PATH. Exiting."
+    echo "Benchmark failed for script $SCRIPT_PATH Exiting."
     exit 1
   fi
 
@@ -245,15 +244,23 @@ generate_combinations() {
 
 # Main benchmark loop
 for INFO in "${QUERY_INFO[@]}"; do
-  IFS=: read -r QUERY_PATH MULTIPLE_KEYS <<< "$INFO"
+  IFS=: read -r QUERY_PATH EXTRA_ARGS <<< "$INFO"
+  EXPORTED_VARS="${EXTRA_ARGS%%:*}"
+  EXTRA_COLUMNS_ARGS="${EXTRA_ARGS#*:}"
+
+  IFS=: read -r -a EXTRA_COLUMNS <<< "$EXTRA_COLUMNS_ARGS"
+  STATS_SELECT_COLUMNS="${EXTRA_COLUMNS[0]:-${STATS_SELECT_COLUMNS_DEFAULT}}"
+  STATS_INSERT_COLUMNS="${EXTRA_COLUMNS[1]:-${STATS_INSERT_COLUMNS_DEFAULT}}"
+  RUNTIME_SELECT_COLUMNS="${EXTRA_COLUMNS[2]:-${RUNTIME_SELECT_COLUMNS_DEFAULT}}"
+  RUNTIME_INSERT_COLUMNS="${EXTRA_COLUMNS[3]:-${RUNTIME_INSERT_COLUMNS_DEFAULT}}"
 
   MAIN_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH").lua"
   INSERT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_insert.lua"
   SELECT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_select"
   LOG_DIR="$OUTPUT_DIR/logs/$(basename "$QUERY_PATH")"
 
-  if [[ -n "$MULTIPLE_KEYS" ]]; then
-    IFS=',' read -r -a KEYS <<< "$MULTIPLE_KEYS"
+  if [[ -n "$EXPORTED_VARS" ]]; then
+    IFS=';' read -r -a KEYS <<< "$EXPORTED_VARS"
 
     # Generate all combinations of key-value pairs
     combinations=$(generate_combinations "" "${KEYS[@]}")
@@ -298,11 +305,11 @@ for INFO in "${QUERY_INFO[@]}"; do
 done
 
 # Statistics csv generated
-python3 "$PYTHON_PATH/generateCombinedCSV.py" "$STATISTICS_FILE_TEMP" "$STATISTICS_FILE" --insert_columns "Total Time"
+python3 "$PYTHON_PATH/generateCombinedCSV.py" "$STATISTICS_FILE_TEMP" "$STATISTICS_FILE" --select_columns "$STATS_SELECT_COLUMNS" --insert_columns "$STATS_INSERT_COLUMNS"
 echo "Combined CSV file created at $STATISTICS_FILE"
 
 # Outputfile csv generated
-python3 "$PYTHON_PATH/generateCombinedCSV.py" "$RUNTIME_FILE_TEMP" "$RUNTIME_FILE" --select_columns "Time (s),Threads"
+python3 "$PYTHON_PATH/generateCombinedCSV.py" "$RUNTIME_FILE_TEMP" "$RUNTIME_FILE" --select_columns "$RUNTIME_SELECT_COLUMNS" --insert_columns "$RUNTIME_INSERT_COLUMNS"
 echo "Combined CSV file created at $RUNTIME_FILE"
 
 # Generate plot after all tasks are completed

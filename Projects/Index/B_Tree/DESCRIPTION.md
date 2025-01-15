@@ -23,8 +23,10 @@ cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/count_row_changes/high_counts" \
   -var '{"length":[500,5000]}' \
-  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/count_row_changes/with_index:length" \
+  -scripts:'[
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/count_row_changes/with_index:length",
   "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/count_row_changes/without_index:length"
+  ]'
 ```
 
 ### Code für Low Count Vergleich:
@@ -34,8 +36,10 @@ cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/count_row_changes/low_counts" \
   -var '{"length":[10,40]}' \
-  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/count_row_changes/with_index:length" \
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/count_row_changes/without_index:length"  
+  -scripts:'[
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/count_row_changes/with_index:length",
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/count_row_changes/without_index:length"
+  ]'
 ```
 
 ### Code unterschiedliche Select - Queries
@@ -44,7 +48,7 @@ cd ../../..
 cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/query_differences" \
-  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/query_differences"
+  -scripts:'["/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/query_differences"]'
 ```
 
 ### Nur Graphen erstellen für Select - Queries (log und csv- files müssen schon bestehen)
