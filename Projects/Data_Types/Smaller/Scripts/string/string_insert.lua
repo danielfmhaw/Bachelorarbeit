@@ -1,6 +1,5 @@
-local priority = tonumber(os.getenv("LENGTH"))
 local typ = tostring(os.getenv("TYP")) or ""
-local length = tonumber(priority) or tonumber(typ:match("%d+")) or 0
+local length = tonumber(os.getenv("LENGTH")) or tonumber(typ:match("%d+")) or 0
 local num_rows = tonumber(os.getenv("NUM_ROWS")) or 0
 
 -- Function to generate a random string of a given length
@@ -23,10 +22,10 @@ end
 
 -- Function to insert randomized data into KUNDEN
 function insert_data()
-   print("daniel",length)
    delete_data()
    for i = 1, num_rows do
-       local name = randomString(length) .. string.format("%d", i)
+       local kunden_id = i
+       local name = randomString(length)
        local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
        local adresse = string.format("Address_%d", i)
        local stadt = string.format("City_%d", math.random(1, 100))
@@ -38,9 +37,9 @@ function insert_data()
        -- Insert into KUNDEN, ignoring duplicates
        local kunden_query = string.format([[
            INSERT IGNORE INTO KUNDEN
-           (NAME, GEBURTSTAG, ADRESSE, STADT, POSTLEITZAHL, LAND, EMAIL, TELEFONNUMMER)
-           VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
-       ]], name, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
+           (KUNDEN_ID, NAME, GEBURTSTAG, ADRESSE, STADT, POSTLEITZAHL, LAND, EMAIL, TELEFONNUMMER)
+           VALUES (%d,'%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
+       ]], kunden_id, name, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
 
        db_query(kunden_query)
    end

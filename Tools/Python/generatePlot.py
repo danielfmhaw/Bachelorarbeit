@@ -29,7 +29,7 @@ def plot_metrics(args, datafile, detailed_pngs_dir, combined_pngs_dir):
             plt.figure(figsize=(10, 6))
             for script in scripts:
                 script_data = data[data['Script'] == script]
-                plt.plot(script_data['Time (s)'], script_data[measure], label=f"{script} - {measure}")
+                plt.plot(script_data['Time (s)'], script_data[measure], label=f"{script}")
 
             plt.title(f'{measure} over Time by Script')
             plt.xlabel('Time (s)')

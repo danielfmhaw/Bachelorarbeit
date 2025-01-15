@@ -1,5 +1,5 @@
 #!/bin/bash
-source pac_gh.env
+source ../../pac_gh.env
 
 LIST_URL="https://api.github.com/repos/$OWNER/$REPO/actions/artifacts"
 ALL_ARTIFACTS=()

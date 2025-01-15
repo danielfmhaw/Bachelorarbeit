@@ -5,19 +5,19 @@ OUTPUT_DIR="$1"
 
 # File Paths
 PYTHON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Tools/Python"
-OUTPUT_FILE="$OUTPUT_DIR/sysbench_output.csv"
-OUTPUT_FILE_INOFFICIAL="$OUTPUT_DIR/sysbench_output_inofficial.csv"
-STATISTICS_OUTPUT_FILE="$OUTPUT_DIR/statistics.csv"
-STATISTICS_OUTPUT_FILE_INOFFICIAL="$OUTPUT_DIR/statistics_inofficial.csv"
+RUNTIME_FILE="$OUTPUT_DIR/sysbench_runtime.csv"
+RUNTIME_FILE_TEMP="$OUTPUT_DIR/sysbench_runtime_temp.csv"
+STATISTICS_FILE="$OUTPUT_DIR/sysbench_statistics.csv"
+STATISTICS_FILE_TEMP="$OUTPUT_DIR/sysbench_statistics_temp.csv"
 
 # Statistics csv generated
-python3 "$PYTHON_PATH/generateCombinedCSV.py" "$STATISTICS_OUTPUT_FILE_INOFFICIAL" "$STATISTICS_OUTPUT_FILE" --insert_columns "Total Time"
-echo "Combined CSV file created at $STATISTICS_OUTPUT_FILE"
+python3 "$PYTHON_PATH/generateCombinedCSV.py" "$STATISTICS_FILE_TEMP" "$STATISTICS_FILE" --select_columns "Total Time"
+echo "Combined CSV file created at $STATISTICS_FILE"
 
 # Outputfile csv generated
-python3 "$PYTHON_PATH/generateCombinedCSV.py" "$OUTPUT_FILE_INOFFICIAL" "$OUTPUT_FILE" --select_columns "Time (s),Threads"
-echo "Combined CSV file created at $OUTPUT_FILE"
+python3 "$PYTHON_PATH/generateCombinedCSV.py" "$RUNTIME_FILE_TEMP" "$RUNTIME_FILE" --select_columns "Time (s),Threads"
+echo "Combined CSV file created at $RUNTIME_FILE"
 
 # Generate plot after all tasks are completed
 echo "Generating plots..."
-python3 "$PYTHON_PATH/generatePlot.py" "$OUTPUT_FILE" "$STATISTICS_OUTPUT_FILE"
+python3 "$PYTHON_PATH/generatePlot.py" "$RUNTIME_FILE" "$STATISTICS_FILE"

@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test-type: [high-count, low-count, b-tree-query-differences, selectivity-change, hash-query-differences, join-type, null-check, int-char, number-type, string-type, string-type-length]
+        test-type: [int-char, string-type-length]
 
     env:
       DB_HOST: ${{ secrets.DB_HOST }}
