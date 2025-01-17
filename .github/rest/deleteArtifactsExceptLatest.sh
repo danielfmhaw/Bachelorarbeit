@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # create file "pac_gh.env" in this directory with this content: GITHUB_TOKEN=your_personal_access_token
-source ../../pac_gh.env
+source ../../gh-secrets.env
 
 chmod +x getArtifacts.sh
 ARTIFACTS=$(./getArtifacts.sh)
@@ -23,6 +23,6 @@ echo "$ARTIFACTS" | jq -c '.artifacts | sort_by(.created_at) | reverse | .[]' | 
             -H "Accept: application/vnd.github+json" \
             "$DELETE_URL"
     else
-        PROCESSED_BASE_NAMES+="$BASE_NAME "
+        PROCESSED_BASE_NAMES+="$BASE_NAME"
     fi
 done

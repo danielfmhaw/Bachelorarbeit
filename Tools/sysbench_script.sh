@@ -33,7 +33,7 @@ while [[ $# -gt 0 ]]; do
         -out) OUTPUT_DIR="$2"; shift 2 ;;
         -var) JSON_VARIABLES="$2"; shift 2 ;;
         -scripts:*)
-            SCRIPT_LIST=$(echo "${1#*:}" | tr -d '\n' | sed 's/[[:space:]]*, */,/g' | sed 's/^[[:space:]]*\[//;s/\][[:space:]]*$//' | sed 's/"//g' | sed 's/^[[:space:]]*//g')
+            SCRIPT_LIST=$(echo "${1#*:}" | tr -d '\n' | sed 's/[[:space:]]*, */,/g' | sed 's/^[[:space:]]*\[//;s/\][[:space:]]*$//' | sed 's/"//g' | sed 's/^[[:space:]]*//g;s/[[:space:]]*$//g')
             IFS=',' read -ra QUERY_INFO <<< "$SCRIPT_LIST"
             shift ;;
         *) usage ;;

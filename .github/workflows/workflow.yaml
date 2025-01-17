@@ -1,4 +1,4 @@
-name: Benchmark Workflow
+name: Benchmark
 
 on:
   push:
@@ -11,12 +11,70 @@ on:
   workflow_dispatch:
 
 jobs:
-  benchmark:
+  prepare-benchmark:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      configurations: ${{ steps.prepare-config.outputs.configurations }}
+    env:
+      GENERAL_PATHS: "./.github/workflows ./.github/pattern.json ./Tools/Python ./Tools/sysbench_script.sh"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Read and generate matrix
+        id: set-matrix
+        run: |
+          CONFIG_FILE=".github/pattern.json"
+          matrix=$(jq -c 'keys' $CONFIG_FILE)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+      - name: Prepare configurations for all test types
+        id: prepare-config
+        run: |
+          CONFIG_FILE=".github/pattern.json"
+          RESULTS=()
+          for TEST_TYPE in $(jq -r 'keys[]' $CONFIG_FILE); do
+            DIRS=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs | @json' "$CONFIG_FILE")
+            VAR=$(jq -c --arg test "$TEST_TYPE" '.[$test].var // {}' "$CONFIG_FILE")
+            if [[ $(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[0]' "$CONFIG_FILE") =~ /Projects\/(.*)\/Scripts/ ]]; then
+              OUTPUT_DIR="Output/${BASH_REMATCH[1]}/${TEST_TYPE}"
+            fi
+          
+            DIRS_HELPER=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/:.*$//' | paste -sd " ")
+            HASH=$(find $DIRS_HELPER -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')
+            LAST_COMMIT=$(git rev-parse HEAD || git rev-parse origin/main)
+            GENERAL_HASH=$(git ls-tree -r $LAST_COMMIT -- $GENERAL_PATHS | awk '{print $3}' | xargs -I {} git show {} | sha256sum | awk '{print $1}')
+            ARTIFACT_NAME="${TEST_TYPE}-${HASH}-${GENERAL_HASH}"
+          
+            EXISTING=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" | \
+              jq -r --arg name "$ARTIFACT_NAME" '.artifacts[] | select(.name == $name).id')
+          
+            # Set should_run to true or false based on artifact existence
+            SHOULD_RUN=$( [[ -z "$EXISTING" ]] && echo true || echo false )
+          
+            # Create the result JSON, including should_run
+            RESULT=$(jq -n \
+            --arg test_type "$TEST_TYPE" \
+            --arg dirs "$DIRS" \
+            --arg var "$VAR" \
+            --arg output_dir "$OUTPUT_DIR" \
+            --arg artifact_name "$ARTIFACT_NAME" \
+            --arg should_run "$SHOULD_RUN" \
+            '{test_type: $test_type, dirs: $dirs, var: $var, output_dir: $output_dir, artifact_name: $artifact_name, should_run: $should_run}')
+          
+            RESULTS+=("$RESULT")
+          done
+          CONFIGURATIONS=$(printf '%s\n' "${RESULTS[@]}" | jq -s '.' | jq -c .)
+          echo "configurations=$CONFIGURATIONS" >> $GITHUB_OUTPUT
+
+  run-tests:
+    needs: prepare-benchmark
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test-type: [int-char, string-type-length]
-
+        test-type: ${{ fromJson(needs.prepare-benchmark.outputs.matrix) }}
     env:
       DB_HOST: ${{ secrets.DB_HOST }}
       DB_PORT: ${{ secrets.DB_PORT }}
@@ -27,59 +85,17 @@ jobs:
       THREADS: 1
       EVENTS: 0
       REPORT_INTERVAL: 1
-      GENERAL_PATHS: "./.github/workflows ./.github/pattern.json ./Tools/Python ./Tools/sysbench_script.sh"
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Load configuration from JSON
+      - name: Extract and save values to GitHub environment
         run: |
-          CONFIG_FILE=".github/pattern.json"
-          TEST_TYPE="${{ matrix.test-type }}"
-          DIRS=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/:.*$//' | paste -sd " ")                  
-          DIRS_STRING=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | paste -sd " ")
-          VAR=$(jq -c --arg test "$TEST_TYPE" '.[$test].var // {}' "$CONFIG_FILE")      
-          
-          if [[ $(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[0]' "$CONFIG_FILE") =~ /Projects\/(.*)\/Scripts/ ]]; then
-            OUTPUT_DIR="Output/${BASH_REMATCH[1]}/${TEST_TYPE}"
-          fi
-          
-          echo "dirs=$DIRS" >> $GITHUB_ENV
-          echo "dirs_string=$DIRS_STRING" >> $GITHUB_ENV
-          echo "var=$VAR" >> $GITHUB_ENV
-          echo "output_dir=$OUTPUT_DIR" >> $GITHUB_ENV
-
-      - name: Calculate hash of directories
-        run: |
-          HASH=$(find ${{ env.dirs }} -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')          
-          echo "hash=$HASH" >> $GITHUB_ENV
-          
-          LAST_COMMIT=$(git rev-parse HEAD || git rev-parse origin/main)          
-          GENERAL_HASH=$(git ls-tree -r $LAST_COMMIT -- $GENERAL_PATHS | awk '{print $3}' | xargs -I {} git show {} | sha256sum | awk '{print $1}')
-          echo "general_hash=$GENERAL_HASH" >> $GITHUB_ENV
-
-      - name: Check for and download existing artifact
-        run: |
-          ARTIFACT_NAME="${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}"
-          echo "artifact_name=$ARTIFACT_NAME" >> $GITHUB_ENV
-
-          EXISTING=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" | \
-            jq -r --arg name "$ARTIFACT_NAME" '.artifacts[] | select(.name == $name).id')
-
-          if [[ $EXISTING ]]; then
-            echo "Artifact $ARTIFACT_NAME found. Downloading..." && echo "should_run=false" >> $GITHUB_ENV
-
-            curl -L -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$EXISTING/zip" \
-              -o artifact.zip && \
-              mkdir -p ${{ env.output_dir }} && \
-              unzip -q artifact.zip -d ${{ env.output_dir }} && \
-              rm artifact.zip
-          else
-            echo "Artifact $ARTIFACT_NAME not found. Running new benchmark." && echo "should_run=true" >> $GITHUB_ENV
-          fi
+          CONFIG=$(echo '${{ needs.prepare-benchmark.outputs.configurations }}' | jq -c --arg test_type "${{ matrix.test-type }}" '.[] | select(.test_type == $test_type)')
+          for key in $(echo $CONFIG | jq -r 'keys[]'); do
+            value=$(echo $CONFIG | jq -r ".${key}")
+            echo "${key}=${value}" >> $GITHUB_ENV
+          done
 
       - name: Cache pip dependencies
         if: env.should_run == 'true'
@@ -99,40 +115,64 @@ jobs:
       - name: Start MySQL container
         if: env.should_run == 'true'
         run: |
-          docker run --name mysql-${{ matrix.test-type }} -d \
+          docker run --name mysql-${{ env.test_type }} -d \
             -e MYSQL_ROOT_PASSWORD=$DB_PASS \
             -e MYSQL_DATABASE=$DB_NAME \
             -p $DB_PORT:3306 mysql:8.0
-          
+
           echo "Waiting for MySQL..."
-          until docker exec mysql-${{ matrix.test-type }} mysqladmin --user=root --password=$DB_PASS --host=127.0.0.1 --port=$DB_PORT ping --silent; do sleep 1; done
+          until docker exec mysql-${{ env.test_type }} mysqladmin --user=root --password=$DB_PASS --host=127.0.0.1 --port=$DB_PORT ping --silent; do sleep 1; done
           echo "MySQL is ready!"
 
       - name: Run sysbench script
         if: env.should_run == 'true'
         run: |
           chmod +x Tools/sysbench_script.sh
-          
+
           Tools/sysbench_script.sh \
             -out "${{ env.output_dir }}" \
             -var '${{ env.var }}' \
-            -scripts:$(echo "${{ env.dirs_string }}" | sed 's/ / /g')
+            -scripts:'${{ env.dirs }}'
 
       - name: Stop MySQL container
         if: env.should_run == 'true'
         run: |
-          docker stop mysql-${{ matrix.test-type }}
-          docker rm mysql-${{ matrix.test-type }}
+          docker stop mysql-${{ env.test_type }}
+          docker rm mysql-${{ env.test_type }}
 
       - name: Upload individual outputs
         if: env.should_run == 'true'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.artifact_name }}
           path: ${{ env.output_dir }}
 
+  upload-combined-output:
+    needs: [prepare-benchmark, run-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Loop through configurations and download artifacts
+        run: |
+          CONFIGS='${{ needs.prepare-benchmark.outputs.configurations }}'
+
+          ALL_ARTIFACTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
+          echo "$CONFIGS" | jq -c '.[]' | while read -r test_case; do
+            artifact_name=$(echo "$test_case" | jq -r '.artifact_name')
+            output_dir=$(echo "$test_case" | jq -r '.output_dir')
+            artifact_id=$(echo "$ALL_ARTIFACTS" | jq -r --arg name "$artifact_name" '.artifacts[] | select(.name == $name) | .id')
+          
+            echo "Downloading artifact ID $artifact_id"
+            curl -L -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$artifact_id/zip" \
+              -o artifact.zip
+            mkdir -p "$output_dir"
+            unzip -q artifact.zip -d "$output_dir"
+            rm artifact.zip
+          done
+
       - name: Upload combined outputs as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: combined-output
           path: Output

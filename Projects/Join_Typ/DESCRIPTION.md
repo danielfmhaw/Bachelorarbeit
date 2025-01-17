@@ -62,8 +62,10 @@ cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Output" \
   -var '{"length":[1, 64]}' \
-  -scripts:"/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/varchar_queries:length" \
+  -scripts:'[
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/varchar_queries:length",
   "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/int_queries"
+  ]'
 ```
 
 ```bash
