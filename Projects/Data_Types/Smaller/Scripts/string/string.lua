@@ -22,7 +22,7 @@ function prepare()
 
     db_query(create_kunden_query)
     db_query(create_indices)
-    print("Table 'KUNDEN' has been successfully created")
+    print(string.format("Table 'KUNDEN' has been successfully created with type %s for column 'NAME'", size))
 end
 
 function cleanup()

@@ -7,8 +7,8 @@ def main():
     parser = argparse.ArgumentParser(description="Process sysbench output CSV file")
     parser.add_argument('input_file', type=str, help="Path to the input CSV file")
     parser.add_argument('output_file', type=str, help="Path to the output CSV file")
-    parser.add_argument('--select_columns', type=str, help="Comma-separated list of columns where select is used", default="")
-    parser.add_argument('--insert_columns', type=str, help="Comma-separated list of columns where insert is used", default="")
+    parser.add_argument('--select_columns', type=str, help="Comma-separated list of columns where only the select value is used", default="")
+    parser.add_argument('--insert_columns', type=str, help="Comma-separated list of columns where only the insert value is used", default="")
 
     args = parser.parse_args()
     df = pd.read_csv(args.input_file)

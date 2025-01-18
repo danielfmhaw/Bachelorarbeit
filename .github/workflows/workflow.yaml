@@ -19,7 +19,7 @@ jobs:
     env:
       GENERAL_PATHS: "./.github/workflows ./.github/pattern.json ./Tools/Python ./Tools/sysbench_script.sh"
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Read and generate matrix
@@ -34,6 +34,8 @@ jobs:
         run: |
           CONFIG_FILE=".github/pattern.json"
           RESULTS=()
+          ALL_ARTIFACTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
+          
           for TEST_TYPE in $(jq -r 'keys[]' $CONFIG_FILE); do
             DIRS=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs | @json' "$CONFIG_FILE")
             VAR=$(jq -c --arg test "$TEST_TYPE" '.[$test].var // {}' "$CONFIG_FILE")
@@ -41,20 +43,14 @@ jobs:
               OUTPUT_DIR="Output/${BASH_REMATCH[1]}/${TEST_TYPE}"
             fi
           
-            DIRS_HELPER=$(jq -r --arg test "$TEST_TYPE" '.[$test].dirs[]' "$CONFIG_FILE" | sed 's/:.*$//' | paste -sd " ")
-            HASH=$(find $DIRS_HELPER -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')
+            HASH=$(echo "$DIRS" | jq -r '.[]' | sed 's/:.*$//' | xargs -I {} find {} -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')
             LAST_COMMIT=$(git rev-parse HEAD || git rev-parse origin/main)
             GENERAL_HASH=$(git ls-tree -r $LAST_COMMIT -- $GENERAL_PATHS | awk '{print $3}' | xargs -I {} git show {} | sha256sum | awk '{print $1}')
+          
             ARTIFACT_NAME="${TEST_TYPE}-${HASH}-${GENERAL_HASH}"
+            SHOULD_RUN=$(echo "$ALL_ARTIFACTS" | jq -e --arg name "$ARTIFACT_NAME" '.artifacts[] | select(.name == $name) | .id' > /dev/null && echo false || echo true)
           
-            EXISTING=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" | \
-              jq -r --arg name "$ARTIFACT_NAME" '.artifacts[] | select(.name == $name).id')
-          
-            # Set should_run to true or false based on artifact existence
-            SHOULD_RUN=$( [[ -z "$EXISTING" ]] && echo true || echo false )
-          
-            # Create the result JSON, including should_run
+            # Creation of the JSON result
             RESULT=$(jq -n \
             --arg test_type "$TEST_TYPE" \
             --arg dirs "$DIRS" \
@@ -155,14 +151,14 @@ jobs:
         run: |
           CONFIGS='${{ needs.prepare-benchmark.outputs.configurations }}'
 
-          ALL_ARTIFACTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
+          ALL_ARTIFACTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
+          
           echo "$CONFIGS" | jq -c '.[]' | while read -r test_case; do
             artifact_name=$(echo "$test_case" | jq -r '.artifact_name')
             output_dir=$(echo "$test_case" | jq -r '.output_dir')
             artifact_id=$(echo "$ALL_ARTIFACTS" | jq -r --arg name "$artifact_name" '.artifacts[] | select(.name == $name) | .id')
           
-            echo "Downloading artifact ID $artifact_id"
+            echo "Downloading for artifact $artifact_name with ID $artifact_id"
             curl -L -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
               "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$artifact_id/zip" \
               -o artifact.zip

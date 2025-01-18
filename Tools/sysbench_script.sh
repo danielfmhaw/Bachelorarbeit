@@ -101,7 +101,7 @@ run_benchmark() {
 
   run_sysbench "$SCRIPT_PATH" "$MODE" "$OUTPUT_FILE"
   if [ $? -ne 0 ]; then
-    echo "Benchmark failed for script $SCRIPT_PATH Exiting."
+    echo "Benchmark failed for script $SCRIPT_PATH"
     exit 1
   fi
 
