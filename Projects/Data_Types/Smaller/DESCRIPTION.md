@@ -1,19 +1,20 @@
-# Performance - Unterschied zwischen Int und Char
+# Performance - Unterschied zwischen unterschiedlichen Datentypen (nummerisch und string)
 
 ## Beschreibung
 
-Es wird der Performance - Unterschied zwischen **Int und Char** analysiert.
+Es wird der Performance - Unterschied zwischen **unterschiedlichen Datentypen**, einmal nummerisch und einmal string, analysiert.
 
 ## Datenbankstruktur
 
 Das Projekt verwendet die gleiche Tabelle **KUNDE**, wie auch für den Integer-Fall in Join_Typ.
+Dieses Mal wird die Spalte **KUNDEN_ID** mit unterschiedlichen [**nummerischen Datentypen**](Scripts/int) definiert.
+Im zweiten Fall wird die Spalte **NAME** mit unterschiedlichen [**string Datentypen**](Scripts/string) definiert.
 
 ## Zielsetzung
 Untersucht werden:
-- Performance – Unterschied mit **unterschiedlichen Zeilenanzahl** insbesondere um die Geschwindigkeit für die Einfügeoperationen zu analysieren.
-- Veranschaulichung der Performanceunterschiede für unterschiedliche **Select-Queries**:
-  - Simple Where
-  - With Sorting
+- Performance – Unterschied zwischen unterschiedlichen Datentypen (nummerisch und string) bei unterschiedlichem Befüllungsgrad
+- Unterschiedliche Abfragen (group by, count, range comparison etc.) auf den beiden Tabellen
+- Für string werden auch update durchgeführt und verglichen
 
 ### Code für Number Größenvergleich:
 ```bash

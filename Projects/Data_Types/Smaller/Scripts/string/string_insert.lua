@@ -1,17 +1,9 @@
+package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):match("(.*/)") .. "../../../../../Tools/Lua/?.lua"
+local utils = require("utils")
+
 local typ = tostring(os.getenv("TYP")) or ""
 local length = tonumber(os.getenv("LENGTH")) or tonumber(typ:match("%d+")) or 0
 local num_rows = tonumber(os.getenv("NUM_ROWS")) or 0
-
--- Function to generate a random string of a given length
-local function randomString(length)
-   local charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-   local result = ""
-   for i = 1, length do
-       local randIndex = math.random(1, #charset)
-       result = result .. charset:sub(randIndex, randIndex)
-   end
-   return result
-end
 
 function delete_data()
    local delete_kunden_query = "DELETE FROM KUNDEN;"
@@ -25,7 +17,7 @@ function insert_data()
    delete_data()
    for i = 1, num_rows do
        local kunden_id = i
-       local name = randomString(length)
+       local name = utils.randomString(length)
        local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
        local adresse = string.format("Address_%d", i)
        local stadt = string.format("City_%d", math.random(1, 100))

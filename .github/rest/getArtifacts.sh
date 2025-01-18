@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# create file "gh-secrets.env" in the root directory of the repo with this content: GITHUB_TOKEN=your_personal_access_token
 source ../../gh-secrets.env
 
 LIST_URL="https://api.github.com/repos/$OWNER/$REPO/actions/artifacts"
