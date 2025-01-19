@@ -1,0 +1,54 @@
+name: Benchmark Workflow
+on:
+  push:
+    paths:
+      - 'Projects/**'
+      - ...
+jobs:
+  prepare-benchmark:
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      configurations: ${{ steps.prepare-config.outputs.configurations }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Read and generate list of matrix name
+        run: # ... echo "matrix=$matrix" >> $GITHUB_OUTPUT
+      - name: Prepare configurations for all test types
+        run: # ... export variables like  test_type, dirs, var, output_dir, artifact_name, should_run as "configurations"
+  run-tests:
+    needs: prepare-benchmark
+    strategy:
+      matrix:
+        test-type: ${{ fromJson(needs.prepare-benchmark.outputs.matrix) }}
+    env:
+      OTHER_ENVIRONMENT_VARIABLES
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Extract and save values to GitHub environment
+        run: # ...
+      - name: Install dependencies
+        run: # install sysbench,pandas and matplotlib
+      - name: Start MySQL container
+        run: |
+          docker run --name mysql-${{ env.test_type }} -d -e MYSQL_ROOT_PASSWORD=$DB_PASS -e MYSQL_DATABASE=$DB_NAME -p $DB_PORT:3306 mysql:8.0
+          until docker exec mysql-${{ env.test_type }} mysqladmin --user=root --password=$DB_PASS --host=127.0.0.1 --port=$DB_PORT ping --silent; do sleep 1; done
+          echo "MySQL is ready!"
+      - name: Run sysbench script
+        run: |
+          chmod +x Tools/sysbench_script.sh
+          Tools/sysbench_script.sh -out "${{ env.output_dir }}" -var '${{ env.var }}' -scripts:'${{ env.dirs }}'
+      - name: Upload individual outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.artifact_name }}
+          path: ${{ env.output_dir }}
+
+  upload-combined-output:
+    needs: [prepare-benchmark, run-tests]
+    steps:
+      - name: Loop through configurations, download artifacts with artifact_name and unzip it
+        run: # ... ALL_ARTIFACTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/actions/artifacts") ...
+      - name: Upload "Output" - folder as artifact
+        run: # ...

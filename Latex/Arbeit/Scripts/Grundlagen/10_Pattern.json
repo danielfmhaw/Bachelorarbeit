@@ -1,0 +1,9 @@
+{
+  "example-name": {
+    "dirs": [
+      "./example-project/Scripts/int_queries",
+      "./example-project/Scripts/varchar_queries:length"
+    ],
+    "var": {"length": [1, 64]}
+  }
+}

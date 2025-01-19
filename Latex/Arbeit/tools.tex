@@ -1,6 +1,13 @@
 %! Author = danielmendes
 %! Date = 05.01.25
-\chapter{Tools}\label{sec:tools}
+\chapter{Grundlagen}\label{ch:grundlagen}
+
+In dem diesem Kapitel betrachten wir die Grundlagen der Bachelorarbeit, die in den späteren Kapiteln für die Durchführung der Benchmarktests und Analysen erforderlich sind.
+Zunächst werden die Auswahl der einzelnen Tools, ihre Funktionsweise und die jeweiligen Vor- und Nachteile evaluiert.
+Anschließend werden die einzelnen Schritte dargestellt, damit man die Tools korrekt verwenden kann.
+Besonders beim Benchmark-Tool untersuchen wir die verschiedenen Argumente, die übergeben werden können, und zeigen anhand eines kurzen Beispiels, wie die Resultate dieses Tools aussehen könnten.
+Danach betrachten wir ein komplexeres Beispiel, welches wir zu großen Teilen bei späteren Tests wiederverwenden können.
+Zu guter Letzt zeigen wir, wie GitHub Actions funktionieren und uns bei den Benchmarktests Aufwand ersparen können und wie wir die Workflows zeitlich und resourcentechnisch optimieren können.
 
 \section{Auswahl der Tools}\label{sec:auswahl-der-tools}
 
@@ -9,21 +16,21 @@ Der folgende Abschnitt beschäftigt sich mit Umsetzung, um dieses Verhalten mess
 Damit wir die Kennzahlen für bestimmte Abfragen an die MySQL – Datenbank bestimmen können, brauchen wir ein zentrales Tool.
 Dieses Tool ist dafür verantwortlich ist die Benchmark - Tests durchzuführen.
 
-Meine Entscheidung ist dabei schlussendlich auf Sysbench \cite{sysbench_repo} gefallen.
+Meine Entscheidung ist dabei schlussendlich auf \textbf{Sysbench} \cite{sysbench_repo} gefallen.
 Sysbench ist ein Open-Source-Tool, das ein skriptfähiges, multi-threaded Benchmark-Tool ist, das auf LuaJIT basiert.
 Es wird hauptsächlich für Datenbankbenchmarks verwendet, kann jedoch auch dazu eingesetzt werden, beliebig komplexe Arbeitslasten zu erstellen, die keinen Datenbankserver erfordern.
 Sysbench analysiert dabei Metriken, wie unter anderem Transaktionen pro Sekunde, Latenz und Anzahl an Threads.
 Dabei kann man genauer spezifizieren, wie oft diese Metriken geloggt werden sollen.
 Sysbench ist dabei nicht auf ein einziges Datenbanksystem eingeschränkt, sondern man kann sich zwischen vielen unterschiedlichen Systemen entscheiden.
 
-Im Zuge der Wahl des Benchmark – Tools habe ich auch andere Benchmarking-Tools betrachtet, wie beispielsweise Benchbase \cite{DifallahPCC13} oder mybench \cite{mybench_repo}.
+Im Zuge der Wahl des Benchmark – Tools habe ich auch andere Benchmarking-Tools betrachtet, wie beispielsweise \textbf{Benchbase} \cite{DifallahPCC13} oder \textbf{mybench} \cite{mybench_repo}.
 Im Vergleich zu diesen Tools bietet Sysbench jedoch die Vorteile der höheren Skriptfähigkeit und Flexibilität.
 Damit ist gemeint, dass bei Sysbench das erste Projekt mit mehr Aufwand verbunden ist als bei den Alternativen.
 Wenn man aber ein Projekt erstmal erstellt hat, dann ist es sehr individuell und man kann schnelle Änderungen hervornehmen.
-In dem Kapitel (TODO (Daniel): Kapitel mit Join Typ) betrachten wir ein beispielhaftes Projekt mit Sysbench, bei dem der Einfluss von unterschiedlichen Datentypen als Join-Operator zwischen zwei Tabellen verglichen wird.
+In dem Kapitel (\ref{sec:projektaufbau-mit-beispiel}) betrachten wir ein beispielhaftes Projekt mit Sysbench, bei dem der Einfluss von unterschiedlichen Datentypen als Join-Operator zwischen zwei Tabellen verglichen wird.
 Wenn wir später die Performance von unterschiedliche Index-Typen betrachten, dann müssen wir nur an wenigen Stellen Veränderungen durchführen, die in dem Kapitel genauer besprochen werden.
 
-Ein weiterer Vorteil von Sysbench ist, dass es als de facto Standard im Bereich der Datenbankbenchmarks angesehen wird \cite{mybench_comparison}.
+Ein weiterer Vorteil von Sysbench ist, dass es als \textbf{de facto Standard} im Bereich der Datenbankbenchmarks angesehen wird \cite{mybench_comparison}.
 Durch diese Position gibt es viele aktive Nutzer und dadurch bedingt viele verfügbaren Ressourcen.
 Vorteile der anderen Tools sind jedoch die weniger präzise Steuerung der Ergebnisraten und der Transaktionen von Sysbench.
 Zudem ist Sysbench auf das Minimale beschränkt, was den Output angeht, da es, wie schon erwähnt, nur eine Reihe von Log-Dateien gibt und
@@ -47,7 +54,7 @@ Für die grafische Darstellung sind dabei die Libraries pandas \cite{reback2020p
 
 Als allererstes muss der MySQL – Server gestartet sein.
 Dabei ist es egal, ob dies lokal auf dem Rechner oder über einen Docker in eines GitHub CI/CD-Workflows erfolgt.
-Das Wichtigste dabei ist es, dass man sich die Zugangsdaten, bestehend aus User - und Passwortdaten, zwischen speichert, da diese gebraucht werden, um den Benchmarktest mit Sysbench zu starten.
+Das Wichtigste dabei ist es, dass man sich die Zugangsdaten, bestehend aus User - und Passwortdaten, speichert, da diese gebraucht werden, um den Benchmarktest mit Sysbench zu starten.
 Nachdem das RDBMS gestartet worden ist, muss zudem eine Datenbank erstellt werden.
 Dies könnte unter anderem so aussehen:
 
@@ -208,7 +215,7 @@ Messwerten übergeben, damit nur für diese die Graphen erzeugt werden.
     Häufige Wiederverbindungen können auch auf Stabilitätsprobleme hindeuten.
 \end{itemize}
 
-\section{Genauere Darstellung anhand eines Beispiels}\label{sec:genauere-darstellung-anhand-eines-beispiels}
+\section{Projektaufbau mit Beispiel}\label{sec:projektaufbau-mit-beispiel}
 In dem vorausgegangenen Kapitel \nameref{sec:einfuhrung-in-die-tools} wurde das Tool Sysbench und seine Funktionsweise anhand eines Demo - Projekts näher erläutert.
 Damit die Reihenfolge und die Bedeutungen der unterschiedlichen Methoden (prepare → run → cleanup) sowie die Vorgehensweise zur Erstellung unserer Grafiken deutlich geworden.
 Das bisherige Problem ist aber, dass wir bei dem dargelegten Beispiel keine Kontrolle über die getesteten Daten haben.
@@ -236,14 +243,16 @@ So sehen die Create Table für den Fall mit der Kundennummer aus:
     caption=Create Table - Befehl für Tabelle Kunden,
     label={lst:create_table_kunde},
     style=custom_daniel,
-]{Scripts/Join_Type/01_Create_Table_Kunde.sql}
+    basicstyle=\ttfamily\scriptsize,
+]{Scripts/Grundlagen/01_Create_Table_Kunde.sql}
 
 \lstinputlisting[
     language=sql,
     caption=Create Table - Befehl für Tabelle Bestellung,
     label={lst:create_table_bestellung},
     style=custom_daniel,
-]{Scripts/Join_Type/02_Create_Table_Bestellung.sql}
+    basicstyle=\ttfamily\scriptsize,
+]{Scripts/Grundlagen/02_Create_Table_Bestellung.sql}
 
 Anschließend müssen wir diese Befehle in \texttt{prepare()} - Funktion miteinbinden.
 Dafür müssen wir einfach die Create Table - Befehle an die Datenbank senden.
@@ -256,7 +265,7 @@ Dies ist ein Auszug aus der \texttt{Prepare} - Funktion:
     label={lst:prepare_query},
     style=custom_daniel,
     basicstyle=\ttfamily\scriptsize,
-]{Scripts/Join_Type/03_Prepare_Query.lua}
+]{Scripts/Grundlagen/03_Prepare_Query.lua}
 
 Wenn die Datenbank beispielsweise in einer Produktivumgebung läuft, dann wollen wir, dass die Benchmarks möglichst wenig Einfluss aus sie haben.
 Damit ist es das Ziel, dass die Datenbank möglichst wieder in ihrem Anfangszustand ist.
@@ -271,7 +280,7 @@ Dafür ist die \texttt{cleanup()} – Funktion vorgesehen:
     label={lst:cleanup_query},
     style=custom_daniel,
     basicstyle=\ttfamily\scriptsize,
-]{Scripts/Join_Type/04_CleanUp_Query.lua}
+]{Scripts/Grundlagen/04_CleanUp_Query.lua}
 
 Wichtig ist dabei, dass man keine Schlüsselintegritäten verletzt.
 Da in diesem Fall die Tabelle \texttt{BESTELLUNGMITID} eine Referenz auf die Tabelle \texttt{KUNDENMITID} hat, muss zuerst die Bestelltabelle und danach erst die Kundentabelle entfernt werden.
@@ -294,7 +303,7 @@ FATAL: cannot find the event() function in Join.lua
     label={lst:insert_query},
     style=custom_daniel,
     basicstyle=\ttfamily\scriptsize,
-]{Scripts/Join_Type/05_Insert_Query.lua}
+]{Scripts/Grundlagen/05_Insert_Query.lua}
 
 Die letzte Anweisung, die wir noch brauchen, ist die Select - Abfrage.
 Hierbei muss man sich Gedanken machen, welche Abfrage benötigt wird, damit die untersuchten Effekte auch tatsächlich auftreten.
@@ -306,7 +315,7 @@ In dem Beispiel brauchen wir deswegen einen Join zwischen den beiden Tabellen ü
     label={lst:select_query},
     style=custom_daniel,
     basicstyle=\ttfamily\scriptsize,
-]{Scripts/Join_Type/06_Select_Query.lua}
+]{Scripts/Grundlagen/06_Select_Query.lua}
 
 Damit haben wir für unseren Vergleich alle vier Operationen genauer definiert und müssen diese 4 Funktionen nur noch leicht anpassen für die Implementierung mit dem Namen als Fremdschlüssel und ohne die Kundennummer in der Kundentabelle.
 Daraufhin benötigen wir noch ein Skript, dass die Operationen in der korrekten Reihenfolge ausführt und die Grafiken generiert.
@@ -346,7 +355,7 @@ Den Orchestrator - Script ruft man wie folgt auf:
     caption=Befehl zum Ausführen des Orchestrator Skripts,
     label={lst:orchestrator_command},
     style=custom_daniel,
-]{Scripts/Join_Type/07_Orchestrator_Command.sh}
+]{Scripts/Grundlagen/07_Orchestrator_Command.sh}
 
 Die Parameter haben folgende Funktion:
 \begin{itemize}[label=--]
@@ -362,7 +371,7 @@ Um zu untersuchen, ob ein bestimmter Indextyp bei Abfragen verwendet wird, müss
 Die eigentlichen Tabellen und deren Datensätze müssen dabei nicht immer wieder gleich befüllt werden.
 Wenn wir auch unsere Ordnerstruktur mit dem Int - Query Beispiel zurückkommen, dann könnte man anstelle von \texttt{int\_queries\_select.lua} auch einen Ordner erstellen mit den Namen \texttt{int\_queries\_select}.
 In diesem Ordner können beliebig viele unterschiedliche Lua - Skripts sein, die select – Funktionen haben.
-Dadurch werden alle Select - Befehle auf der gleichen Datenbasis verglichen und so können wir im Kapitel (TODO (Daniel): Index) erkennen, wann der Index verwendet wird und wann nicht.
+Dadurch werden alle Select - Befehle auf der gleichen Datenbasis verglichen und so können wir im Kapitel \ref{sec:grundlagen-der-indexierung} erkennen, wann der Index verwendet wird und wann nicht.
 
 Bevor wir uns das Ergebnis des Befehls anschauen, kommen wir zu der Funktionsweise des Orchestrator - Skript \texttt{sysbench\_script.sh}.
 Im Grundlegenden arbeitet dieses Skript ähnlich wie schon das Skript im Demo - Beispiel, aber durch die zusätzlichen Anwendungsfälle kommt es zu mehr Komplexität.
@@ -394,9 +403,10 @@ Als nächstes muss man für alle diese Kombinationen die Schritte ausführen, di
     label={lst:main_loop},
     style=custom_daniel,
     basicstyle=\ttfamily\scriptsize,
-]{Scripts/Join_Type/08_Main_Loop.sh}
+]{Scripts/Grundlagen/08_Main_Loop.sh}
 
-Die Funktion \texttt{process\_script\_benchmark} überprüft noch es sich bei dem Select – Directory um einen Ordner handelt oder nicht.
+Die Funktion \texttt{process\_script\_benchmark} führt wie beim Demo - Beispiel schon erwähnt, die Methoden prepare, insert, selct und cleanup durch \ref{lst:sysbench_monitor}.
+Außerdem überprüft sie auch, ob es sich bei dem Select – Directory um einen Ordner handelt oder nicht.
 Wenn es ein Ordner ist, dann werden alle Dateien in diesem Ordner mit Sysbench durchgeführt, wenn nicht, dann wird an den Ordner nur die Endung \texttt{.lua} hinzugefügt.
 
 \lstinputlisting[
@@ -405,23 +415,14 @@ Wenn es ein Ordner ist, dann werden alle Dateien in diesem Ordner mit Sysbench d
     label={lst:process_script_benchmark},
     style=custom_daniel,
     basicstyle=\ttfamily\scriptsize,
-]{Scripts/Join_Type/09_Process_Script_Benchmark.sh}
+]{Scripts/Grundlagen/09_Process_Script_Benchmark.sh}
+\textbf{INFO:} Die Shell-Ausschnitte sind zum Teil verkürzt und würden auf diese Weise nicht funktionieren.
 
-Die Methode \texttt{run\_benchmark} führt den Sysbench – Befehl aus und wenn es sich um die Methode \texttt{Run} handelt, dann müssen die Daten während der Ausführung und die Statistiken am Ende in je eine CSV - Datei speichern.
+Die Methode \texttt{run\_benchmark} führt den Sysbench – Befehl (siehe \ref{lst:sysbenchrun}) aus und nur wenn es sich um die Methode \texttt{RUN} handelt, werden die Daten während der Ausführung und die Endstatistiken in je eine CSV - Datei gespeichert.
 Aus diesen beiden CSV - Dateien müssen die Insert - und Select - Queries der zugehörigen Skripte wieder vereint werden und die Attribute werden miteinander addiert.
-Als letzter Schritt erfolgt noch der bekannte Schritt der Grapherstellung.
+Der letzte Schritt, der noch fehlt, ist die Erstellung der Graphen.
 
-\lstinputlisting[
-    language=sh,
-    caption=Methode Run Benchmark,
-    label={lst:run_benchmark},
-    style=custom_daniel,
-    basicstyle=\ttfamily\scriptsize,
-]{Scripts/Join_Type/10_Run_Benchmark.sh}
-
-INFO: Die Shell - Ausschnitte sind zum Teil verkürzt und würden auf diese Weise nicht funktionieren.
-
-Wenn wir den Befehl ausführen, wird der Output-Ordner an der gewünschten Stelle erstellt.
+Wenn wir das komplette Skript für unser Join-Typ-Beispiel ausführen, dann ist das Endresultat ein Output-Ordner, der an angegebener Stelle erstellt wird.
 In diesem Ordner werden verschiedene Grafiken generiert, die die Ergebnisse visualisieren.
 Die erste Art stellen Zeitreihendiagramme dar, die auf der X-Achse den zeitlichen Verlauf zeigen.
 Auf der Y-Achse werden hingegen in einigen Diagrammen die unterschiedlichen Metriken eines einzelnen Skripts dargestellt, während andere Diagramme die Werte einer bestimmten Metrik auf der Y-Achse zeigen und dabei die Ergebnisse verschiedener Skripte vergleichen.
@@ -432,9 +433,7 @@ Dieses verzichtet auf eine Zeitachse und fasst die Performance über den gesamte
 Im Vergleich zur Laufzeitanalyse liefert es zusätzliche Informationen, wie etwa die Latenz oder die Gesamtanzahl der Queries.
 Dadurch ist es auch möglich, dass mehrere Skripte und mehrere Kennzahlen in einer Grafik dargestellt werden können.
 
-PNGs
-
-\begin{figure}[!ht]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
@@ -450,8 +449,20 @@ PNGs
     \caption[Join-Typ: Skriptvergleich]{Die Grafik zeigt alle Metriken für die Skripte \texttt{int\_queries} (links) und \texttt{varchar\_queries\_length\_1} (rechts)}
     \label{fig:join-typ-comp-script}
 \end{figure}
+\vspace{-20pt}
 
-\begin{figure}[!ht]
+Aus den Grafiken, die für ein Skript alle Metriken veranschaulichen, kann man möglicherweise Datenfehler erkennen.
+So springt bei Abbildung (\texttt{int\_queries.png}) die Latenz bei einigen Messpunkten von 0 ms auf einen deutlich erhöhten Wert und danach wieder auf 0 ms zurück.
+Ansonsten aber sind die anderen Metriken auf einem konstanten Level, und es gibt wenige Schwankungen.
+Bei der Abbildung (\texttt{varchar\_queries\_length\_1.png}) sieht dies sehr ähnlich aus, und auch dort schwankt die Latenz etwas mehr.
+Wenn wir jetzt die drei Skripte miteinander vergleichen wollen, können wir die Abbildungen Reads.png und Writes.png heranziehen.
+Was die Lesegeschwindigkeit angeht, kann man erkennen, dass \texttt{int\_queries} am meisten Reads hat, als Nächstes kommt \texttt{varchar\_queries\_length\_1} und dann \texttt{varchar\_queries\_length\_64}.
+Damit sind die Abfragen, wie wir erwartet haben, bei \texttt{int\_queries} am schnellsten, und je länger der String wird, desto langsamer werden die Abfragen.
+Bei den Schreibgeschwindigkeiten sieht das schon etwas anders aus, wobei es hier zunächst bei allen eine langsamere Startphase gibt.
+Anschließend an diesen Cold Start liegt das Niveau von \texttt{int\_queries} am höchsten, also auch am schnellsten.
+Die beiden \texttt{varchar\_queries} sind hier aber überraschenderweise auf einem ähnlichen Niveau.
+
+\begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
@@ -467,23 +478,120 @@ PNGs
     \caption[Join-Typ: Metrikvergleich]{Die Grafik zeigt den Vergleich zwischen allen Skripten für die Metriken Reads (links) und Writes (rechts)}
     \label{fig:join-typ-comp-metric}
 \end{figure}
+\vspace{-20pt}
 
-\begin{figure}[!ht]
+Bei der Abbildung (\texttt{statistics.png}) kann man die Effekte der Lese- und Schreibgeschwindigkeiten auch erkennen.
+Es fällt auch auf, dass, anders als bei Reads, Writes, Queries, die Latenz bei schnelleren Queries geringer ist und nicht der höchste Wert der Beste ist.
+
+\begin{figure}[H]
     \centering
-    \includegraphics[width=.7\textwidth]{PNGs/Script/Join_Typ/join-type/statistics}
+    \includegraphics[width=.6\textwidth]{PNGs/Script/Join_Typ/join-type/statistics}
     \caption[Join-Typ: Hexagon-Diagramm]{Darstellung der Skripte und 6 Metriken in einem Hexagon}
     \label{fig:join-typ-hex}
 \end{figure}
 
-Aus den Grafiken, die für ein Skript alle Metriken veranschaulichen, kann man möglicherweise Datenfehler erkennen.
-So springt bei Abbildung (\texttt{int\_queries.png}) die Latenz bei einigen Messpunkten von 0 ms auf einen deutlich erhöhten Wert und danach wieder auf 0 ms zurück.
-Ansonsten aber sind die anderen Metriken auf einem konstanten Level, und es gibt wenige Schwankungen.
-Bei der Abbildung (\texttt{varchar\_queries\_length\_1.png}) sieht dies sehr ähnlich aus, und auch dort schwankt die Latenz etwas mehr.
-Wenn wir jetzt die drei Skripte miteinander vergleichen wollen, können wir die Abbildungen Reads.png und Writes.png heranziehen.
-Was die Lesegeschwindigkeit angeht, kann man erkennen, dass \texttt{int\_queries} am meisten Reads hat, als Nächstes kommt \texttt{varchar\_queries\_length\_1} und dann \texttt{varchar\_queries\_length\_64}.
-Damit sind die Abfragen, wie wir erwartet haben, bei \texttt{int\_queries} am schnellsten, und je länger der String wird, desto langsamer werden die Abfragen.
-Bei den Schreibgeschwindigkeiten sieht das schon etwas anders aus, wobei es hier zunächst bei allen eine langsamere Startphase gibt.
-Anschließend an diesen Cold Start liegt das Niveau von \texttt{int\_queries} am höchsten, also auch am schnellsten.
-Die beiden \texttt{varchar\_queries} sind hier aber überraschenderweise auf einem ähnlichen Niveau.
-Bei der Abbildung (\texttt{statistics.png}) kann man die Effekte der Lese- und Schreibgeschwindigkeiten auch erkennen.
-Es fällt auch auf, dass, anders als bei Reads, Writes, Queries, die Latenz bei schnelleren Queries geringer ist und nicht der höchste Wert der Beste ist.
+\section{GitHub Action}\label{sec:github-action}
+
+Im Verlauf der Bachelorarbeit sind immer mehr unterschiedliche Projekte dazugekommen, wie in den späteren Kapiteln zu sehen sein wird, die alle das Orchestrator-Skript verwenden.
+Dadurch sind immer mehr Fallunterscheidungen im Hauptskript erforderlich geworden und man hat schnell den Überblick verloren, wenn man Änderungen vorgenommen hat.
+Um diese Änderungen zu überprüfen, mussten jedes Mal alle Skripte nacheinander ausgeführt werden, was nicht nur zeitintensiv war, sondern auch hohe Lasten für den lokalen Rechner bedeutete.
+Eine Möglichkeit wäre es gewesen, die Skripte parallel durchlaufen zu lassen, um Zeit zu sparen, damit wäre aber nicht das Lastenproblem und der manuelle Aufwand gelöst worden.
+Eine deutlich bessere Variante ist das Automatisieren dieser Befehle unabhängig von dem lokalen Rechner auf virtuellen Maschinen in der Cloud.
+Als Plattform für diese Continuous Integration und Continuous Delivery (CI/CD) habe ich mich für GitHub Actions entschieden (\cite{github_action_doku}).
+Mit GitHub Actions kann man Workflows erstellen, die bei einem bestimmten Event getriggert werden und anschließend eine Anzahl von Aufträgen nacheinander oder gleichzeitig ausführen können.
+Jeder Auftrag (engl. Job) wird innerhalb eines eigenen Runners der virtuellen Maschine in einem Container ausgeführt und mann über einen oder mehrere Schritte (eng. Step) verfügen.
+Die Schritte können wiederum beliebige Shell-Befehle, Skripte oder Aktionen ausführen.
+
+Wie in den Kapiteln \ref{sec:einfuhrung-in-die-tools} und \ref{sec:projektaufbau-mit-beispiel} erklärt, müssen wir das Hauptskript ausführen, in dem die Benchmarktests durchführen werden.
+Außerdem benötigen wir auch die Pfade zu den Lua-Skripten, die getestet werden sollen und in einigen Fällen müssen wir auch Variablen definieren, die später exportiert und in den Lua-Skripts verwendet werden.
+Diese Pfade und Variablen müssen wir pro Projekt definieren und zusammen mit je einem Namen in einer JSON-Datei speichern.
+
+\lstinputlisting[
+    language=Json,
+    caption=JSON mit Konfiguration der Script,
+    label={lst:script_configuration},
+    style=custom_daniel,
+]{Scripts/Grundlagen/10_Pattern.json}
+
+Damit wir das Hauptskript ausführen können, müssen wir im ersten Auftrag (engl. Job) die Daten dieser JSON-Datei verarbeiten und bestimmte Variablen, wie beispielweise den Outputordner definieren.
+Zudem müssen wir alle Namen der verschiedenen Projekte in einer Liste zusammenfügen und als Output für den nächsten Job definieren.
+Dieser Job wird erst gestartet, wenn der Erste beendet ist und ist verantwortlich für das eigentliche Durchführen der Benchmarks.
+Da wir die Vorteile des gleichzeitigen Ausführens der Aufträge nutzen wollen, müssen wir die Matrixstrategie verwenden, damit die Benchmarks parallel ausgeführt werden.
+Bei der Matrixstrategie kann man Variablen definieren, um automatisch mehrere Auftragsausführungen parallel zu erstellen.
+In unserem Fall verwenden wir dafür die Liste mit den unterschiedlichen Projektnamen.
+
+Damit nun die Benchmarks ausgeführt werden können, müssen wir innerhalb dieser Matrixausführung einige Vorbereitungen treffen.
+Zum einen müssen wir die Dependencies für Sysbench und die Python-Libraries installieren und zum anderen müssen wir einen MySQL-Container mit passenden Konfigurationen starten und vorbereiten.
+Nach diesen Schritten können wir das Hauptskript ausführen und die Outputdateien werden an dem angegebenen Pfad erstellt.
+
+Um Zugriff auf diese Dateien zu erhalten, müssen wir sie als GitHub Artifact hochladen.
+Die GitHub Artifacts können wir anschließend entweder über die GitHub REST Api oder die Übersicht des Workflows in GitHub als Zip-Datei herunterladen.
+Als letzten Auftrag, nach Beendigung beider vorangegangenen Jobs, können wir alle GitHub Artifacts zu diesem Workflow herunterladen und gemeinsam als Artifact wieder hochladen, damit wir z.B. bei 10 Projekten, nicht 10 Zip-Dateien herunterladen und einzeln entpacken müssen, um die Änderungen der Dateien zu überprüfen.
+Wenn fehlerhafte Änderungen den Workflow triggern, kann es dazu kommen, dass je nach Fehler unterschiedliche Jobs oder Steps nicht erfolgreich ausgeführt werden und damit der komplette Workflow scheitert.
+
+Der Workflow wird in einer YAML-Datei im Ordner \texttt{.github/workflows/} definiert.
+Zunächst muss man den Names des Workflows definieren und anschließend, wann er getriggert werden soll.
+Dies kann beispielsweise manuell auf GitHub mit dem Tag \texttt{workflow\_dispatch} oder bei jedem Push mit \texttt{push}, u.a. kann das auch auf bestimmte Dateien oder Ordner einschränken.
+Unter dem Tag \texttt{env} muss man die Umgebungsvariablen definieren, dazu gehören zum Beispiel der Datenbankname oder die Länge der Durchführung des Benchmarks.
+Wenn es sich um vertrauliche Informationen handelt, sollte man GitHub Secrets dafür verwenden.
+Ein Beispiel dafür wäre das Downloaden der Artefakte im letzten Job, um einen gemeinsamen Output-Ordner zu erstellen.
+Dafür wird die GitHub REST API benötigt, die ein vertrauliches \texttt{Personal Access Token} erfordert, welches Repository- sowie Lese- und Schreibrechte für GitHub Registries besitzt.
+
+\lstinputlisting[
+    language=yaml,
+    caption=Ausschnitt aus der Workflow - Datei,
+    label={lst:workflow_yaml},
+    style=custom_daniel,
+    basicstyle=\ttfamily\scriptsize,
+]{Scripts/Grundlagen/11_Workflow.yaml}
+
+Die eben beschriebene YAML - Datei reicht aus, damit alle angegebenen Skripten in dem JSON ausgeführt und die Output Dateien alle korrekt in einem Ordner als ZIP-Datei hochgeladen werden.
+Es bieten sich aber auch Alternativen an, die zu einer Optimierung des Workflows führen.
+
+\section{Optimierungen des Workflows}\label{sec:optimierungen-des-workflows}
+
+Zum einen kann man die zu installierenden Abhängigkeiten mithilfe des GitHub Caches (\cite{github_cache_doku}) speichern.
+Dies bietet sich besonders an, da sich die Abhängigkeiten über die Workflows hinweg nur selten ändern.
+Falls sich doch etwas ändert, kann man beispielsweise die \texttt{require\allowbreak ments.txt}-Datei anpassen.
+Dadurch werden einmalig alle Abhängigkeiten neu installiert und anschließend im Cache abgelegt.
+Falls sich bis zum nächsten Workflow keine Änderungen an den Abhängigkeiten ergeben, wird der Cache automatisch genutzt.
+Der Zeitgewinn in unserem Beispiel ist jedoch nur gering und beträgt nur wenige Sekunden pro Workflow.
+
+\lstinputlisting[
+    language=yaml,
+    caption=Speichern der Abhängigkeiten im Cache,
+    label={lst:cache_yaml},
+    style=custom_daniel,
+]{Scripts/Grundlagen/12_Cache.yaml}
+
+Deutlich mehr Zeit und Ressourcen kann man aber sparen, wenn man zwischen zwei unterschiedlichen Arten von Dateien unterscheidet.
+Denn zum einen gibt es Dateien, die die Ergebnisse von allen Skripten beeinflussen.
+Dazu gehören das Workflow - Skript und die JSON - Datei, aber auch das Orchestrator - Skript und die darin verwendeten Python - Skripte.
+Die Ordner an sich, die in der JSON angegeben werden, die beeinflussen nur sich selbst und nicht die anderen Skripte.
+Beispielweise, wenn ich in Projekt A die Anzahl an Zeilen ändere, die ausgeführt werden, dann ändert dies nichts an dem Ergebnis von Projekt B oder C.
+In diesem Beispiel würde es sich anbieten, dass für Projekt A die Benchmarks neu durchgeführt werden, für Projekt B und C könnte hingegen jeweils der letzte erfolgreiche Output Ordner benutzt werden.
+Als Endresultat könnten damit die neue Durchführung von Projekt A zusammen mit der alten Ausführung der Projekte B und C in einer ZIP – Datei hochgeladen werden.
+Dadurch wird nur ein Drittel der eigentlichen Ressourcen verbraucht, wenn man davon ausgehen würde, dass alle 3 Projekte gleich viel Zeit benötigen würden.
+
+Für die Implementierung dieser Optimierung muss zunächst die allgemeinen Skripte hashen und zusätzlich noch die Ordner mit den Lua - Skripten, die für das jeweilige Skript aus der JSON benötigt werden.
+Diese beiden Hashes kann zusammen mit den Testtypen kombinieren, damit bekommt die folgende Struktur für den Namen:
+
+\begin{lstlisting}[language=yaml,label={lst:hash_name},style=custom_daniel]
+NAME="${{ matrix.test-type }}-${{ env.hash }}-${{ env.general_hash }}"
+\end{lstlisting}
+
+Nachdem wir unsere JSON geladen haben, machen wir nun nicht mehr direkt mit der Installation der Abhängigkeiten weiter, sondern davor hashen wir die unterschiedlichen Pfade und erstellen unseren Namen.
+Wenn es keinen Ordner mit dem gleichen Namen gibt, dann machen wir weiter wie bisher.
+Das einzige, was sich ändert, ist der Schritt vor dem Hochladen des gesamten Output-Ordners.
+Der vom Testtypen erzeugte Ordner muss zusammen mit seinem Namen hochgeladen werden, damit er im nächsten Workflow heruntergeladen werden kann, sofern die Hashes unverändert bleiben.
+Ist dies beim nächsten Workflow der Fall, dann muss der Ordner nur heruntergeladen werden und and die korrekte Adresse im Output Ordner verschoben werden.
+Die Installation der Abhängigkeiten, das Starten des MySQL - Containers und das Ausführen des Orchestrator - Skripts hat man sich damit erspart.
+
+Die letzte Frage lautet, wo die Ordner mit den berechneten Namen gespeichert und beim nächsten Run wieder heruntergeladen werden sollen.
+Zum einen kann man Lösungen in GitHub selbst verwenden.
+Zum einen würde sich eine GitHub Cache - Lösung wieder anbieten, aber tatsächlich sind GitHub Artifacts für das Sichern von Dateien besser geeignet (\cite{github_cache_doku}).
+Eine andere interessante Lösung kann auch das Nutzen von expliziten Branches nur für die Sicherung der Dateien seien.
+Das Problem ist hier, dass es manchmal durch bestimmtes Timing zu Problemen beim Pushen kommen kann, da zufällig ein anderer paralleler Workflow in der Zeit zwischen Rebase, Commit und Push den Code verändert hat, wodurch nach verhindertem Push erneut ein Rebase durchgeführt werden muss.
+Außerdem muss man dafür der GitHub Action Schreibberichtigungen geben.
+Des Weiteren eignen sich auch Cloud - Speicherlösungen sehr gut, um die Ordner zu speichern und wieder herunterzuladen.
+Dazu gehören von Google Cloud Storage (GCS), AWS S3 oder MS Azure Storage, die sich zusammen mit GitHub Artifacts am besten eignen.

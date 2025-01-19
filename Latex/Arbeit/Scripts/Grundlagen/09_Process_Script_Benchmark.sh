@@ -1,4 +1,5 @@
 process_script_benchmark() {
+  local QUERY_PATH="$1" LOG_DIR="$2" INSERT_SCRIPT="$3" SELECT_SCRIPT="$4" COMBINATION="${5:-}"
   local SCRIPTS=()
   local IS_FROM_SELECT_DIR=false
 
@@ -11,6 +12,11 @@ process_script_benchmark() {
     IS_FROM_SELECT_DIR=true
   fi
 
+  # Prepare benchmark
+  PREPARE_LOG_FILE="$LOG_DIR/$(basename "$QUERY_PATH")${COMBINATION:+_${COMBINATION}}_prepare.log"
+  run_benchmark "$MAIN_SCRIPT" "prepare" "$PREPARE_LOG_FILE" "" "${COMBINATION_NAME:-}"
+
+  # Select and Insert benchmark
   for SCRIPT in "${SCRIPTS[@]}"; do
     if [ -f "$SCRIPT" ]; then
       local SCRIPT_NAME
@@ -19,4 +25,7 @@ process_script_benchmark() {
       run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME" "$COMBINATION"
     fi
   done
+
+  #Cleanup benchmark
+  run_benchmark "$MAIN_SCRIPT" "cleanup" "$LOG_DIR/$(basename "$QUERY_PATH")${COMBINATION:+_${COMBINATION}}_cleanup.log"
 }

@@ -1,9 +1,0 @@
-{
-  "join-type": {
-    "dirs": [
-      "./Projects/Join_Typ/Scripts/int_queries",
-      "./Projects/Join_Typ/Scripts/varchar_queries:length"
-    ],
-    "var": {"length": [1, 64]}
-  }
-}
