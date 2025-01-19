@@ -85,11 +85,7 @@ echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,
 echo "Script,Read (noq),Write (noq),Other (noq),Total (noq),Transactions (per s.),Queries (per s.),Ignored Errors (per s.),Reconnects (per s.),Total Time (s),Total Events,Latency Min (ms),Latency Avg (ms),Latency Max (ms),Latency 95th Percentile (ms),Latency Sum (ms)" > "$STATISTICS_FILE_TEMP"
 
 run_benchmark() {
-  local SCRIPT_PATH="$1"
-  local MODE="$2"
-  local OUTPUT_FILE="$3"
-  local SCRIPT_NAME="${4:-}"
-  local COMBINATION="${5:-}"
+  local SCRIPT_PATH="$1" MODE="$2" OUTPUT_FILE="$3" SCRIPT_NAME="${4:-}" COMBINATION="${5:-}"
 
   if [[ -n "$SCRIPT_NAME" ]]; then
     echo "Running $(basename "$SCRIPT_PATH") for $TIME seconds ..."
@@ -114,9 +110,7 @@ run_benchmark() {
 
 # Helper function to run sysbench with specified Lua script and mode
 run_sysbench() {
-  local LUA_SCRIPT_PATH="$1"
-  local MODE="$2"
-  local LOG_FILE="$3"
+  local LUA_SCRIPT_PATH="$1" MODE="$2" LOG_FILE="$3"
 
   sysbench \
     --db-driver=mysql \
@@ -136,8 +130,7 @@ run_sysbench() {
 
 # Function to extract and save run data
 extract_run_data() {
-  local RAW_RESULTS_FILE="$1"
-  local SCRIPT_NAME="$2"
+  local RAW_RESULTS_FILE="$1" SCRIPT_NAME="$2"
 
   grep '^\[ ' "$RAW_RESULTS_FILE" | while read -r line; do
     time=$(echo "$line" | awk '{print $2}' | sed 's/s//')
@@ -158,8 +151,7 @@ extract_run_data() {
 
 # Function to extract statistics from sysbench results
 extract_statistics() {
-  local RAW_RESULTS_FILE="$1"
-  local SCRIPT_NAME="$2"
+  local RAW_RESULTS_FILE="$1" SCRIPT_NAME="$2"
 
   # Extract SQL statistics and append to statistics_inofficial.csv
   read=$(awk '/read:/ {print $2}' "$RAW_RESULTS_FILE")
@@ -183,11 +175,7 @@ extract_statistics() {
 }
 
 process_script_benchmark() {
-  local QUERY_PATH="$1"
-  local LOG_DIR="$2"
-  local INSERT_SCRIPT="$3"
-  local SELECT_SCRIPT="$4"
-  local COMBINATION="${5:-}"
+  local QUERY_PATH="$1" LOG_DIR="$2" INSERT_SCRIPT="$3" SELECT_SCRIPT="$4" COMBINATION="${5:-}"
 
   local SCRIPTS=()
   local IS_FROM_SELECT_DIR=false
@@ -201,6 +189,11 @@ process_script_benchmark() {
     IS_FROM_SELECT_DIR=true
   fi
 
+  # Prepare benchmark
+  PREPARE_LOG_FILE="$LOG_DIR/$(basename "$QUERY_PATH")${COMBINATION:+_${COMBINATION}}_prepare.log"
+  run_benchmark "$MAIN_SCRIPT" "prepare" "$PREPARE_LOG_FILE" "" "${COMBINATION_NAME:-}"
+
+  # Select and Insert benchmark
   for SCRIPT in "${SCRIPTS[@]}"; do
     if [ -f "$SCRIPT" ]; then
       local SCRIPT_NAME
@@ -221,6 +214,9 @@ process_script_benchmark() {
       run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME" "$COMBINATION"
     fi
   done
+
+  #Cleanup benchmark
+  run_benchmark "$MAIN_SCRIPT" "cleanup" "$LOG_DIR/$(basename "$QUERY_PATH")${COMBINATION:+_${COMBINATION}}_cleanup.log"
 }
 
 generate_combinations() {
@@ -269,9 +265,7 @@ for INFO in "${QUERY_INFO[@]}"; do
         # Export key-value pairs for the current combination
         IFS=',' read -ra key_value_pairs <<< "$combination"
         for pair in "${key_value_pairs[@]}"; do
-            key="${pair%%=*}"
-            value="${pair#*=}"
-            export "$(echo "$key" | tr '[:lower:]' '[:upper:]')=$value"
+          export "$(echo "${pair%%=*}" | tr '[:lower:]' '[:upper:]')=${pair#*=}"
         done
 
         # Create a directory name for the combination
@@ -279,28 +273,12 @@ for INFO in "${QUERY_INFO[@]}"; do
         LOG_DIR_KEY_VALUE="$LOG_DIR/$COMBINATION_NAME"
         mkdir -p "$LOG_DIR_KEY_VALUE"
 
-        # Prepare benchmark
-        RAW_RESULTS_FILE="${LOG_DIR_KEY_VALUE}/$(basename "$QUERY_PATH")_${COMBINATION_NAME}_prepare.log"
-        run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE" "" "$COMBINATION_NAME"
-
-        # Process script benchmark
         process_script_benchmark "$QUERY_PATH" "$LOG_DIR_KEY_VALUE" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$COMBINATION_NAME"
-
-        # Cleanup benchmark
-        RAW_RESULTS_FILE="${LOG_DIR_KEY_VALUE}/$(basename "$QUERY_PATH")_${COMBINATION_NAME}_cleanup.log"
-        run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
     done <<< "$combinations"
   else
     # Process normally when no keys specified
     mkdir -p "$LOG_DIR"
-    RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_prepare.log"
-    run_benchmark "$MAIN_SCRIPT" "prepare" "$RAW_RESULTS_FILE"
-
     process_script_benchmark "$QUERY_PATH" "$LOG_DIR" "$INSERT_SCRIPT" "$SELECT_SCRIPT"
-
-    # Cleanup phase
-    RAW_RESULTS_FILE="$LOG_DIR/$(basename "$QUERY_PATH")_cleanup.log"
-    run_benchmark "$MAIN_SCRIPT" "cleanup" "$RAW_RESULTS_FILE"
   fi
 done
 
