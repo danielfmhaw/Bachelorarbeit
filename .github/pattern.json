@@ -85,5 +85,16 @@
       }
     },
     "var": {"typ":["char_255","varchar_255"],"length":[56,240],"num_rows":[2000]}
+  },
+  "view-comparison": {
+    "scripts": {
+      "./Projects/Views/Scripts/virtual_view": {
+        "vars": "length"
+      },
+      "./Projects/Views/Scripts/with_trigger": {
+        "vars": "length"
+      }
+    },
+    "var": {"length":[1000],"refresh":["every","once"]}
   }
 }
