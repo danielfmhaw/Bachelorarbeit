@@ -1,69 +1,89 @@
 {
   "high-count": {
-    "dirs": [
-      "./Projects/Index/B_Tree/Scripts/count_row_changes/with_index:length",
-      "./Projects/Index/B_Tree/Scripts/count_row_changes/without_index:length"
-    ],
+    "scripts": {
+      "./Projects/Index/B_Tree/Scripts/count_row_changes/with_index": {
+        "vars": "length"
+      },
+      "./Projects/Index/B_Tree/Scripts/count_row_changes/without_index": {
+        "vars": "length"
+      }
+    },
     "var": {"length": [400, 4000]}
   },
   "low-count": {
-    "dirs": [
-      "./Projects/Index/B_Tree/Scripts/count_row_changes/with_index:length",
-      "./Projects/Index/B_Tree/Scripts/count_row_changes/without_index:length"
-    ],
+    "scripts": {
+      "./Projects/Index/B_Tree/Scripts/count_row_changes/with_index": {
+        "vars": "length"
+      },
+      "./Projects/Index/B_Tree/Scripts/count_row_changes/without_index": {
+        "vars": "length"
+      }
+    },
     "var": {"length": [10, 40]}
   },
   "b-tree-query-differences": {
-    "dirs": [
-      "./Projects/Index/B_Tree/Scripts/query_differences"
-    ]
+    "scripts": {
+      "./Projects/Index/B_Tree/Scripts/query_differences": {}
+    }
   },
   "selectivity-change": {
-    "dirs": [
-      "./Projects/Index/Hash/Scripts/selectivity_changes:length"
-    ],
+    "scripts": {
+      "./Projects/Index/Hash/Scripts/selectivity_changes": {"vars": "length"}
+    },
     "var": {"length": [10, 100, 500]}
   },
   "hash-query-differences": {
-    "dirs": [
-      "./Projects/Index/Hash/Scripts/query_differences"
-    ]
+    "scripts": {
+      "./Projects/Index/Hash/Scripts/query_differences": {}
+    }
   },
   "join-type": {
-    "dirs": [
-      "./Projects/Join_Typ/Scripts/int_queries",
-      "./Projects/Join_Typ/Scripts/varchar_queries:length"
-    ],
+    "scripts": {
+      "./Projects/Join_Typ/Scripts/varchar_queries": {
+        "vars": "length"
+      },
+      "./Projects/Join_Typ/Scripts/int_queries": {}
+    },
     "var": {"length": [1, 64]}
   },
   "null-check": {
-    "dirs": [
-      "./Projects/Data_Types/Null/Scripts/with_null",
-      "./Projects/Data_Types/Null/Scripts/not_null"
-    ]
+    "scripts": {
+      "./Projects/Data_Types/Null/Scripts/with_null": {},
+      "./Projects/Data_Types/Null/Scripts/not_null": {}
+    }
   },
   "int-char": {
-    "dirs": [
-      "./Projects/Data_Types/Simpler/Scripts/int_column",
-      "./Projects/Data_Types/Simpler/Scripts/char_column"
-    ]
+    "scripts": {
+      "./Projects/Data_Types/Simpler/Scripts/int_column": {},
+      "./Projects/Data_Types/Simpler/Scripts/char_column": {}
+    }
   },
   "number-type": {
-    "dirs": [
-      "./Projects/Data_Types/Smaller/Scripts/int:datatyp"
-    ],
+    "scripts": {
+      "./Projects/Data_Types/Smaller/Scripts/int": {
+        "vars": "datatyp"
+      }
+    },
     "var": {"datatyp":["smallint_13","smallint_16","mediumint_24","int_32","bigint_64","decimal_65"]}
   },
   "string-type": {
-    "dirs": [
-      "./Projects/Data_Types/Smaller/Scripts/string:typ;num_rows"
-    ],
+    "scripts": {
+      "./Projects/Data_Types/Smaller/Scripts/string": {
+        "vars": "typ,num_rows"
+      }
+    },
     "var": {"typ":["char_4","char_64","varchar_4","varchar_64"],"num_rows":[2000]}
   },
   "string-type-length": {
-    "dirs": [
-      "./Projects/Data_Types/Smaller/Scripts/string:typ;length;num_rows:Total Time (s);Write (noq)::Time (s);Threads;Writes:"
-    ],
+    "scripts":{
+      "./Projects/Data_Types/Smaller/Scripts/string": {
+        "vars": "typ,length,num_rows",
+        "stats_select_columns": "Total Time (s),Write (noq)",
+        "stats_insert_columns": "",
+        "runtime_select_columns": "Time (s),Threads,Writes",
+        "runtime_insert_columns": ""
+      }
+    },
     "var": {"typ":["char_255","varchar_255"],"length":[56,240],"num_rows":[2000]}
   }
 }
