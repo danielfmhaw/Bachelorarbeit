@@ -25,35 +25,34 @@ usage() {
 # Initialize variables
 OUTPUT_DIR=""
 JSON_VARIABLES=""
-QUERY_INFO=()
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
-    case "$1" in
-        -out) OUTPUT_DIR="$2"; shift 2 ;;
-        -var) JSON_VARIABLES="$2"; shift 2 ;;
-        -scripts:*)
-            SCRIPT_LIST=$(echo "${1#*:}" | tr -d '\n' | sed 's/[[:space:]]*, */,/g' | sed 's/^[[:space:]]*\[//;s/\][[:space:]]*$//' | sed 's/"//g' | sed 's/^[[:space:]]*//g;s/[[:space:]]*$//g')
-            IFS=',' read -ra QUERY_INFO <<< "$SCRIPT_LIST"
-            shift ;;
-        *) usage ;;
-    esac
+  case "$1" in
+    -out) OUTPUT_DIR="$2"; shift 2 ;;
+    -var) JSON_VARIABLES="$2"; shift 2 ;;
+    -scripts)
+        SCRIPTS=$(echo "$2" | tr -d '\n' | sed 's/[[:space:]]*{/{/g' | sed 's/}[[:space:]]*/}/g' | sed 's/: /:/g' | sed 's/, /,/g')
+        SCRIPT_KEYS=$(echo "$SCRIPTS" | jq -r 'keys[]')
+        shift 2
+        ;;
+    *) usage ;;
+  esac
 done
 
 # Validate required arguments
-if [ -z "$OUTPUT_DIR" ] || [ "${#QUERY_INFO[@]}" -eq 0 ]; then
+if [ -z "$OUTPUT_DIR" ] || [ "${#SCRIPTS[@]}" -eq 0 ]; then
     usage
 fi
 
-# Validate queries against parsed JSON variables
-for INFO in "${QUERY_INFO[@]}"; do
-    if [[ "$INFO" == *":"* ]]; then
-        KEYS_AFTER_COLON=$(echo "$INFO" | awk -F':' '{print $2}' | tr ';' ' ')
-        for KEY in $KEYS_AFTER_COLON; do
-              if ! echo "$JSON_VARIABLES" | jq -e ".\"$KEY\"" >/dev/null 2>&1; then
-                echo "Error: The variable '$KEY' in query '$INFO' is not defined in JSON_VARIABLES"
-                exit 1
-              fi
+for SCRIPT_KEY in $SCRIPT_KEYS; do
+    VARS_VALUE=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_KEY" '.[$key].vars // ""')
+    if [[ -n "$VARS_VALUE" ]]; then
+        IFS=',' read -ra VARS_LIST <<< "$VARS_VALUE"
+        for VAR in "${VARS_LIST[@]}"; do
+            if ! echo "$JSON_VARIABLES" | jq -e ".\"$VAR\"" >/dev/null 2>&1; then
+                echo "Error: The variable '$VAR' in query '$SCRIPT_KEY' is not defined in JSON_VARIABLES"
+            fi
         done
     fi
 done
@@ -175,7 +174,7 @@ extract_statistics() {
 }
 
 process_script_benchmark() {
-  local QUERY_PATH="$1" LOG_DIR="$2" INSERT_SCRIPT="$3" SELECT_SCRIPT="$4" COMBINATION="${5:-}"
+  local SCRIPT_PATH="$1" LOG_DIR="$2" INSERT_SCRIPT="$3" SELECT_SCRIPT="$4" COMBINATION="${5:-}"
 
   local SCRIPTS=()
   local IS_FROM_SELECT_DIR=false
@@ -190,7 +189,7 @@ process_script_benchmark() {
   fi
 
   # Prepare benchmark
-  PREPARE_LOG_FILE="$LOG_DIR/$(basename "$QUERY_PATH")${COMBINATION:+_${COMBINATION}}_prepare.log"
+  PREPARE_LOG_FILE="$LOG_DIR/$(basename "$SCRIPT_PATH")${COMBINATION:+_${COMBINATION}}_prepare.log"
   run_benchmark "$MAIN_SCRIPT" "prepare" "$PREPARE_LOG_FILE" "" "${COMBINATION_NAME:-}"
 
   # Select and Insert benchmark
@@ -199,9 +198,9 @@ process_script_benchmark() {
       local SCRIPT_NAME
       if [ -n "$COMBINATION" ]; then
         if $IS_FROM_SELECT_DIR && [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
-          SCRIPT_NAME="${QUERY_PATH##*/}_${COMBINATION}_select_$(basename "$SCRIPT" .lua)"
+          SCRIPT_NAME="${SCRIPT_PATH##*/}_${COMBINATION}_select_$(basename "$SCRIPT" .lua)"
         else
-          SCRIPT_NAME="${QUERY_PATH##*/}_${COMBINATION}_$(basename "$SCRIPT" .lua | sed "s/^${QUERY_PATH##*/}_//")"
+          SCRIPT_NAME="${SCRIPT_PATH##*/}_${COMBINATION}_$(basename "$SCRIPT" .lua | sed "s/^${SCRIPT_PATH##*/}_//")"
         fi
       else
         if $IS_FROM_SELECT_DIR && [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
@@ -216,7 +215,7 @@ process_script_benchmark() {
   done
 
   #Cleanup benchmark
-  run_benchmark "$MAIN_SCRIPT" "cleanup" "$LOG_DIR/$(basename "$QUERY_PATH")${COMBINATION:+_${COMBINATION}}_cleanup.log"
+  run_benchmark "$MAIN_SCRIPT" "cleanup" "$LOG_DIR/$(basename "$SCRIPT_PATH")${COMBINATION:+_${COMBINATION}}_cleanup.log"
 }
 
 generate_combinations() {
@@ -239,24 +238,25 @@ generate_combinations() {
 }
 
 # Main benchmark loop
-for INFO in "${QUERY_INFO[@]}"; do
-  IFS=: read -r QUERY_PATH EXTRA_ARGS <<< "$INFO"
-  EXPORTED_VARS="${EXTRA_ARGS%%:*}"
-  EXTRA_COLUMNS_ARGS="${EXTRA_ARGS#*:}"
+for SCRIPT_PATH in $SCRIPT_KEYS; do
+  EXPORTED_VARS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].vars // ""')
+  STATS_SELECT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].stats_select_columns // ""')
+  STATS_INSERT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].stats_insert_columns // ""')
+  RUNTIME_SELECT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].runtime_select_columns // ""')
+  RUNTIME_INSERT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].runtime_insert_columns // ""')
 
-  IFS=: read -r -a EXTRA_COLUMNS <<< "$EXTRA_COLUMNS_ARGS"
-  STATS_SELECT_COLUMNS="${EXTRA_COLUMNS[0]:-${STATS_SELECT_COLUMNS_DEFAULT}}"
-  STATS_INSERT_COLUMNS="${EXTRA_COLUMNS[1]:-${STATS_INSERT_COLUMNS_DEFAULT}}"
-  RUNTIME_SELECT_COLUMNS="${EXTRA_COLUMNS[2]:-${RUNTIME_SELECT_COLUMNS_DEFAULT}}"
-  RUNTIME_INSERT_COLUMNS="${EXTRA_COLUMNS[3]:-${RUNTIME_INSERT_COLUMNS_DEFAULT}}"
+  STATS_SELECT_COLUMNS=${STATS_SELECT_COLUMNS:-$STATS_SELECT_COLUMNS_DEFAULT}
+  STATS_INSERT_COLUMNS=${STATS_INSERT_COLUMNS:-$STATS_INSERT_COLUMNS_DEFAULT}
+  RUNTIME_SELECT_COLUMNS=${RUNTIME_SELECT_COLUMNS:-$RUNTIME_SELECT_COLUMNS_DEFAULT}
+  RUNTIME_INSERT_COLUMNS=${RUNTIME_INSERT_COLUMNS:-$RUNTIME_INSERT_COLUMNS_DEFAULT}
 
-  MAIN_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH").lua"
-  INSERT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_insert.lua"
-  SELECT_SCRIPT="${QUERY_PATH}/$(basename "$QUERY_PATH")_select"
-  LOG_DIR="$OUTPUT_DIR/logs/$(basename "$QUERY_PATH")"
+  MAIN_SCRIPT="${SCRIPT_PATH}/$(basename "$SCRIPT_PATH").lua"
+  INSERT_SCRIPT="${SCRIPT_PATH}/$(basename "$SCRIPT_PATH")_insert.lua"
+  SELECT_SCRIPT="${SCRIPT_PATH}/$(basename "$SCRIPT_PATH")_select"
+  LOG_DIR="$OUTPUT_DIR/logs/$(basename "$SCRIPT_PATH")"
 
   if [[ -n "$EXPORTED_VARS" ]]; then
-    IFS=';' read -r -a KEYS <<< "$EXPORTED_VARS"
+    IFS=',' read -r -a KEYS <<< "$EXPORTED_VARS"
 
     # Generate all combinations of key-value pairs
     combinations=$(generate_combinations "" "${KEYS[@]}")
@@ -273,12 +273,12 @@ for INFO in "${QUERY_INFO[@]}"; do
         LOG_DIR_KEY_VALUE="$LOG_DIR/$COMBINATION_NAME"
         mkdir -p "$LOG_DIR_KEY_VALUE"
 
-        process_script_benchmark "$QUERY_PATH" "$LOG_DIR_KEY_VALUE" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$COMBINATION_NAME"
+        process_script_benchmark "$SCRIPT_PATH" "$LOG_DIR_KEY_VALUE" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$COMBINATION_NAME"
     done <<< "$combinations"
   else
     # Process normally when no keys specified
     mkdir -p "$LOG_DIR"
-    process_script_benchmark "$QUERY_PATH" "$LOG_DIR" "$INSERT_SCRIPT" "$SELECT_SCRIPT"
+    process_script_benchmark "$SCRIPT_PATH" "$LOG_DIR" "$INSERT_SCRIPT" "$SELECT_SCRIPT"
   fi
 done
 

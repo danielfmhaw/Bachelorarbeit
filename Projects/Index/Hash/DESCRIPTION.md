@@ -25,7 +25,9 @@ cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output/selectivity_changes" \
   -var '{"length":[10,100,500]}' \
-  -scripts:'["/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Scripts/selectivity_changes:length"]' 
+  -scripts '{
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Scripts/selectivity_changes": {"vars": "length"}
+  }' 
 ```
 
 ### Code unterschiedliche Select - Queries
@@ -34,5 +36,7 @@ cd ../../..
 cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output/query_differences" \
-  -scripts:'["/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Scripts/query_differences"]' 
+  -scripts '{
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Scripts/query_differences": {}
+  }'
 ```
