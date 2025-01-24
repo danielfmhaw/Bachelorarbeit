@@ -93,6 +93,10 @@
       },
       "./Projects/Views/Scripts/with_trigger": {
         "vars": "length"
+      },
+      "./Projects/Views/Scripts/mat_view": {
+        "vars": "length",
+        "db": "postgres"
       }
     },
     "var": {"length":[1000],"refresh":["every","once"]}

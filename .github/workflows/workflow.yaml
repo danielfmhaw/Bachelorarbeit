@@ -48,6 +48,7 @@ jobs:
           
             ARTIFACT_NAME="${TEST_TYPE}-${HASH}-${GENERAL_HASH}"
             SHOULD_RUN=$(echo "$ALL_ARTIFACTS" | jq -e --arg name "$ARTIFACT_NAME" '.artifacts[] | select(.name == $name) | .id' > /dev/null && echo false || echo true)
+            ENVS=$(jq -r --arg test "$TEST_TYPE" '.[$test].scripts | to_entries | map(if .value.db then .value.db else "mysql" end) | unique | join(",")' "$CONFIG_FILE")
           
             # Creation of the JSON result
             RESULT=$(jq -n \
@@ -57,7 +58,8 @@ jobs:
             --arg output_dir "$OUTPUT_DIR" \
             --arg artifact_name "$ARTIFACT_NAME" \
             --arg should_run "$SHOULD_RUN" \
-            '{test_type: $test_type, scripts: $scripts, var: $var, output_dir: $output_dir, artifact_name: $artifact_name, should_run: $should_run}')
+            --arg envs "$ENVS" \
+            '{test_type: $test_type, scripts: $scripts, var: $var, output_dir: $output_dir, artifact_name: $artifact_name, should_run: $should_run, envs: $envs}')
           
             RESULTS+=("$RESULT")
           done
@@ -71,11 +73,6 @@ jobs:
       matrix:
         test-type: ${{ fromJson(needs.prepare-benchmark.outputs.matrix) }}
     env:
-      DB_HOST: ${{ secrets.DB_HOST }}
-      DB_PORT: ${{ secrets.DB_PORT }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASS: ${{ secrets.DB_PASS }}
-      DB_NAME: ${{ secrets.DB_NAME }}
       TIME: 8
       THREADS: 1
       EVENTS: 0
@@ -107,16 +104,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas matplotlib
 
-      - name: Start MySQL container
-        if: env.should_run == 'true'
+      - name: Start PostgreSQL container
+        if: env.should_run == 'true' && contains(env.envs, 'postgres')
         run: |
+          eval $(jq -r --arg env "postgres" '.[$env] | to_entries | .[] | "export " + .key + "=" + (.value | @sh)' "./envs.json")
+          docker run --name postgres-${{ env.test_type }} -d \
+            -e POSTGRES_PASSWORD=$DB_PASS \
+            -e POSTGRES_DB=$DB_NAME \
+            -p $DB_PORT:$DB_PORT postgres:15
+          
+          echo "Waiting for PostgreSQL..."
+          until docker exec postgres-${{ env.test_type }} pg_isready --host=$DB_HOST --port=$DB_PORT --username=$DB_USER; do sleep 1; done
+          echo "PostgreSQL is ready!"
+
+      - name: Start MySQL container
+        if: env.should_run == 'true' && contains(env.envs, 'mysql')
+        run: |
+          eval $(jq -r --arg env "mysql" '.[$env] | to_entries | .[] | "export " + .key + "=" + (.value | @sh)' "./envs.json")
           docker run --name mysql-${{ env.test_type }} -d \
             -e MYSQL_ROOT_PASSWORD=$DB_PASS \
             -e MYSQL_DATABASE=$DB_NAME \
-            -p $DB_PORT:3306 mysql:8.0
-
+            -p $DB_PORT:$DB_PORT mysql:8.0
+          
           echo "Waiting for MySQL..."
-          until docker exec mysql-${{ env.test_type }} mysqladmin --user=root --password=$DB_PASS --host=127.0.0.1 --port=$DB_PORT ping --silent; do sleep 1; done
+          until docker exec mysql-${{ env.test_type }} mysqladmin --user=$DB_USER --password=$DB_PASS --host=$DB_HOST --port=$DB_PORT ping --silent; do sleep 1; done
           echo "MySQL is ready!"
 
       - name: Run sysbench script
@@ -129,11 +140,11 @@ jobs:
             -var '${{ env.var }}' \
             -scripts '${{ env.scripts }}'
 
-      - name: Stop MySQL container
+      - name: Stop MySQL and PostgreSQL containers
         if: env.should_run == 'true'
         run: |
-          docker stop mysql-${{ env.test_type }}
-          docker rm mysql-${{ env.test_type }}
+          docker ps -q -f name=mysql-${{ env.test_type }} | xargs -r docker stop | xargs -r docker rm
+          docker ps -q -f name=postgres-${{ env.test_type }} | xargs -r docker stop | xargs -r docker rm
 
       - name: Upload individual outputs
         if: env.should_run == 'true'
