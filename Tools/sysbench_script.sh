@@ -1,30 +1,17 @@
 which bash
 
 if [ -n "$GITHUB_ACTIONS" ]; then
-    ENV_PATH="./db.env"
-    PYTHON_PATH="./Tools/Python"
+    ABS_PATH="."
 else
-    ENV_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/db.env"
-    PYTHON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Tools/Python"
+    ABS_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo"
 fi
-
-# Load environment variables
-if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ]; then
-    if [ -f "$ENV_PATH" ]; then
-        # shellcheck source=/path/to/your/env/file
-        source "$ENV_PATH"
-    fi
-fi
+PYTHON_PATH="${ABS_PATH}/Tools/Python"
 
 # Display usage instructions
 usage() {
     echo "Usage: $0 -out <output_dir> [-var <json_variables>] -scripts:<query_info1> <query_info2> ..."
     exit 1
 }
-
-# Initialize variables
-OUTPUT_DIR=""
-JSON_VARIABLES=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -70,10 +57,10 @@ RUNTIME_SELECT_COLUMNS_DEFAULT="Time (s);Threads"
 RUNTIME_INSERT_COLUMNS_DEFAULT=""
 
 # Sysbench configuration
-TIME=${TIME:-32}
+TIME=${TIME:-8}
 THREADS=${THREADS:-8}
 EVENTS=${EVENTS:-0}
-REPORT_INTERVAL=${REPORT_INTERVAL:-4}
+REPORT_INTERVAL=${REPORT_INTERVAL:-1}
 
 # Ensure output directories exist
 rm -rf "$OUTPUT_DIR"
@@ -110,14 +97,13 @@ run_benchmark() {
 # Helper function to run sysbench with specified Lua script and mode
 run_sysbench() {
   local LUA_SCRIPT_PATH="$1" MODE="$2" LOG_FILE="$3"
-
   sysbench \
-    --db-driver=mysql \
-    --mysql-host="$DB_HOST" \
-    --mysql-port="$DB_PORT" \
-    --mysql-user="$DB_USER" \
-    --mysql-password="$DB_PASS" \
-    --mysql-db="$DB_NAME" \
+    --db-driver="$DRIVER" \
+    --${DRIVER}-host="$DB_HOST" \
+    --${DRIVER}-port="$DB_PORT" \
+    --${DRIVER}-user="$DB_USER" \
+    --${DRIVER}-password="$DB_PASS" \
+    --${DRIVER}-db="$DB_NAME" \
     --time=$TIME \
     --threads=$THREADS \
     --events=$EVENTS \
@@ -218,6 +204,29 @@ process_script_benchmark() {
   run_benchmark "$MAIN_SCRIPT" "cleanup" "$LOG_DIR/$(basename "$SCRIPT_PATH")${COMBINATION:+_${COMBINATION}}_cleanup.log"
 }
 
+prepare_variables(){
+  local SCRIPT_PATH="$1"
+  ENV=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].db // "mysql"')
+  # shellcheck disable=SC2046
+  eval $(jq -r --arg env "$ENV" '.[$env] | to_entries | .[] | "export " + .key + "=" + (.value | @sh)' "$ABS_PATH/envs.json")
+
+  EXPORTED_VARS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].vars // ""')
+  STATS_SELECT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].stats_select_columns // ""')
+  STATS_INSERT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].stats_insert_columns // ""')
+  RUNTIME_SELECT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].runtime_select_columns // ""')
+  RUNTIME_INSERT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].runtime_insert_columns // ""')
+
+  STATS_SELECT_COLUMNS=${STATS_SELECT_COLUMNS:-$STATS_SELECT_COLUMNS_DEFAULT}
+  STATS_INSERT_COLUMNS=${STATS_INSERT_COLUMNS:-$STATS_INSERT_COLUMNS_DEFAULT}
+  RUNTIME_SELECT_COLUMNS=${RUNTIME_SELECT_COLUMNS:-$RUNTIME_SELECT_COLUMNS_DEFAULT}
+  RUNTIME_INSERT_COLUMNS=${RUNTIME_INSERT_COLUMNS:-$RUNTIME_INSERT_COLUMNS_DEFAULT}
+
+  MAIN_SCRIPT="${SCRIPT_PATH}/$(basename "$SCRIPT_PATH").lua"
+  INSERT_SCRIPT="${SCRIPT_PATH}/$(basename "$SCRIPT_PATH")_insert.lua"
+  SELECT_SCRIPT="${SCRIPT_PATH}/$(basename "$SCRIPT_PATH")_select"
+  LOG_DIR="$OUTPUT_DIR/logs/$(basename "$SCRIPT_PATH")"
+}
+
 generate_combinations() {
     local current_combination="$1"
     shift
@@ -239,21 +248,7 @@ generate_combinations() {
 
 # Main benchmark loop
 for SCRIPT_PATH in $SCRIPT_KEYS; do
-  EXPORTED_VARS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].vars // ""')
-  STATS_SELECT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].stats_select_columns // ""')
-  STATS_INSERT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].stats_insert_columns // ""')
-  RUNTIME_SELECT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].runtime_select_columns // ""')
-  RUNTIME_INSERT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].runtime_insert_columns // ""')
-
-  STATS_SELECT_COLUMNS=${STATS_SELECT_COLUMNS:-$STATS_SELECT_COLUMNS_DEFAULT}
-  STATS_INSERT_COLUMNS=${STATS_INSERT_COLUMNS:-$STATS_INSERT_COLUMNS_DEFAULT}
-  RUNTIME_SELECT_COLUMNS=${RUNTIME_SELECT_COLUMNS:-$RUNTIME_SELECT_COLUMNS_DEFAULT}
-  RUNTIME_INSERT_COLUMNS=${RUNTIME_INSERT_COLUMNS:-$RUNTIME_INSERT_COLUMNS_DEFAULT}
-
-  MAIN_SCRIPT="${SCRIPT_PATH}/$(basename "$SCRIPT_PATH").lua"
-  INSERT_SCRIPT="${SCRIPT_PATH}/$(basename "$SCRIPT_PATH")_insert.lua"
-  SELECT_SCRIPT="${SCRIPT_PATH}/$(basename "$SCRIPT_PATH")_select"
-  LOG_DIR="$OUTPUT_DIR/logs/$(basename "$SCRIPT_PATH")"
+  prepare_variables "$SCRIPT_PATH"
 
   if [[ -n "$EXPORTED_VARS" ]]; then
     IFS=',' read -r -a KEYS <<< "$EXPORTED_VARS"
