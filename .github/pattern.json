@@ -95,7 +95,7 @@
         "vars": "length"
       },
       "./Projects/Views/Scripts/mat_view": {
-        "vars": "length",
+        "vars": "length,refresh",
         "db": "postgres"
       }
     },
