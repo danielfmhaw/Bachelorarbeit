@@ -12,6 +12,31 @@ def parse_arguments():
     parser.add_argument('metrics', type=str, nargs='*', help='List of metrics to plot (e.g., QPS Reads Writes). If empty, all metrics will be used.')
     return parser.parse_args()
 
+# Label from script-examples
+# 1. int_queries_select => int_queries
+# 2. varchar_queries_comb_length_1_select => varchar_queries_length_1
+# 3. query_differences_select_column_prefix => column_prefix
+# 4. mat_view_comb_length_1000_refresh_every_select_query_table_mat => query_table_mat_length_1000_refresh_every
+def get_label_from_scripts(scripts_list):
+    script_name = scripts_list[0]
+    dir_name = ""
+    with_comb = "_comb_" in script_name
+
+    if with_comb:
+        dir_name, script_name = script_name.split("_comb_")
+
+    if len(scripts_list) == 1:
+        if "_select_" in script_name:
+            group1, group2 = script_name.split("_select_")
+            return f"{group2}_{group1}" if with_comb else f"{group2}"
+        elif "_select" in script_name:
+            base_name = script_name.split("_select")[0]
+            return f"{dir_name}_{base_name}" if dir_name else base_name
+        return script_name
+
+    base_name = script_name.split('_select_')[0]
+    return f"{dir_name}_{base_name}" if dir_name else base_name
+
 def plot_metrics(args, datafile, detailed_pngs_dir, combined_pngs_dir):
     data = pd.read_csv(datafile)
     scripts = data['Script'].unique()
@@ -27,9 +52,25 @@ def plot_metrics(args, datafile, detailed_pngs_dir, combined_pngs_dir):
         for measure in measures:
             # Detailed plots for each measure
             plt.figure(figsize=(10, 6))
+            script_data_dict = {}
             for script in scripts:
                 script_data = data[data['Script'] == script]
-                plt.plot(script_data['Time (s)'], script_data[measure], label=f"{script}")
+                script_data_values = script_data[[measure]].apply(lambda row: ','.join(row.astype(str)), axis=1).str.cat(sep=',')
+                if script_data_values in script_data_dict:
+                    if script not in script_data_dict[script_data_values]:
+                        script_data_dict[script_data_values].append(script)
+                else:
+                    script_data_dict[script_data_values] = [script]
+
+            for script_data, scripts_list in script_data_dict.items():
+                script_data_all = data[data['Script'] == scripts_list[0]]
+                if len(scripts_list) > 1:
+                    cleaned_script_names = {script.split("_comb_")[0] if "_comb_" in script else script.split("_select")[0] for script in scripts_list}
+                    for name in cleaned_script_names:
+                        plt.plot(script_data_all['Time (s)'], script_data_all[measure], label=name)
+                else:
+                    label = get_label_from_scripts(scripts_list)
+                    plt.plot(script_data_all['Time (s)'], script_data_all[measure], label=label)
 
             plt.title(f'{measure} over Time by Script')
             plt.xlabel('Time (s)')
@@ -44,18 +85,19 @@ def plot_metrics(args, datafile, detailed_pngs_dir, combined_pngs_dir):
         # Combined plots for each script
         for script in scripts:
             plt.figure(figsize=(10, 6))
+            script_name = get_label_from_scripts([script])
             script_data = data[data['Script'] == script]
             for measure in measures:
                 plt.plot(script_data['Time (s)'], script_data[measure], label=measure)
 
-            plt.title(f'All metrics for {script}' if script else 'Metrics over Time')
+            plt.title(f'All metrics for {script_name}' if script_name else 'Metrics over Time')
             plt.xlabel('Time (s)')
             plt.ylabel('Values')
             plt.legend(title="Measure")
             plt.grid(True)
 
-            script_name = script if script else "All_Scripts"
-            combined_output_file_path = os.path.join(combined_pngs_dir, f"{script_name}.png")
+            script_path = script_name if script_name else "All_Scripts"
+            combined_output_file_path = os.path.join(combined_pngs_dir, f"{script_path}.png")
             plt.savefig(combined_output_file_path, bbox_inches='tight')
             plt.close()
 
@@ -84,7 +126,7 @@ def plot_radar_chart(radar_datafile, output_dir):
     fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
 
     for _, row in radar_data_percentages.iterrows():
-        script_name = row['Script']
+        script_name = get_label_from_scripts([row['Script']])
         sample = row[columns_of_interest].values
         sample = np.append(sample, sample[0])
 

@@ -42,14 +42,17 @@ cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Output" \
   -var '{"length":[1000],"refresh":["every","once"]}' \
-  -scripts:'[
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/mat_view:length;refresh"
-  ]'
+  -scripts '{
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/mat_view": {
+      "vars": "length,refresh",
+      "db": "postgres"
+    }
+  }'
 ```
 
 ### Nur Graphen erstellen für Select - Queries (log und csv- files müssen schon bestehen)
 ```bash
-cd ../../..
+cd ../..
 cd Tools
 ./generate_graph.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Output

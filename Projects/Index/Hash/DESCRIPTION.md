@@ -40,3 +40,11 @@ cd Tools
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Scripts/query_differences": {}
   }'
 ```
+
+### Nur Graphen erstellen für Select - Queries (log und csv- files müssen schon bestehen)
+```bash
+cd ../../..
+cd Tools
+./generate_graph.sh \
+  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output/query_differences
+```

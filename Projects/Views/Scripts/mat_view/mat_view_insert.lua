@@ -38,23 +38,19 @@ function insert_data()
             ON CONFLICT (KUNDEN_ID) DO NOTHING;
         ]], kunden_id, name, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
         db_query(kunden_query)
-        --if refresh == "every" then
-        --    local refresh_materialized_view_query = [[
-        --        REFRESH MATERIALIZED VIEW KUNDEN_MAT_OVERVIEW;;
-        --    ]]
-        --    db_query(refresh_materialized_view_query)
-        --end
+        if refresh == "every" then
+            local refresh_materialized_view_query = [[
+                REFRESH MATERIALIZED VIEW KUNDEN_MAT_OVERVIEW;
+            ]]
+            db_query(refresh_materialized_view_query)
+        end
     end
-    local refresh_materialized_view_query = [[
-        REFRESH MATERIALIZED VIEW KUNDEN_MAT_OVERVIEW;;
-    ]]
-    db_query(refresh_materialized_view_query)
-    --if refresh == "once" then
-    --    local refresh_materialized_view_query = [[
-    --        REFRESH MATERIALIZED VIEW KUNDEN_MAT_OVERVIEW;;
-    --    ]]
-    --    db_query(refresh_materialized_view_query)
-    --end
+    if refresh == "once" then
+        local refresh_materialized_view_query = [[
+            REFRESH MATERIALIZED VIEW KUNDEN_MAT_OVERVIEW;
+        ]]
+        db_query(refresh_materialized_view_query)
+    end
 end
 
 function event()

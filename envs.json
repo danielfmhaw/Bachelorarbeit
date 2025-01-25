@@ -10,7 +10,7 @@
   "postgres": {
     "DRIVER": "pgsql",
     "DB_HOST": "127.0.0.1",
-    "DB_PORT": "5432",
+    "DB_PORT": "5433",
     "DB_USER": "postgres",
     "DB_PASS": "password",
     "DB_NAME": "sbtest"
