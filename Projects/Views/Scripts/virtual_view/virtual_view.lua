@@ -1,14 +1,14 @@
 function prepare()
     local create_kunden_query = [[
-        CREATE TABLE IF NOT EXISTS KUNDEN (
-            KUNDEN_ID     INT PRIMARY KEY,
+        CREATE TABLE KUNDEN (
+            KUNDEN_ID     INT AUTO_INCREMENT PRIMARY KEY,
             NAME          VARCHAR(255),
             GEBURTSTAG    DATE,
             ADRESSE       VARCHAR(255),
             STADT         VARCHAR(100),
             POSTLEITZAHL  VARCHAR(10),
             LAND          VARCHAR(100),
-            EMAIL         VARCHAR(255) UNIQUE,
+            EMAIL         VARCHAR(255),
             TELEFONNUMMER VARCHAR(20)
         );
     ]]

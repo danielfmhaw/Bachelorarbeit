@@ -9,14 +9,14 @@ function prepare()
             STADT         VARCHAR(100),
             POSTLEITZAHL  VARCHAR(10),
             LAND          VARCHAR(100),
-            EMAIL         VARCHAR(255) UNIQUE,
+            EMAIL         VARCHAR(255),
             TELEFONNUMMER VARCHAR(20)
         );
     ]]
 
     -- Create the materialized view that aggregates the data for fast access
     local create_materialized_view_query = [[
-        CREATE MATERIALIZED VIEW IF NOT EXISTS KUNDEN_MAT_OVERVIEW AS
+        CREATE MATERIALIZED VIEW KUNDEN_MAT_OVERVIEW AS
         SELECT
             LAND,
             COUNT(*) AS ANZAHL_KUNDEN
