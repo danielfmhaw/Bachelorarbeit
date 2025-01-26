@@ -35,6 +35,113 @@ Bei mehreren Spalten ist die Reihenfolge der Spalten im Index entscheidend, da M
 Ein Index über zwei Spalten ist nicht gleichbedeutend mit zwei separaten einspaltigen Indizes.
 Es gibt verschiedene Typen von Indizes, die jeweils für unterschiedliche Zwecke optimiert sind und die im nächsten Abschnitt behandelt werden.
 
+Ein Index für ein bestimmtes Attribut A einer Tabelle ist eine Datenstruktur, die die Suche nach Tupeln mit einem bestimmen Wert für Attribut A effizienter macht.
+
+Wenn Tabellen immer mehr Datensätze enthalten, wird es umso schwieriger alle Tupel zu scannen, um (nur wenige) Tupel zu finden, die zu einer Bedingung passen.
+Besonders nützlich sind Indizes bei Abfragen, die Joins zwischen mehreren Tabellen enthalten, da sie ermöglichen, die Anzahl der zu prüfenden Tupel erheblich zu reduzieren, wenn eine einschränkende Bedingung vorliegt.
+
+Datenbankmanagementsysteme ermöglichen das Erstellen von Indizes über mehrere Attribute.
+Die Reihenfolge der Attribute ist hierbei entscheidend, da der Index nur effizient genutzt werden kann, wenn das erste Attribut der Reihenfolge in der Abfrage angegeben wird.
+Gibt man nur das zweite Attribut an, ohne das erste zu referenzieren, kann der Index nicht direkt verwendet werden.
+
+Das Auswählen von Indizes erfordert von den Entwicklern eine Tradeoff abzuwägen.
+Es gibt dabei zwei Faktoren, die die Entscheidung beeinflussen.
+Zum einen kann ein Index auf einem Attribut Abfragen mit diesem Attribut erheblich beschleunigen.
+Zum anderen erschwert jeder Index Einfügungen, Löschungen und Aktualisierungen, da diese mehr Zeit und Aufwand erfordern.
+
+Um zu verstehen, wie man Indizes für eine Datenbank auswählt, muss man wissen, wo bei der Bearbeitung einer Abfrage die meiste Zeit verbraucht wird.
+Die Tupel einer Relation sind üblicherweise auf viele Seiten einer Festplatte verteilt, wobei eine Seite mehrere Tausend Bytes umfasst und viele Tupel speichert.
+Um ein Tupel zu prüfen, muss die gesamte Seite, bzw.\ Block, in den Hauptspeicher geladen werden, wobei es kaum mehr Zeit kostet, alle Tupel einer Seite statt nur ein einzelnes zu prüfen.
+
+Meistens ist der sinnvollste Index, den wir in einer Tabelle definieren können, der Schlüssel.
+Das liegt zum einen daran, dass Abfragen auf diese Spalte sehr häufig vorkommen und zum anderen gibt es beim Schlüssel keine doppelten Werte, weshalb der Index entweder nichts oder genau eine Referenz auf ein Tupel zurückgibt.
+
+Es gibt aber auch zwei Situationen, bei denen es hilfreich sein kann, einen Index auf Nichtschlüsselattribute zu definieren.
+Zum einen wenn das Attribut ähnlich wie ein Schlüssel.
+Damit ist gemeint, dass es für einen bestimmten Wert nicht genau ein Tupel gibt, wie bei einem Schlüssel, aber nur eine geringe Anzahl an Tupeln und damit werden auch weniger Festplattenzugriff für einen bestimmten Wert des Attributs benötigt wird.
+Selbst wenn die Werte auf unterschiedlichen Blöcken gespeichert sind, sparen wir uns immer noch Zeit mit Index, wenn durch ihn nicht alle Blöcke geladen werden müssen.
+Der andere Fall, bei dem ein Index sinnvoll sein könnte, wäre wenn die Tupel nach dem Attribut geclustert sind.
+Das bedeutet, dass aufeinanderfolgende Ausprägungen des Attributs bei einem erstellten Index dazu führen, dass weniger Datenblöcke auf die Festplatte geladen werden müssen.
+
+Jede Modifikation an einer Relation R zwingt uns dazu, jeden Index auf einem oder mehreren der modifizierten Attribute von R zu ändern.
+Daher müssen wir nicht nur die Seiten von R lesen und schreiben, die modifiziert wurden, sondern auch bestimmte Seiten, die den Index enthalten, lesen und schreiben.
+Aber selbst wenn Modifikationen die häufigste Form von Datenbankaktionen sind, kann es einen Effizienzgewinn bedeuten, einen Index auf ein häufig verwendetes Attribut zu erstellen.
+Da tatsächlich einige Modifikationsbefehle Abfragen in der Datenbank beinhalten, muss man vorsichtig sein, wie man die relative Häufigkeit von Modifikationen und Abfragen schätzt.
+
+Da eine Relation auf viele Festplattenblöcke verteilt ist, entstehen die Hauptkosten einer Abfrage oder Modifikation durch das Laden der Seiten in den Hauptspeicher.
+Indizes können hierbei Zeit sparen, da sie den Zugriff auf Tupel ohne vollständige Durchsuchung der Relation ermöglichen.
+Allerdings müssen auch Indizes auf der Festplatte gespeichert werden, was zusätzliche Festplattenzugriffe verursacht.
+Modifikationen sind daher etwa doppelt so teuer wie der Zugriff auf den Index oder die Daten in einer Abfrage.
+
+Um den neuen Wert eines Index zu berechnen, müssen wir Annahmen darüber treffen, welche Abfragen und Modifikationen mit hoher Wahrscheinlichkeit auf der Datenbank durchgeführt werden.
+Manchmal haben wir eine Historie von Abfragen, die wir nutzen können, um gute Informationen zu erhalten, unter der Annahme, dass die Zukunft wie die Vergangenheit sein wird.
+
+TODO:Change Example
+\begin{lstlisting}[caption=Tabelle StarsIn Deklaration,label=declaration-starsin]
+StarsIn(movieTitle, movieYear, starName)
+\end{lstlisting}
+
+\begin{lstlisting}[language=SQL,caption=Select-Query 1 für Stars in,label=starsin-select-query-1]
+SELECT movieTitle, movieYear FROM StarsIn WHERE starName = s;
+\end{lstlisting}
+
+\begin{lstlisting}[language=SQL,caption=Select-Query 2 für Stars in,label=starsin-select-query-2]
+SELECT starName FROM StarsIn WHERE movieTitle = t AND movieYear = y;
+\end{lstlisting}
+
+\begin{lstlisting}[language=SQL,caption=Insert-Query 2 für Stars in,label=starsin-insert-query]
+SELECT starName FROM StarsIn WHERE movieTitle = t AND movieYear = y;
+\end{lstlisting}
+
+\begin{table}[h!]
+    \centering
+    \setlength{\arrayrulewidth}{0.4mm}
+    \[
+        \begin{array}{r|c c c c}
+            \textbf{Action} & \textbf{No Index} & \textbf{Star Index} & \textbf{Movie Index} & \textbf{Both Indexes} \\ \hline
+            Q_1 & 10 & 4 & 10 & 4 \\
+            Q_2 & 10 & 10 & 4 & 4 \\
+            I   & 2  & 4  & 4  & 6 \\ \hline
+            \textbf{Average} & 2 + 8p_1 + 8p_2 & 4 + 6p_2 & 4 + 6p_1 & 6 - 2p_1 - 2p_2 \\
+        \end{array}
+    \]
+    \caption[Performance-Vergleich]{Darstellung der unterschiedlichen Queries mit Indexen}
+    \label{tab:performance-queries}
+\end{table}
+
+\textbf{Voraussetzungen}
+\begin{enumerate}
+    \item \texttt{StarsIn} belegt 10 Seiten, daher die Kosten bei gesamter Untersuchung bei 10.
+    \item Im Durchschnitt ist ein Star in 3 Filmen aufgetreten und ein Film hat 3 Stars.
+    \item Selbst mit Index einen Durchschnitt von 3 Tupel für einen Star oder Film, ohne 10.
+    \item Wenn eine Indexseite modifiziert/eingefügt werden muss, ist ein weiterer Festplattenzugriff erforderlich, um die modifizierte Seite zurückzuschreiben.
+    \item Für eine Einfügung ohne Index sind auch zwei Festplattenzugriffe nötig.
+\end{enumerate}
+
+Wenn es nur einen Index auf Stars gibt, erfordert Q2 immer noch einen Scan der gesamten Relation (Kosten 10).
+Allerdings kann Q1 beantwortet werden, indem eine Indexseite gelesen wird, um die drei Tupel für einen bestimmten Star zu finden, und anschließend drei weitere Zugriffe erfolgen, um diese Tupel zu finden.
+Einfügen I erfordert, dass sowohl eine Seite des Index als auch eine Seite der Daten gelesen und geschrieben wird, was insgesamt 4 Festplattenzugriffe bedeutet.
+
+Die letzte Zeile in Abb.\ 8.3 gibt die durchschnittlichen Kosten einer Aktion an, unter der Annahme, dass der Anteil der Zeit, in der wir Qi ausführen, p1 beträgt und der Anteil der Zeit, in der wir Q2 ausführen, p2 ist.
+Daher beträgt der Anteil der Zeit, in der wir I ausführen, 1 — p1 — p2.
+
+Je nach pi und p2 kann jede der vier Optionen (Index/kein Index) die besten durchschnittlichen Kosten für die drei Aktionen ergeben.
+Zum Beispiel, wenn pi = p2 = 0,1, dann ist der Ausdruck 2 + 8pi + 8p2 am kleinsten, sodass wir es bevorzugen würden, keine Indizes zu erstellen.
+
+Das heißt, wenn wir überwiegend Einfügungen durchführen und nur sehr wenige Abfragen, dann wollen wir keinen Index.
+Intuitiv, wenn wir viele Abfragen durchführen und die Anzahl der Abfragen, die Filme und Stars angeben, ungefähr gleich häufig sind, dann sind beide Indizes erwünscht.
+Wenn wir nur ein Typ von Query häufig verwenden, dann sollten wir nur den Index definieren, der uns bei dieser hilft.
+
+Das "Tuning" einer Datenbank umfasst nicht nur die Auswahl von Indizes, sondern auch die Festlegung vieler verschiedener Parameter.
+Es gibt zahlreiche Tools, die entwickelt wurden, um diese Verantwortung vom Datenbankdesigner zu übernehmen, indem das System sich selbst optimiert oder dem Designer zumindest Empfehlungen für sinnvolle Entscheidungen gibt.
+Dabei ermittelt das Tool zuerst die Abfragelast, dann können Einschränkungen festgelegt werden.
+Anschließend werde Kandidaten-Indizes generiert und bewertet und zu guter Letzt wählt man die Index-Sets aus.
+Ein komplexeres Problem tritt beim dritten Schritt auf, wenn bereits gewählte Indizes existieren, da diese beeinflussen können, wie viel Nutzen ein zusätzlicher Index bringt.
+Ein bewährter Ansatz zur Auswahl von Indizes ist das sogenannte „greedy“ - Verfahren, bei dem zunächst ohne ausgewählte Indizes der Nutzen jedes Kandidaten-Index bewertet wird.
+Wenn es einen Index mit positivem Nutzen gibt, wird dieser ausgewählt und anschließend wird eine Neubewertung ausgeführt, wobei davon ausgegangen wird, dass der zuvor ausgewählte Index bereits verfügbar ist.
+Dieser Prozess wird so lange wiederholt, bis es keinen Kandidaten-Index mit positivem Nutzen mehr gibt.
+
+
 \section{B-Baum-Index}
 
 Indizes werden auf der Ebene der Storage-Engine und nicht auf der Serverebene implementiert.
