@@ -1,20 +1,10 @@
 #!/bin/bash
 
-if [ -n "$GITHUB_ACTIONS" ]; then
-    ENV_PATH="./db.env"
-    GENERATE_PLOT_SCRIPT="./Tools/Python/generatePlot.py"
-else
-    ENV_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/db.env"
-    GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Tools/Python/generatePlot.py"
-fi
+ABS_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo"
+GENERATE_PLOT_SCRIPT="${ABS_PATH}/Tools/Python/generatePlot.py"
 
-if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_NAME" ]; then
-    if [ -f "$ENV_PATH" ]; then
-        # shellcheck source=/path/to/your/env/file
-        source "$ENV_PATH"
-    fi
-fi
-
+# shellcheck disable=SC2046
+eval $(jq -r --arg env "mysql" '.[$env] | to_entries | .[] | "export " + .key + "=" + (.value | @sh)' "$ABS_PATH/envs.json")
 OUTPUT_DIR="output"
 [[ "$1" == "-out" ]] && OUTPUT_DIR="$2" && shift 2
 
