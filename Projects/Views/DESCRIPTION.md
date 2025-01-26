@@ -29,13 +29,39 @@ cd Tools
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/with_trigger": {
       "vars": "length"
     },
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/with_trigger_postgres": {
+      "vars": "length",
+      "db": "postgres"
+    },
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/mat_view": {
+      "vars": "length,refresh",
+      "db": "postgres"
+    }
+  }'
+```
+
+### View - Vergleich ohne Mat-View:
+```bash
+cd ../..
+cd Tools
+./sysbench_script.sh \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Output" \
+  -var '{"length":[1000]}' \
+  -scripts '{
+   "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/virtual_view": {
+      "vars": "length"
+    },
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/with_trigger": {
+      "vars": "length"
+    },
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/with_trigger_postgres": {
       "vars": "length",
       "db": "postgres"
     }
   }'
 ```
 
+### Only Mat-View in Postgres:
 ```bash
 cd ../..
 cd Tools  

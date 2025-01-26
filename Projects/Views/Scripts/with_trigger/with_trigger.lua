@@ -1,20 +1,20 @@
 function prepare()
     local create_kunden_query = [[
-        CREATE TABLE IF NOT EXISTS KUNDEN (
-            KUNDEN_ID     INT PRIMARY KEY,
+        CREATE TABLE KUNDEN (
+            KUNDEN_ID     INT AUTO_INCREMENT PRIMARY KEY,
             NAME          VARCHAR(255),
             GEBURTSTAG    DATE,
             ADRESSE       VARCHAR(255),
             STADT         VARCHAR(100),
             POSTLEITZAHL  VARCHAR(10),
             LAND          VARCHAR(100),
-            EMAIL         VARCHAR(255) UNIQUE,
+            EMAIL         VARCHAR(255),
             TELEFONNUMMER VARCHAR(20)
         );
     ]]
 
     local create_materialized_view_query = [[
-        CREATE TABLE IF NOT EXISTS KUNDEN_MAT_OVERVIEW AS
+        CREATE TABLE KUNDEN_MAT_OVERVIEW AS
         SELECT 
             LAND,
             COUNT(*) AS ANZAHL_KUNDEN
@@ -60,7 +60,7 @@ function prepare()
     db_query(create_materialized_view_query)
     db_query(create_insert_trigger_query)
     db_query(create_delete_trigger_query)
-    print("Table 'KUNDEN', Materialized View 'KUNDEN_MAT_OVERVIEW' and Triggers have been successfully created.")
+    print("Table 'KUNDEN', Table 'KUNDEN_MAT_OVERVIEW' and Triggers have been successfully created.")
 end
 
 function cleanup()

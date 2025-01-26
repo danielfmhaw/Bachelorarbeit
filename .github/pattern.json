@@ -94,6 +94,10 @@
       "./Projects/Views/Scripts/with_trigger": {
         "vars": "length"
       },
+      "./Projects/Views/Scripts/with_trigger_postgres": {
+        "vars": "length",
+        "db": "postgres"
+      },
       "./Projects/Views/Scripts/mat_view": {
         "vars": "length,refresh",
         "db": "postgres"
