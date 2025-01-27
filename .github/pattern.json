@@ -88,21 +88,22 @@
   },
   "view-comparison": {
     "scripts": {
-      "./Projects/Views/Scripts/virtual_view": {
-        "vars": "length"
-      },
-      "./Projects/Views/Scripts/with_trigger": {
-        "vars": "length"
-      },
+      "./Projects/Views/Scripts/without_view": {},
+      "./Projects/Views/Scripts/virtual_view": {},
+      "./Projects/Views/Scripts/with_trigger": {}
+    }
+  },
+  "mat-view-comparison": {
+    "scripts": {
+      "./Projects/Views/Scripts/with_trigger": {},
       "./Projects/Views/Scripts/with_trigger_postgres": {
-        "vars": "length",
         "db": "postgres"
       },
       "./Projects/Views/Scripts/mat_view": {
-        "vars": "length,refresh",
+        "vars": "refresh",
         "db": "postgres"
       }
     },
-    "var": {"length":[1000],"refresh":["every","once"]}
+    "var": {"refresh":["every","once"]}
   }
 }

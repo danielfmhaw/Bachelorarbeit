@@ -1,47 +1,53 @@
+local con = sysbench.sql.driver():connect()
+
 function prepare()
-    -- Create KUNDEN table if it doesn't exist
     local create_kunden_query = [[
-        CREATE TABLE KUNDEN (
-            KUNDEN_ID     SERIAL PRIMARY KEY,
-            NAME          VARCHAR(255),
-            GEBURTSTAG    DATE,
-            ADRESSE       VARCHAR(255),
-            STADT         VARCHAR(100),
-            POSTLEITZAHL  VARCHAR(10),
-            LAND          VARCHAR(100),
-            EMAIL         VARCHAR(255),
-            TELEFONNUMMER VARCHAR(20)
-        );
+       CREATE TABLE KUNDEN (
+           KUNDEN_ID     INT PRIMARY KEY,
+           NAME          VARCHAR(255),
+           GEBURTSTAG    DATE,
+           ADRESSE       VARCHAR(255),
+           STADT         VARCHAR(100),
+           POSTLEITZAHL  VARCHAR(10),
+           LAND          VARCHAR(100),
+           EMAIL         VARCHAR(255),
+           TELEFONNUMMER VARCHAR(20)
+       );
     ]]
 
-    -- Create the materialized view that aggregates the data for fast access
+    local create_bestellung_query = [[
+       CREATE TABLE BESTELLUNG (
+           BESTELLUNG_ID SERIAL PRIMARY KEY,
+           BESTELLDATUM DATE,
+           ARTIKEL_ID   INT,
+           UMSATZ       INT,
+           FK_KUNDEN    INT NOT NULL,
+           FOREIGN KEY (FK_KUNDEN) REFERENCES KUNDEN (KUNDEN_ID) ON DELETE CASCADE
+       );
+    ]]
+
     local create_materialized_view_query = [[
         CREATE MATERIALIZED VIEW KUNDEN_MAT_OVERVIEW AS
         SELECT
-            LAND,
-            COUNT(*) AS ANZAHL_KUNDEN
-        FROM KUNDEN
-        WHERE LAND IS NOT NULL
-          AND EXTRACT(YEAR FROM AGE(GEBURTSTAG)) < 50
-        GROUP BY LAND;
+            EXTRACT(YEAR FROM B.BESTELLDATUM) AS Jahr,
+            K.LAND AS Land,
+            SUM(B.UMSATZ) AS Gesamtumsatz
+        FROM KUNDEN K
+                 JOIN BESTELLUNG B ON K.KUNDEN_ID = B.FK_KUNDEN
+        GROUP BY EXTRACT(YEAR FROM B.BESTELLDATUM), K.LAND;
     ]]
 
-    -- Execute the queries to create the tables, materialized view, and refresh function
-    db_query(create_kunden_query)
-    db_query(create_materialized_view_query)
+    con:query(create_kunden_query)
+    con:query(create_bestellung_query)
+    con:query(create_materialized_view_query)
 
-    print("Table 'KUNDEN' and Materialized View 'KUNDEN_MAT_OVERVIEW' have been successfully created.")
+    print("Table 'KUNDEN', Table 'BESTELLUNG' and Materialized View 'KUNDEN_MAT_OVERVIEW' have been successfully created.")
 end
 
 function cleanup()
-    -- Drop the materialized view, table, and refresh function
-    local drop_refresh_function_query = "DROP FUNCTION IF EXISTS refresh_kunden_mat_overview;"
-    local drop_materialized_view_query = "DROP MATERIALIZED VIEW IF EXISTS KUNDEN_MAT_OVERVIEW;"
-    local drop_kunden_query = "DROP TABLE IF EXISTS KUNDEN;"
-
-    db_query(drop_refresh_function_query)
-    db_query(drop_materialized_view_query)
-    db_query(drop_kunden_query)
+    con:query("DROP MATERIALIZED VIEW IF EXISTS KUNDEN_MAT_OVERVIEW;")
+    con:query("DROP TABLE IF EXISTS BESTELLUNG;")
+    con:query("DROP TABLE IF EXISTS KUNDEN;")
 
     print("Cleanup successfully done.")
 end
