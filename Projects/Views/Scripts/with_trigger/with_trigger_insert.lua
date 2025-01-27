@@ -1,4 +1,6 @@
-local num_rows = tonumber(os.getenv("LENGTH")) or 0
+local con = sysbench.sql.driver():connect()
+local num_rows = 400
+local bestellungProKunde = 2
 
 -- List of countries
 local countries = {
@@ -10,16 +12,18 @@ local countries = {
 }
 
 function delete_data()
+    local delete_bestellung_query = "DELETE FROM BESTELLUNG;"
     local delete_kunden_query = "DELETE FROM KUNDEN;"
-    db_query("START TRANSACTION")
-    db_query(delete_kunden_query)
-    db_query("COMMIT")
+    con:query("START TRANSACTION")
+    con:query(delete_bestellung_query)
+    con:query(delete_kunden_query)
+    con:query("COMMIT")
 end
 
--- Function to insert randomized data into KUNDEN
 function insert_data()
     delete_data()
     for i = 1, num_rows do
+        local kunden_id = i
         local name = string.format("Kunde_%d", i)
         local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
         local adresse = string.format("Address_%d", i)
@@ -31,10 +35,24 @@ function insert_data()
 
         local kunden_query = string.format([[
             INSERT INTO KUNDEN
-            (NAME, GEBURTSTAG, ADRESSE, STADT, POSTLEITZAHL, LAND, EMAIL, TELEFONNUMMER)
-            VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
-        ]], name, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
-        db_query(kunden_query)
+            (KUNDEN_ID, NAME, GEBURTSTAG, ADRESSE, STADT, POSTLEITZAHL, LAND, EMAIL, TELEFONNUMMER)
+            VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
+        ]], kunden_id, name, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
+        con:query(kunden_query)
+
+        for j = 1, bestellungProKunde do
+            local bestelldatum = string.format("%d-%02d-%02d", math.random(2018, 2024), math.random(1, 12), math.random(1, 28))
+            local artikel_id = math.random(1, 1000)
+            local umsatz = math.random(100, 1000)
+
+            local bestellung_query = string.format([[
+                INSERT INTO BESTELLUNG
+                (BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
+                VALUES ('%s', %d, %d, %d);
+            ]], bestelldatum, artikel_id, kunden_id, umsatz)
+
+            con:query(bestellung_query)
+        end
     end
 end
 

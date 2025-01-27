@@ -1,11 +1,9 @@
+local con = sysbench.sql.driver():connect()
 function select_query()
-    local select_kunden_mat_overview = "SELECT Count(*) FROM KUNDEN_OVERVIEW;"
-    local select_germany_customers = "SELECT * FROM KUNDEN_OVERVIEW WHERE LAND = 'Germany';"
-    local select_range_count = "SELECT * FROM KUNDEN_OVERVIEW WHERE ANZAHL_KUNDEN > 5000;"
-
-    db_query(select_kunden_mat_overview)
-    db_query(select_germany_customers)
-    db_query(select_range_count)
+    con:query("SELECT Jahr, SUM(Gesamtumsatz) AS UmsatzProJahr FROM KUNDEN_OVERVIEW GROUP BY Jahr;")
+    con:query("SELECT * FROM KUNDEN_OVERVIEW WHERE Jahr = 2020;")
+    con:query("SELECT * FROM KUNDEN_OVERVIEW WHERE Land = 'Germany';")
+    con:query("SELECT * FROM KUNDEN_OVERVIEW WHERE Gesamtumsatz > 2500;")
 end
 
 function event()
