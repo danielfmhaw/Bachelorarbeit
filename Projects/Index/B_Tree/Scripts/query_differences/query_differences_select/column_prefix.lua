@@ -1,6 +1,6 @@
+local con = sysbench.sql.driver():connect()
 function select_column_prefix()
-    local column_prefix_query = "SELECT * FROM KUNDEN WHERE NAME LIKE 'M%';"
-    db_query(column_prefix_query)
+    con:query("SELECT * FROM KUNDEN WHERE NAME LIKE 'M%';")
 end
 
 function event()

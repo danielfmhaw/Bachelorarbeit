@@ -1,6 +1,6 @@
+local con = sysbench.sql.driver():connect()
 function select_simple_filter()
-    local simple_filter_query = "SELECT * FROM KUNDEN WHERE KUNDEN_ID > '1234';"
-    db_query(simple_filter_query)
+    con:query("SELECT * FROM KUNDEN WHERE KUNDEN_ID > '1234';")
 end
 
 function event()

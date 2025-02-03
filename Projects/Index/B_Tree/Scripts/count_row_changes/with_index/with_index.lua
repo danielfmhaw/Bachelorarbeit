@@ -1,3 +1,4 @@
+local con = sysbench.sql.driver():connect()
 function prepare()
     local create_kunden_query = [[
         CREATE TABLE IF NOT EXISTS KUNDEN (
@@ -19,18 +20,17 @@ function prepare()
         CREATE INDEX idx_geburtstag ON KUNDEN(GEBURTSTAG);
     ]]
 
-    db_query(create_kunden_query)
-    db_query(create_indices)
+    con:query(create_kunden_query)
+    con:query(create_indices)
     print("Table 'KUNDEN' and indices have been successfully created.")
 end
 
 function cleanup()
-    db_query("DROP INDEX idx_stadt ON KUNDEN;")
-    db_query("DROP INDEX idx_postleitzahl ON KUNDEN;")
-    db_query("DROP INDEX idx_geburtstag ON KUNDEN;")
+    con:query("DROP INDEX idx_stadt ON KUNDEN;")
+    con:query("DROP INDEX idx_postleitzahl ON KUNDEN;")
+    con:query("DROP INDEX idx_geburtstag ON KUNDEN;")
 
-    local drop_kunden_query = "DROP TABLE IF EXISTS KUNDEN;"
-    db_query(drop_kunden_query)
+    con:query("DROP TABLE IF EXISTS KUNDEN;")
 
     print("Cleanup successfully done.")
 end

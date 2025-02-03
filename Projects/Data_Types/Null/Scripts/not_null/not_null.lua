@@ -1,3 +1,4 @@
+local con = sysbench.sql.driver():connect()
 function prepare()
     local create_kunden_query = [[
         CREATE TABLE KUNDEN (
@@ -13,12 +14,12 @@ function prepare()
         );
     ]]
 
-    db_query(create_kunden_query)
+    con:query(create_kunden_query)
     print("Table 'KUNDEN' has been successfully created.")
 end
 
 function cleanup()
     local drop_kunden_query = "DROP TABLE IF EXISTS KUNDEN;"
-    db_query(drop_kunden_query)
+    con:query(drop_kunden_query)
     print("Cleanup successfully done")
 end

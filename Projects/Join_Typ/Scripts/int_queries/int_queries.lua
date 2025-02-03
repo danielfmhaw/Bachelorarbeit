@@ -1,3 +1,4 @@
+local con = sysbench.sql.driver():connect()
 function prepare()
     -- SQL query to create the KUNDENMITID table without auto-increment for KUNDEN_ID
     local create_kunden_query = [[
@@ -26,8 +27,8 @@ function prepare()
         );
     ]]
 
-    db_query(create_kunden_query)
-    db_query(create_bestellung_query)
+    con:query(create_kunden_query)
+    con:query(create_bestellung_query)
     print("Tables KUNDENMITID and BESTELLUNGMITID have been successfully created.")
 end
 
@@ -35,7 +36,7 @@ function cleanup()
     local drop_bestellung_query = "DROP TABLE IF EXISTS BESTELLUNGMITID;"
     local drop_kunden_query = "DROP TABLE IF EXISTS KUNDENMITID;"
 
-    db_query(drop_bestellung_query)
-    db_query(drop_kunden_query)
+    con:query(drop_bestellung_query)
+    con:query(drop_kunden_query)
     print("Cleanup successfully done")
 end

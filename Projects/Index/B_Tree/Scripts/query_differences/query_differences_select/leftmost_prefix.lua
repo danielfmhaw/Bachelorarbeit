@@ -1,6 +1,6 @@
+local con = sysbench.sql.driver():connect()
 function select_leftmost_prefix()
-    local leftmost_prefix_query = "SELECT * FROM KUNDEN WHERE NAME = 'Müller';"
-    db_query(leftmost_prefix_query)
+    con:query("SELECT * FROM KUNDEN WHERE NAME = 'Müller';")
 end
 
 function event()

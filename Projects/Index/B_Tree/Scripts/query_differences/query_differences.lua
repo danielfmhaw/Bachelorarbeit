@@ -1,3 +1,4 @@
+local con = sysbench.sql.driver():connect()
 function prepare()
     local create_kunden_query = [[
         CREATE TABLE KUNDEN (
@@ -18,17 +19,15 @@ function prepare()
         CREATE INDEX combined_index ON KUNDEN(NAME, VORNAME, GEBURTSTAG);
     ]]
 
-    db_query(create_kunden_query)
-    db_query(create_indices)
+    con:query(create_kunden_query)
+    con:query(create_indices)
     print("Table 'KUNDEN' and index have been successfully created.")
 end
 
 
 function cleanup()
-    db_query("DROP INDEX combined_index ON KUNDEN;")
-
-    local drop_kunden_query = "DROP TABLE IF EXISTS KUNDEN;"
-    db_query(drop_kunden_query)
+    con:query("DROP INDEX combined_index ON KUNDEN;")
+    con:query("DROP TABLE IF EXISTS KUNDEN;")
 
     print("Cleanup successfully done.")
 end

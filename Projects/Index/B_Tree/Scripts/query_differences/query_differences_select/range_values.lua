@@ -1,6 +1,6 @@
+local con = sysbench.sql.driver():connect()
 function select_range_values()
-    local range_query = "SELECT * FROM KUNDEN WHERE NAME BETWEEN 'Müller' AND 'Schulz';"
-    db_query(range_query)
+    con:query("SELECT * FROM KUNDEN WHERE NAME BETWEEN 'Müller' AND 'Schulz';")
 end
 
 function event()

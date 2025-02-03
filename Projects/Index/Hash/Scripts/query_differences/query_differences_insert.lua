@@ -1,3 +1,4 @@
+local con = sysbench.sql.driver():connect()
 local num_rows = 3000
 
 local last_names = {
@@ -10,9 +11,9 @@ local first_names = {
 
 function delete_data()
     local delete_kunden_query = "DELETE FROM KUNDEN;"
-    db_query("START TRANSACTION")
-    db_query(delete_kunden_query)
-    db_query("COMMIT")
+    con:query("START TRANSACTION")
+    con:query(delete_kunden_query)
+    con:query("COMMIT")
 end
 
 -- Function to insert randomized data into KUNDEN
@@ -35,7 +36,7 @@ function insert_data()
             (KUNDEN_ID, NAME, VORNAME, GEBURTSTAG, ADRESSE, STADT, POSTLEITZAHL, LAND, EMAIL, TELEFONNUMMER)
             VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
         ]], kunden_id, name, vorname, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
-        db_query(kunden_query)
+        con:query(kunden_query)
     end
 end
 

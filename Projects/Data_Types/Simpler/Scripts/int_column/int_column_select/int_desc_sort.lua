@@ -1,6 +1,6 @@
+local con = sysbench.sql.driver():connect()
 function select_desc_order()
-    local desc_order_query = "SELECT * FROM KUNDEN ORDER BY KUNDEN_ID DESC;"
-    db_query(desc_order_query)
+    con:query("SELECT * FROM KUNDEN ORDER BY KUNDEN_ID DESC;")
 end
 
 function event()
