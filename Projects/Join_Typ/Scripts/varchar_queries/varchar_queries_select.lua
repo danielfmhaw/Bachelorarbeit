@@ -1,3 +1,4 @@
+local con = sysbench.sql.driver():connect()
 function select_query()
     local join_query = [[
         SELECT k.STADT, SUM(b.UMSATZ) AS Total_Umsatz
@@ -5,7 +6,7 @@ function select_query()
         JOIN BESTELLUNGMITVARCHAR b ON k.NAME = b.FK_KUNDEN
         GROUP BY k.STADT;
     ]]
-    db_query(join_query)
+    con:query(join_query)
 end
 
 function event()

@@ -1,13 +1,14 @@
+local con = sysbench.sql.driver():connect()
 local num_rows = 700
 local bestellungProKunde = 3
 
 function delete_data()
     local delete_bestellung_query = "DELETE FROM BESTELLUNGMITID;"
     local delete_kunden_query = "DELETE FROM KUNDENMITID;"
-    db_query("START TRANSACTION")
-    db_query(delete_bestellung_query)
-    db_query(delete_kunden_query)
-    db_query("COMMIT")
+    con:query("START TRANSACTION")
+    con:query(delete_bestellung_query)
+    con:query(delete_kunden_query)
+    con:query("COMMIT")
 end
 -- Function to insert randomized data into KUNDENMITID and BESTELLUNGMITID
 function insert_data()
@@ -31,7 +32,7 @@ function insert_data()
         ]], kunden_id, name, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
 
         -- Execute the customer insertion
-        db_query(kunden_query)
+        con:query(kunden_query)
 
         for j = 1, bestellungProKunde do
             local bestellung_id = (i-1) * bestellungProKunde + j
@@ -45,7 +46,7 @@ function insert_data()
                 VALUES (%d,'%s', %d, %d, %d);
             ]], bestellung_id, bestelldatum, artikel_id, kunden_id, umsatz)
 
-            db_query(bestellung_query)
+            con:query(bestellung_query)
         end
     end
 end

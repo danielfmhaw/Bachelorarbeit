@@ -10,4 +10,17 @@ function utils.randomString(length)
     return result
 end
 
+function utils.print_results(result)
+    if result and result.nrows > 0 then
+        for i = 1, result.nrows do
+            local row = result:fetch_row()
+            local output_string = ""
+            for j = 1, #row do
+                output_string = output_string .. tostring(row[j]) .. " "
+            end
+            io.stderr:write(output_string .. "\n")
+        end
+    end
+end
+
 return utils

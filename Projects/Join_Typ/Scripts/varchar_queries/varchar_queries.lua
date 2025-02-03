@@ -1,3 +1,4 @@
+local con = sysbench.sql.driver():connect()
 function prepare()
     -- Create Table Kunden with varchar as PK
     local create_kunden_query = [[
@@ -26,8 +27,8 @@ function prepare()
     ]]
 
     -- Execute the table creation queries
-    db_query(create_kunden_query)
-    db_query(create_bestellung_query)
+    con:query(create_kunden_query)
+    con:query(create_bestellung_query)
 
     -- Log message indicating tables have been created
     print("Tables KUNDENMITVARCHAR and BESTELLUNGMITVARCHAR have been successfully created.")
@@ -37,7 +38,7 @@ function cleanup()
     local drop_kunden_query = "DROP TABLE IF EXISTS KUNDENMITVARCHAR;"
     local drop_bestellung_query = "DROP TABLE IF EXISTS BESTELLUNGMITVARCHAR;"
 
-    db_query(drop_bestellung_query)
-    db_query(drop_kunden_query)
+    con:query(drop_bestellung_query)
+    con:query(drop_kunden_query)
     print("Cleanup successfully done")
 end

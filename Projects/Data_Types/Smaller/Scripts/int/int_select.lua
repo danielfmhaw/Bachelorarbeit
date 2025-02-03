@@ -1,9 +1,7 @@
+local con = sysbench.sql.driver():connect()
 function select_query()
-    local query_count = "SELECT COUNT(*) FROM KUNDEN;"
-    local query_name_order = "SELECT * FROM KUNDEN ORDER BY NAME;"
-
-    db_query(query_count)
-    db_query(query_name_order)
+    con:query("SELECT COUNT(*) FROM KUNDEN;")
+    con:query("SELECT * FROM KUNDEN ORDER BY NAME;")
 end
 
 function event()

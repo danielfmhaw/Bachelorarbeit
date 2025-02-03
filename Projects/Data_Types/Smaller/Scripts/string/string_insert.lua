@@ -1,3 +1,4 @@
+local con = sysbench.sql.driver():connect()
 package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):match("(.*/)") .. "../../../../../Tools/Lua/?.lua"
 local utils = require("utils")
 
@@ -6,10 +7,10 @@ local length = tonumber(os.getenv("LENGTH")) or tonumber(typ:match("%d+")) or 0
 local num_rows = tonumber(os.getenv("NUM_ROWS")) or 0
 
 function delete_data()
-   local delete_kunden_query = "DELETE FROM KUNDEN;"
-   db_query("START TRANSACTION")
-   db_query(delete_kunden_query)
-   db_query("COMMIT")
+    local delete_kunden_query = "DELETE FROM KUNDEN;"
+    con:query("START TRANSACTION")
+    con:query(delete_kunden_query)
+    con:query("COMMIT")
 end
 
 -- Function to insert randomized data into KUNDEN
@@ -33,7 +34,7 @@ function insert_data()
            VALUES (%d,'%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
        ]], kunden_id, name, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
 
-       db_query(kunden_query)
+       con:query(kunden_query)
    end
 end
 

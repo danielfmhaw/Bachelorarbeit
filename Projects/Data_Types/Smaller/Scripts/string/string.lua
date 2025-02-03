@@ -1,3 +1,4 @@
+local con = sysbench.sql.driver():connect()
 local size = tostring(os.getenv("TYP")) or ""
 size = size:gsub("([a-zA-Z]+)_(%d+)", "%1(%2)")
 
@@ -20,16 +21,13 @@ function prepare()
         CREATE INDEX idx_name ON KUNDEN(NAME);
     ]]
 
-    db_query(create_kunden_query)
-    db_query(create_indices)
+    con:query(create_kunden_query)
+    con:query(create_indices)
     print(string.format("Table 'KUNDEN' has been successfully created with type %s for column 'NAME'", size))
 end
 
 function cleanup()
-    local drop_kunden_query = "DROP TABLE IF EXISTS KUNDEN;"
-    local drop_index_query = "DROP INDEX idx_name ON KUNDEN;"
-
-    db_query(drop_index_query)
-    db_query(drop_kunden_query)
+    con:query("DROP INDEX idx_name ON KUNDEN;")
+    con:query("DROP TABLE IF EXISTS KUNDEN;")
     print("Cleanup successfully done")
 end

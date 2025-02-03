@@ -1,6 +1,6 @@
+local con = sysbench.sql.driver():connect()
 function select_query()
-    local query_name = "SELECT * FROM KUNDEN WHERE NAME = 'Kunde_1' AND GEBURTSTAG < '1980-01-01';"
-    db_query(query_name)
+    con:query("SELECT * FROM KUNDEN WHERE NAME = 'Kunde_1' AND GEBURTSTAG < '1980-01-01';")
 end
 
 function event()
