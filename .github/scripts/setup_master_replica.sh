@@ -1,4 +1,5 @@
 #!/bin/bash
+number_of_replicas=${1:-3}
 
 docker network create mysql-network
 
@@ -11,7 +12,7 @@ until docker exec mysql-primary mysqladmin ping -uroot -ppassword --silent &> /d
 done
 
 # Start Replica Containers
-for i in {1..4}; do
+for ((i=1; i<=number_of_replicas; i++)); do
   docker run -d --name mysql-replica-${i} --network mysql-network -e MYSQL_ROOT_PASSWORD=password -p $((3307 + i)):3306 mysql:8 \
     --server-id=$((i + 1)) --log-bin=mysql-bin --read-only=1
   until docker exec mysql-replica-${i} mysqladmin ping -uroot -ppassword --silent &> /dev/null; do
@@ -35,7 +36,7 @@ FLUSH PRIVILEGES;
 "
 
 # Setup Replicas
-for i in {1..3}; do
+for ((i=1; i<=number_of_replicas-1; i++)); do
   docker exec -i mysql-replica-${i} mysql -uroot -ppassword -e "
   CHANGE REPLICATION SOURCE TO
     SOURCE_HOST = 'mysql-primary',
