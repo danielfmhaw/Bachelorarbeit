@@ -97,13 +97,20 @@
     "scripts": {
       "./Projects/Views/Scripts/with_trigger": {},
       "./Projects/Views/Scripts/with_trigger_postgres": {
-        "db": "postgres"
+        "db": ["postgres"]
       },
       "./Projects/Views/Scripts/mat_view": {
         "vars": "refresh",
-        "db": "postgres"
+        "db": ["postgres"]
       }
     },
     "var": {"refresh":["every","once"]}
+  },
+  "replication": {
+    "scripts": {
+      "./Projects/Replication/Scripts/int_queries": {
+        "db": ["mysql_master_slave","mysql"]
+      }
+    }
   }
 }

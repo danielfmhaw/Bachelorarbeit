@@ -1,10 +1,10 @@
-name: Benchmark
+name: Run All Benchmarks
 
 on:
   push:
     paths:
       - 'Projects/**'
-      - '.github/workflows/**'
+      - '.github/workflows/workflow.yaml'
       - '.github/pattern.json'
       - 'Tools/Python/**'
       - 'Tools/sysbench_script.sh'
@@ -48,7 +48,7 @@ jobs:
           
             ARTIFACT_NAME="${TEST_TYPE}-${HASH}-${GENERAL_HASH}"
             SHOULD_RUN=$(echo "$ALL_ARTIFACTS" | jq -e --arg name "$ARTIFACT_NAME" '.artifacts[] | select(.name == $name) | .id' > /dev/null && echo false || echo true)
-            ENVS=$(jq -r --arg test "$TEST_TYPE" '.[$test].scripts | to_entries | map(if .value.db then .value.db else "mysql" end) | unique | join(",")' "$CONFIG_FILE")
+            ENVS=$(jq -r --arg test "$TEST_TYPE" '.[$test].scripts | to_entries | map(if .value.db then .value.db[] else "mysql" end) | unique | join(",")' "$CONFIG_FILE")
           
             # Creation of the JSON result
             RESULT=$(jq -n \
@@ -104,6 +104,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas matplotlib
 
+      - name: Start MySQL container
+        if: env.should_run == 'true' && contains(env.envs, 'mysql')
+        run: |
+          eval $(jq -r --arg env "mysql" '.[$env] | to_entries | .[] | "export " + .key + "=" + (.value | @sh)' "./envs.json")
+          docker run --name mysql-${{ env.test_type }} -d \
+            -e MYSQL_ROOT_PASSWORD=$DB_PASS \
+            -e MYSQL_DATABASE=$DB_NAME \
+            -p $DB_PORT:$DB_PORT mysql:8.0
+          
+          echo "Waiting for MySQL..."
+          until docker exec mysql-${{ env.test_type }} mysqladmin --user=$DB_USER --password=$DB_PASS --host=$DB_HOST --port=$DB_PORT ping --silent; do sleep 1; done
+          echo "MySQL is ready!"
+
       - name: Start PostgreSQL container
         if: env.should_run == 'true' && contains(env.envs, 'postgres')
         run: |
@@ -117,18 +130,11 @@ jobs:
           until docker exec postgres-${{ env.test_type }} pg_isready --host=$DB_HOST --port=$DB_PORT --username=$DB_USER; do sleep 1; done
           echo "PostgreSQL is ready!"
 
-      - name: Start MySQL container
-        if: env.should_run == 'true' && contains(env.envs, 'mysql')
+      - name: Start MySQL Replication container
+        if: env.should_run == 'true' && contains(env.envs, 'mysql_master_slave')
         run: |
-          eval $(jq -r --arg env "mysql" '.[$env] | to_entries | .[] | "export " + .key + "=" + (.value | @sh)' "./envs.json")
-          docker run --name mysql-${{ env.test_type }} -d \
-            -e MYSQL_ROOT_PASSWORD=$DB_PASS \
-            -e MYSQL_DATABASE=$DB_NAME \
-            -p $DB_PORT:$DB_PORT mysql:8.0
-          
-          echo "Waiting for MySQL..."
-          until docker exec mysql-${{ env.test_type }} mysqladmin --user=$DB_USER --password=$DB_PASS --host=$DB_HOST --port=$DB_PORT ping --silent; do sleep 1; done
-          echo "MySQL is ready!"
+          chmod +x .github/scripts/setup.sh
+          .github/scripts/setup.sh
 
       - name: Run sysbench script
         if: env.should_run == 'true'
@@ -154,7 +160,7 @@ jobs:
           path: ${{ env.output_dir }}
 
   upload-combined-output:
-    needs: [prepare-benchmark, run-tests]
+    needs: [ prepare-benchmark, run-tests ]
     runs-on: ubuntu-latest
     steps:
       - name: Loop through configurations and download artifacts
