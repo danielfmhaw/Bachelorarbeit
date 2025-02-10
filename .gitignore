@@ -1,4 +1,5 @@
 .DS_Store
 .idea
 Latex/Motivation_Letter
+Tools/Test
 gh-secrets.env

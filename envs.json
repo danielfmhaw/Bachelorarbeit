@@ -14,5 +14,14 @@
     "DB_USER": "postgres",
     "DB_PASS": "password",
     "DB_NAME": "sbtest"
+  },
+  "mysql_master_slave": {
+    "DRIVER": "mysql",
+    "DB_HOST": "127.0.0.1",
+    "DB_PORT": "3307",
+    "DB_USER": "root",
+    "DB_PASS": "password",
+    "DB_NAME": "sbtest",
+    "REPLICAS_COUNT": 3
   }
 }

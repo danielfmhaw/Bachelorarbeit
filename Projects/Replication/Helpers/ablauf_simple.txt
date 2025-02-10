@@ -1,0 +1,65 @@
+0. docker.yaml:
+version: '3'
+services:
+  mysql-primary:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3307:3306"
+    command: --server-id=1 --log-bin=mysql-bin
+
+  mysql-replica-1:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3308:3306"
+    command: --server-id=2 --log-bin=mysql-bin --read-only=1
+
+  mysql-replica-2:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3309:3306"
+    command: --server-id=3 --log-bin=mysql-bin --read-only=1
+
+1. cd Projects/Replication/Helpers (directory of docker.yaml)
+2. docker-compose up -d
+3. Verify with: docker ps
+
+4. Master
+4.1. Enter Console
+4.1.1 docker exec -it helpers-mysql-primary-1 mysql -uroot -ppassword
+4.2. Commands inside the console
+4.2.1 SHOW BINARY LOG STATUS;
+4.2.2 CREATE DATABASE sbtest;
+4.2.3 CREATE USER 'repl'@'%' IDENTIFIED WITH sha256_password BY 'repl_password';
+4.2.4 GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';
+4.2.5 FLUSH PRIVILEGES;
+
+5. Set Up Replica
+5.1: Enter Console
+5.1.1: docker exec -it helpers-mysql-replica-1-1 mysql -uroot -ppassword
+5.1.2: docker exec -it helpers-mysql-replica-2-1 mysql -uroot -ppassword
+
+5.2. Configure Replication for both replicas
+5.2.1 CHANGE REPLICATION SOURCE TO
+        SOURCE_HOST = 'helpers-mysql-primary-1',
+        SOURCE_USER = 'repl',
+        SOURCE_PASSWORD = 'repl_password',
+        SOURCE_LOG_FILE = 'mysql-bin.000003',
+        SOURCE_LOG_POS = 158;
+
+5.2.2 START REPLICA;
+(5.2.3 SHOW REPLICA STATUS\G;)
+
+6. Run Sysbench
+sysbench --db-driver=mysql --mysql-host=127.0.0.1 --mysql-port=3307 --mysql-user=root --mysql-password=password --mysql-db=sbtest oltp_insert --tables=1 --table-size=2500 prepare
+sysbench --db-driver=mysql --mysql-host=127.0.0.1 --mysql-port=3307 --mysql-user=root --mysql-password=password --mysql-db=sbtest oltp_read_write --tables=1 --table-size=2500 run
+sysbench --db-driver=mysql --mysql-host=127.0.0.1 --mysql-port=3308 --mysql-user=root --mysql-password=password --mysql-db=sbtest oltp_read_only --tables=1 --table-size=2500 run
+sysbench --db-driver=mysql --mysql-host=127.0.0.1 --mysql-port=3309 --mysql-user=root --mysql-password=password --mysql-db=sbtest oltp_read_only --tables=1 --table-size=2500 run
+sysbench --db-driver=mysql --mysql-host=127.0.0.1 --mysql-port=3307 --mysql-user=root --mysql-password=password --mysql-db=sbtest oltp_insert --tables=1 --table-size=2500 cleanup
+
+7. Or just use local_setup.sh
