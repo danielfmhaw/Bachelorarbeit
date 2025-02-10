@@ -8,6 +8,7 @@ on:
       - '.github/pattern.json'
       - 'Tools/Python/**'
       - 'Tools/sysbench_script.sh'
+      - 'envs.json'
   workflow_dispatch:
 
 jobs:
@@ -17,7 +18,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       configurations: ${{ steps.prepare-config.outputs.configurations }}
     env:
-      GENERAL_PATHS: "./.github/workflows ./.github/pattern.json ./Tools/Python ./Tools/sysbench_script.sh"
+      GENERAL_PATHS: "./.github/workflows ./.github/pattern.json ./Tools/Python ./Tools/sysbench_script.sh envs.json"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -32,39 +33,8 @@ jobs:
       - name: Prepare configurations for all test types
         id: prepare-config
         run: |
-          CONFIG_FILE=".github/pattern.json"
-          RESULTS=()
-          ALL_ARTIFACTS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/actions/artifacts")
-          
-          for TEST_TYPE in $(jq -r 'keys[]' $CONFIG_FILE); do
-            SCRIPTS=$(jq -r --arg test "$TEST_TYPE" '.[$test].scripts | @json' "$CONFIG_FILE")
-            VAR=$(jq -c --arg test "$TEST_TYPE" '.[$test].var // {}' "$CONFIG_FILE")
-            if [[ $(jq -r --arg test "$TEST_TYPE" '.[$test].scripts | keys_unsorted | .[0]' "$CONFIG_FILE") =~ /Projects\/(.*)\/Scripts/ ]]; then
-              OUTPUT_DIR="Output/${BASH_REMATCH[1]}/${TEST_TYPE}"
-            fi
-            HASH=$(echo "$SCRIPTS" | jq -r 'keys_unsorted[]' | xargs -I {} find {} -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')
-            LAST_COMMIT=$(git rev-parse HEAD || git rev-parse origin/main)
-            GENERAL_HASH=$(git ls-tree -r $LAST_COMMIT -- $GENERAL_PATHS | awk '{print $3}' | xargs -I {} git show {} | sha256sum | awk '{print $1}')
-          
-            ARTIFACT_NAME="${TEST_TYPE}-${HASH}-${GENERAL_HASH}"
-            SHOULD_RUN=$(echo "$ALL_ARTIFACTS" | jq -e --arg name "$ARTIFACT_NAME" '.artifacts[] | select(.name == $name) | .id' > /dev/null && echo false || echo true)
-            ENVS=$(jq -r --arg test "$TEST_TYPE" '.[$test].scripts | to_entries | map(if .value.db then .value.db[] else "mysql" end) | unique | join(",")' "$CONFIG_FILE")
-          
-            # Creation of the JSON result
-            RESULT=$(jq -n \
-            --arg test_type "$TEST_TYPE" \
-            --arg scripts "$SCRIPTS" \
-            --arg var "$VAR" \
-            --arg output_dir "$OUTPUT_DIR" \
-            --arg artifact_name "$ARTIFACT_NAME" \
-            --arg should_run "$SHOULD_RUN" \
-            --arg envs "$ENVS" \
-            '{test_type: $test_type, scripts: $scripts, var: $var, output_dir: $output_dir, artifact_name: $artifact_name, should_run: $should_run, envs: $envs}')
-          
-            RESULTS+=("$RESULT")
-          done
-          CONFIGURATIONS=$(printf '%s\n' "${RESULTS[@]}" | jq -s '.' | jq -c .)
-          echo "configurations=$CONFIGURATIONS" >> $GITHUB_OUTPUT
+          chmod +x .github/scripts/prepare_configs.sh
+          .github/scripts/prepare_configs.sh ${{ secrets.GITHUB_TOKEN }} ${{ github.repository }}
 
   run-tests:
     needs: prepare-benchmark
@@ -133,8 +103,10 @@ jobs:
       - name: Start MySQL Replication container
         if: env.should_run == 'true' && contains(env.envs, 'mysql_master_slave')
         run: |
-          chmod +x .github/scripts/setup.sh
-          .github/scripts/setup.sh
+          number_of_replicas=$(( $(jq '.mysql_master_slave.REPLICAS_COUNT' envs.json) + 1 ))
+          chmod +x .github/scripts/setup_master_replica.sh
+          .github/scripts/setup_master_replica.sh $number_of_replicas  
+          echo "number_of_replicas=$number_of_replicas" >> $GITHUB_ENV
 
       - name: Run sysbench script
         if: env.should_run == 'true'
@@ -151,6 +123,12 @@ jobs:
         run: |
           docker ps -q -f name=mysql-${{ env.test_type }} | xargs -r docker stop | xargs -r docker rm
           docker ps -q -f name=postgres-${{ env.test_type }} | xargs -r docker stop | xargs -r docker rm
+          if [[ -n "${{ env.number_of_replicas }}" ]]; then
+            docker ps -q -f name=mysql-primary | xargs -r docker stop | xargs -r docker rm
+            for ((i=1; i<=${{ env.number_of_replicas }}; i++)); do
+              docker ps -q -f name=mysql-replica-${i} | xargs -r docker stop | xargs -r docker rm
+            done
+          fi
 
       - name: Upload individual outputs
         if: env.should_run == 'true'

@@ -1,6 +1,9 @@
-name: Only Replication Benchmark (for Debug)
+name: MySQL Replication Test
 
 on:
+  push:
+    paths:
+      - '.github/workflows/replication.yaml'
   workflow_dispatch:
 
 jobs:
@@ -11,17 +14,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Start MySQL Replication container
+        run: |
+          number_of_replicas=$(( $(jq '.mysql_master_slave.REPLICAS_COUNT' envs.json) + 1 ))
+          chmod +x .github/scripts/setup_master_replica.sh
+          .github/scripts/setup_master_replica.sh $number_of_replicas  
+          echo "number_of_replicas=$number_of_replicas" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y sysbench
           python -m pip install --upgrade pip
           pip install pandas matplotlib
-
-      - name: Start MySQL Replication container
-        run: |
-          chmod +x .github/scripts/setup.sh
-          .github/scripts/setup.sh
 
       - name: Run sysbench script
         run: |
@@ -34,6 +39,13 @@ jobs:
              "db": ["mysql_master_slave"]
            }
           }'
+          
+      - name: Cleanup MySQL containers
+        run: |
+          docker ps -q -f name=mysql-primary | xargs -r docker stop | xargs -r docker rm
+          for ((i=1; i<=${{ env.number_of_replicas }}; i++)); do
+            docker ps -q -f name=mysql-replica-${i} | xargs -r docker stop | xargs -r docker rm
+          done
 
       - name: Upload test outputs
         uses: actions/upload-artifact@v4
