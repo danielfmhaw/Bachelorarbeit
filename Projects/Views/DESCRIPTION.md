@@ -38,11 +38,11 @@ cd Tools
   -scripts '{
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/with_trigger": {},
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/with_trigger_postgres": {
-      "db": "postgres"
+      "db": ["postgres"]
     },
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/mat_view": {
       "vars": "refresh",
-      "db": "postgres"
+      "db": ["postgres"]
     }
   }'
 ```

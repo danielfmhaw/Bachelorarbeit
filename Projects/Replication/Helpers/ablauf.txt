@@ -1,0 +1,85 @@
+0. docker-compose.yaml:
+version: '3'
+services:
+  mysql-primary:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    command: --server-id=1 --log-bin=mysql-bin
+
+  mysql-replica-1:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3308:3306"
+    command: --server-id=2 --log-bin=mysql-bin --read-only=1
+
+  mysql-replica-2:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3309:3306"
+    command: --server-id=3 --log-bin=mysql-bin --read-only=1
+
+1. cd Projects/Replication/Helpers
+2. docker-compose up -d
+3. Verify with: docker ps
+
+4. Set Up the Primary:
+docker exec -it helpers-mysql-primary-1 mysql -uroot -proot
+
+4.1. Create a Replication User:
+CREATE USER 'replica'@'%' IDENTIFIED WITH sha256_password BY 'password';
+GRANT REPLICATION SLAVE ON *.* TO 'replica'@'%';
+GRANT ALL PRIVILEGES ON sbtest.* TO 'replica'@'%';
+FLUSH PRIVILEGES;
+
+4.2. Get the Master Status (Binary Log Info):
+FLUSH TABLES WITH READ LOCK;
+Scenario	Solution
+MySQL ≥8.0.23	SHOW BINARY LOG STATUS;
+MySQL <8.0.23	SHOW MASTER STATUS;
+
+5. Set Up the Replica:
+docker exec -it helpers-mysql-replica-1 mysql -uroot -proot
+
+5.1. Configure Replication
+CHANGE REPLICATION SOURCE TO
+  SOURCE_HOST = 'mysql-primary',
+  SOURCE_USER = 'replica',
+  SOURCE_PASSWORD = 'password',
+  SOURCE_LOG_FILE = 'mysql-bin.000003',
+  SOURCE_LOG_POS = 1088;
+
+START REPLICA;
+SHOW REPLICA STATUS\G;
+
+
+6. UNLOCK TABLES; => in master
+
+7. Insert in Master
+docker exec -it replication-mysql-primary-1 mysql -uroot -proot -e "
+CREATE DATABASE sbtest;
+USE sbtest;
+CREATE TABLE users (id INT PRIMARY KEY, name VARCHAR(50));
+INSERT INTO users VALUES (1, 'Alice');
+"
+
+8. Verify in Replica
+docker exec -it docker_mysql-replica_1 mysql -uroot -proot -e "
+USE sbtest;
+GRANT ALL PRIVILEGES ON sbtest.* TO 'replica'@'%';
+SELECT * FROM users;
+"
+
+9. Test fpr Benchmark
+USE sbtest;
+SELECT COUNT(*) FROM KUNDEN;
+SELECT COUNT(*) FROM BESTELLUNG;
+
+DROP TABLE BESTELLUNG;
+DROP TABLE KUNDEN;
