@@ -1,0 +1,42 @@
+name: Only Replication Benchmark (for Debug)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sysbench
+          python -m pip install --upgrade pip
+          pip install pandas matplotlib
+
+      - name: Start MySQL Replication container
+        run: |
+          chmod +x .github/scripts/setup.sh
+          .github/scripts/setup.sh
+
+      - name: Run sysbench script
+        run: |
+          chmod +x Tools/sysbench_script.sh
+          
+          Tools/sysbench_script.sh \
+          -out "./Projects/Replication/Output" \
+          -scripts '{
+           "./Projects/Replication/Scripts/int_queries": {
+             "db": ["mysql_master_slave"]
+           }
+          }'
+
+      - name: Upload test outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: "daniel-test-123"
+          path: "./Projects/Replication/Output"
