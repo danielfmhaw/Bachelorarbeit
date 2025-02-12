@@ -1,4 +1,8 @@
 local con = sysbench.sql.driver():connect()
+package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):match("(.*/)") .. "../../../../Tools/Lua/?.lua"
+local utils = require("utils")
+local format = os.getenv("FORMAT")
+
 function prepare()
     -- SQL query to create the KUNDEN table without auto-increment for KUNDEN_ID
     local create_kunden_query = [[
@@ -26,6 +30,11 @@ function prepare()
             FOREIGN KEY (FK_KUNDEN) REFERENCES KUNDEN (KUNDEN_ID)
         );
     ]]
+
+    if format and format ~= "" then
+        con:query(string.format("SET SESSION binlog_format = '%s';", format:upper()))
+        utils.print_results(con:query("SHOW VARIABLES LIKE 'binlog_format';"))
+    end
 
     con:query(create_kunden_query)
     con:query(create_bestellung_query)
