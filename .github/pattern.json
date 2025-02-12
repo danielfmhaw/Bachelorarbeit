@@ -96,7 +96,7 @@
   "mat-view-comparison": {
     "scripts": {
       "./Projects/Views/Scripts/with_trigger": {},
-      "./Projects/Views/Scripts/with_trigger_postgres": {
+      "./Projects/Views/Scripts/with_trigger_pg": {
         "db": ["postgres"]
       },
       "./Projects/Views/Scripts/mat_view": {
@@ -106,11 +106,20 @@
     },
     "var": {"refresh":["every","once"]}
   },
-  "replication": {
+  "replication-vs-no": {
     "scripts": {
       "./Projects/Replication/Scripts/int_queries": {
         "db": ["mysql_master_slave","mysql"]
       }
     }
+  },
+  "replication-format-change": {
+    "scripts": {
+      "./Projects/Replication/Scripts/int_queries": {
+        "vars": "format",
+        "db": ["mysql_master_slave_less_replicas"]
+      }
+    },
+    "var": {"format":["statement","row","mixed"]}
   }
 }

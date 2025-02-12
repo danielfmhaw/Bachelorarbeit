@@ -71,7 +71,7 @@ echo "Script,Time (s),Threads,TPS,QPS,Reads,Writes,Other,Latency (ms;95%),ErrPs,
 echo "Script,Read (noq),Write (noq),Other (noq),Total (noq),Transactions (per s.),Queries (per s.),Ignored Errors (per s.),Reconnects (per s.),Total Time (s),Total Events,Latency Min (ms),Latency Avg (ms),Latency Max (ms),Latency 95th Percentile (ms),Latency Sum (ms)" > "$STATISTICS_FILE_TEMP"
 
 process_script_benchmark() {
-  local SCRIPT_PATH="$1" LOG_DIR="$2" INSERT_SCRIPT="$3" SELECT_SCRIPT="$4" COMBINATION="$5"
+  local DB_INFO="$1" SCRIPT_PATH="$2" LOG_DIR="$3" INSERT_SCRIPT="$4" SELECT_SCRIPT="$5" COMBINATION="$6"
   local SCRIPTS=()
   local IS_FROM_SELECT_DIR=false
 
@@ -94,17 +94,22 @@ process_script_benchmark() {
   for SCRIPT in "${SCRIPTS[@]}"; do
     if [ -f "$SCRIPT" ]; then
       local SCRIPT_NAME
+      BASE_NAME=$(basename "$SCRIPT" .lua)
+      DB_SUFFIX=$( [ -n "$DB_INFO" ] && echo "_db_${DB_INFO}" )
       if [ -n "$COMBINATION" ]; then
+        COMB_SUFFIX="_comb_${COMBINATION}"
         if $IS_FROM_SELECT_DIR && [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
-          SCRIPT_NAME="${SCRIPT_PATH##*/}_comb_${COMBINATION}_select_$(basename "$SCRIPT" .lua)"
+          SCRIPT_NAME="${SCRIPT_PATH##*/}${DB_SUFFIX}${COMB_SUFFIX}_select_${BASE_NAME}"
         else
-          SCRIPT_NAME="${SCRIPT_PATH##*/}_comb_${COMBINATION}_$(basename "$SCRIPT" .lua | sed "s/^${SCRIPT_PATH##*/}_//")"
+          CLEAN_NAME=$(basename "$SCRIPT" .lua | sed "s/^${SCRIPT_PATH##*/}_//")
+          SCRIPT_NAME="${SCRIPT_PATH##*/}${DB_SUFFIX}${COMB_SUFFIX}_${CLEAN_NAME}"
         fi
       else
         if $IS_FROM_SELECT_DIR && [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
-          SCRIPT_NAME="$(basename "$SELECT_SCRIPT")_$(basename "$SCRIPT" .lua)"
+          BASE_SELECT_NAME=$(basename "$SELECT_SCRIPT" .lua)
+          SCRIPT_NAME="${BASE_SELECT_NAME%_*}${DB_SUFFIX}_${BASE_SELECT_NAME##*_}_${BASE_NAME}"
         else
-          SCRIPT_NAME=$(basename "$SCRIPT" .lua)
+          SCRIPT_NAME="${BASE_NAME%_*}${DB_SUFFIX}_${BASE_NAME##*_}"
         fi
       fi
       local RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
@@ -133,7 +138,7 @@ run_benchmark() {
     OUTPUT_BASE_FILE="${OUTPUT_FILE%.log}"
     for PORT in $DB_PORTS; do
       echo "Running $(basename "$SCRIPT_PATH") on port $PORT for $TIME seconds ..."
-      local CUSTOM_SCRIPT_NAME="${SCRIPT_NAME%_select}_select_port_${PORT}"
+      local CUSTOM_SCRIPT_NAME="${SCRIPT_NAME%_select}_select_with_port_${PORT}"
       OUTPUT_FILE="${OUTPUT_BASE_FILE%.log}_port_${PORT}.log"
 
       run_sysbench "$SCRIPT_PATH" "$MODE" "$OUTPUT_FILE" "$PORT" || { echo "Benchmark failed for script $SCRIPT_PATH on port $PORT"; exit 1; }
@@ -259,12 +264,21 @@ generate_combinations() {
     done
 }
 
+# Get number of DBMS used in all scripts
+DBMS_SET=()
+for SCRIPT_PATH in $SCRIPT_KEYS; do
+  for db in $(jq -r --arg key "$SCRIPT_PATH" '.[$key].db // ["mysql"] | .[]' <<< "$SCRIPTS"); do
+    [[ ! " ${DBMS_SET[*]} " =~ (^|[[:space:]])$db($|[[:space:]]) ]] && DBMS_SET+=("$db")
+  done
+done
+DBMS_COUNT=${#DBMS_SET[@]}
+
 # Main benchmark loop
 for SCRIPT_PATH in $SCRIPT_KEYS; do
   DBMS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].db // ["mysql"]')
-  DBMS_LENGTH=$(echo "$DBMS" | jq length)
   for DB in $(echo "$DBMS" | jq -r '.[]'); do
     prepare_variables "$SCRIPT_PATH" "$DB"
+    DB_INFO="$( [ "$DBMS_COUNT" -ne 1 ] && echo "${DB}" )"
     if [[ -n "$EXPORTED_VARS" ]]; then
         IFS=',' read -r -a KEYS <<< "$EXPORTED_VARS"
 
@@ -279,15 +293,12 @@ for SCRIPT_PATH in $SCRIPT_KEYS; do
             done
 
             # Create a directory name for the combination
-            COMBINATION_NAME="$( [ "$DB" != "mysql" ] || [ "$DBMS_LENGTH" -ne 1 ] && echo "${DB}_" )$(echo "$combination" | sed -E 's/(^|,)num_rows=[^,]*//g;s/^,//;s/,$//' | tr ',' '_' | tr '=' '_')"
+            COMBINATION_NAME=$(echo "$combination" | sed -E 's/(^|,)num_rows=[^,]*//g;s/^,//;s/,$//' | tr ',' '_' | tr '=' '_')
             LOG_DIR_COMBINATION="$LOG_DIR/$COMBINATION_NAME"
-
-            process_script_benchmark "$SCRIPT_PATH" "$LOG_DIR_COMBINATION" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$COMBINATION_NAME"
+            process_script_benchmark "$DB_INFO" "$SCRIPT_PATH" "$LOG_DIR_COMBINATION" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$COMBINATION_NAME"
         done <<< "$COMBINATIONS"
     else
-      COMBINATION_NAME="$( [ "$DB" != "mysql" ] || [ "$DBMS_LENGTH" -ne 1 ] && echo "${DB}" )"
-      LOG_DIR_COMBINATION="$LOG_DIR/$COMBINATION_NAME"
-      process_script_benchmark "$SCRIPT_PATH" "$LOG_DIR_COMBINATION" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$COMBINATION_NAME"
+      process_script_benchmark "$DB_INFO" "$SCRIPT_PATH" "$LOG_DIR" "$INSERT_SCRIPT" "$SELECT_SCRIPT"
     fi
     # shellcheck disable=SC2046
     eval $(jq -r --arg env "$DB" '.[$env] | to_entries | .[] | "unset " + .key' "$ABS_PATH/envs.json")

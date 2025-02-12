@@ -14,8 +14,7 @@ Die Ergebnisse helfen, fundierte Entscheidungen zur Datenbankgestaltung zu treff
 
 Führe das folgende Script aus, um die Benchmarks mit den korrekten Pfaden und Parametern auszuführen.
 
-### Code für Join Type - Vergleich:
-
+### Code für Replikation vs No Replikation:
 ```bash
 cd ../..
 cd Tools
@@ -28,9 +27,24 @@ cd Tools
   }'
 ```
 
+### Code für Replikation mit unterschiedlichen Formaten:
+```bash
+cd ../..
+cd Tools
+./sysbench_script.sh \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output" \
+  -var '{"format":["statement","row","mixed"]}' \
+  -scripts '{
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Scripts/int_queries": {
+      "vars": "format",
+      "db": ["mysql_master_slave_less_replicas"]
+    }
+  }'
+```
+
 ```bash
 cd ../..
 cd Tools
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Output
+  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output
 ```
