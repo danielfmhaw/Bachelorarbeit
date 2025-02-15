@@ -108,14 +108,14 @@
   },
   "replication-vs-no": {
     "scripts": {
-      "./Projects/Replication/Scripts/int_queries": {
+      "./Projects/Replication/Scripts/replication": {
         "db": ["mysql_master_slave","mysql"]
       }
     }
   },
   "replication-format-change": {
     "scripts": {
-      "./Projects/Replication/Scripts/int_queries": {
+      "./Projects/Replication/Scripts/replication": {
         "vars": "format",
         "db": ["mysql_master_slave_less_replicas"]
       }

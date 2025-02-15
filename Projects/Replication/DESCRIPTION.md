@@ -21,7 +21,7 @@ cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output" \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Scripts/int_queries": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Scripts/replication": {
       "db": ["mysql_master_slave","mysql"]
     }
   }'
@@ -35,7 +35,7 @@ cd Tools
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output" \
   -var '{"format":["statement","row","mixed"]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Scripts/int_queries": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Scripts/replication": {
       "vars": "format",
       "db": ["mysql_master_slave_less_replicas"]
     }
