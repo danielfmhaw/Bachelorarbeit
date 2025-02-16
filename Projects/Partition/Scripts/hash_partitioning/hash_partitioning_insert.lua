@@ -1,6 +1,13 @@
 local con = sysbench.sql.driver():connect()
-local num_rows = 700
-local bestellungProKunde = 3
+local num_rows = 2500
+local bestellungProKunde = 2
+
+local countries = {
+    "China", "India", "United States", "Indonesia", "Pakistan",
+    "Brazil", "Nigeria", "Bangladesh", "Russia", "Mexico",
+    "Japan", "Ethiopia", "Philippines", "Egypt", "Vietnam",
+    "DR Congo", "Turkey", "Iran", "Germany", "Thailand"
+}
 
 function delete_data()
     local delete_bestellung_query = "DELETE FROM BESTELLUNG;"
@@ -16,11 +23,11 @@ function insert_data()
     for i = 1, num_rows do
         local kunden_id = i
         local name = string.format("Kunde_%d", i)
-        local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
+        local geburtstag = string.format("%04d-01-01", math.random(1950, 2020))
         local adresse = string.format("Address_%d", i)
         local stadt = string.format("City_%d", math.random(1, 100))
         local postleitzahl = string.format("%05d", math.random(10000, 99999))
-        local land = "Germany"
+        local land = countries[math.random(#countries)]
         local email = string.format("customer%d@example.com", i)
         local telefonnummer = string.format("+49157%07d", math.random(1000000, 9999999))
 
