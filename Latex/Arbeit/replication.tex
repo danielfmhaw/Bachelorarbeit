@@ -9,7 +9,7 @@ Dadurch ist die Skalierbarkeit nahezu unbegrenzt durch das einfache Hinzufügen 
 Es trägt allerdings auch Nachteile mit sich, zu denen wir u.a.\ auch später in diesem Abschnitt kommen.
 In schon in den vorherigen Kapiteln gehen wir zuerst auf die Grundlagen ein, dann betrachten wir die Konfiguration, die die Basis für die Benchmarks bilden und abschließend analysieren wir die Ergebnisse.
 
-\section{Grundlagen}\label{sec:grundlagen}
+\section{Grundlagen}\label{sec:replication-grundlagen}
 Replikation ermöglicht die Konfiguration eines oder mehrere Server als Replicas eines anderen Servers (Master).
 Neben der Begrifflichkeit Master-Replika, sind auch die Varianten Primary-Secondary, als auch Master-Slave üblich.
 Das grundlegende Problem, das die Replikation löst, besteht darin, die Daten eines Servers mit denen eines anderen synchron zu halten.
@@ -61,7 +61,7 @@ Replikation eignet sich gut zum Skalieren von Lesevorgängen.
 
 Die Replikation von MySQL ist größtenteils abwärtskompatibel, d.h.\ dass ein neuerer Server in der Regel problemlos als Replika eines älteren Servers fungieren kann.
 Andersherum kann es aber zu Fehler kommen, da möglicherweise neue Funktionen oder die SQL-Syntax des neueren Servers nicht verstanden werden kann.
-In unserem Beispiel verwenden wir ohnehin nur eine MySQL-Version (siehe \ref{sec:durchfuhrung}).
+In unserem Beispiel verwenden wir ohnehin nur eine MySQL-Version (siehe \ref{sec:replication-durchfuhrung}).
 
 Es gibt zwei verschiedene Arten der Replikation, die von MySQL unterstützt werden: die anweisungsbasierte (engl.\ statement-based) und die zeilenbasierte (engl.\ row-based) Replikation.
 Die anweisungsbasierte Replikation wird seit MySQL 5.0 und älter unterstützt und funktioniert, indem die Abfrage, die die Daten auf dem Master geändert hat, protokolliert wird.
@@ -82,7 +82,7 @@ Andererseits ist das folgende Ereignis deutlich günstiger mit statement-basiert
 
 \vspace{-5pt}
 \begin{lstlisting}[language=SQL,caption=Update-Befehl auf dem Master,label={lst:repl_update_command}]
-UPDATE enormous_table SET col1 = 0;
+UPDATE master_table SET col1 = 0;
 \end{lstlisting}
 \vspace{-5pt}
 
@@ -108,7 +108,7 @@ Da kein Format in jeder Situation perfekt ist, kann MySQL dynamisch zwischen sta
 Standardmäßig wird die statement-basierte Replikation verwendet, aber wenn MySQL ein Ereignis erkennt, das nicht korrekt als Statement repliziert werden kann, wechselt es automatisch zur row-basierten Replikation
 Sie können das Format auch manuell steuern, indem Sie die Session-Variable binlog\_format setzen
 
-\section{Durchführung}\label{sec:durchfuhrung}
+\section{Durchführung}\label{sec:replication-durchfuhrung}
 
 Für die Durchführung nutzen wir wieder die Kundentabelle (\ref{lst:create_table_kunde}) und die Bestelltabelle (\ref{lst:create_table_bestellung}), die wir schon aus dem Beispiel aus Kapitel \ref{sec:projektaufbau-mit-beispiel} kennen.
 Die einzige Anpassung, die wir vornehmen müssen, sind die unterschiedlichen Werte \texttt{STATEMENT}, \texttt{ROW} und \texttt{MIXED}, die die Variable \texttt{binlog\_format} annehmen kann.
@@ -175,11 +175,21 @@ Der nächste Schritt besteht darin, dem Replikat zu sagen, wie es sich mit dem M
 
 \vspace{-5pt}
 \begin{lstlisting}[language=SQL,caption=Verbindung der Replica zum Master,label={lst:repl_con_replica_master}]
-CHANGE MASTER TO MASTER_HOST='server1',
-  MASTER_USER='repl',
-  MASTER_PASSWORD='p4ssword',
+CHANGE MASTER TO
+  MASTER_HOST='YOUR_HOST_NAME',
+  MASTER_USER='YOUR_USER',
+  MASTER_PASSWORD='YOUR_PASSWORD',
   MASTER_LOG_FILE='mysql-bin.000001',
   MASTER_LOG_POS=0;
+\end{lstlisting}
+\vspace{-5pt}
+
+Die Spalten \texttt{MASTER\_LOG\_FILE} und \texttt{MASTER\_LOG\_POS} müssen mit dem Ergebnis von dem Befehl aus \ref{lst:repl_master_config} übereinstimmen.
+Um die eigentliche Replikation zu starten, muss man den folgenden Befehl ausführen:
+
+\vspace{-5pt}
+\begin{lstlisting}[language=SQL,caption=Starten der Replikation,label={lst:repl_replica_start}]
+START SLAVE;
 \end{lstlisting}
 \vspace{-5pt}
 
@@ -192,14 +202,6 @@ SHOW PROCESSLIST\G;
 \vspace{-5pt}
 
 Die Spalten \texttt{Slave\_IO\_State}, \texttt{Slave\_IO\_Running} und \texttt{Slave\_SQL\_Running} zeigen an, dass die Replikationsprozesse nicht laufen oder nicht.
-Um die eigentliche Replikation aber erst zu starten, muss man den folgenden Befehl ausführen:
-
-\vspace{-5pt}
-\begin{lstlisting}[language=SQL,caption=Starten der Replikation,label={lst:repl_replica_start}]
-START SLAVE;
-\end{lstlisting}
-\vspace{-5pt}
-
 Wenn \texttt{Seconds\_Behind\_Master} nicht mehr NULL ist, dann bedeutet das, dass der I/O-Thread auf ein Ereignis vom Master wartet, weil er schon alle Binary-Logs abgerufen hat.
 Wenn man Änderungen an dem Master vornimmt, dann sollte man beobachten, dass die verschiedenen Datei- und Positionswerte auf dem Replikat inkrementiert werden und auch die Änderungen in den Datenbanken sollten auf dem Replikat sichtbar sein.
 Außerdem sollten zwei Threads auf dem Replikat aktiv sein, die immer unter dem Benutzerkonto "system user" laufen.
@@ -210,7 +212,7 @@ Um ein Replikat mit einem Master zu synchronisieren, sind drei Elemente erforder
 Eine kalte Kopie erfordert das Herunterfahren des Masters, um dessen Dateien zu kopieren, bevor er mit einem neuen Binary-Log neu gestartet wird, was jedoch zu Ausfallzeiten führt.
 Bei einer warmen Kopie können die Dateien übertragen werden, während der Server weiterhin läuft.
 
-\section{Analyse}\label{sec:analyse}
+\section{Analyse}\label{sec:replication-analyse}
 
 Im vorherigen Abschnitt wurde erklärt, wie man die Master und vor allem die Replicas korrekt konfiguriert und den Prozess der Replikation startet.
 Es wurde auch erklärt, wie wir das Binlog-Format verändern können und dass wir das Lua-Skript mit den Kunden- und Bestelltabelle verwenden.
