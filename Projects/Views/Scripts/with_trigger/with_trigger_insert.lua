@@ -7,8 +7,7 @@ local countries = {
     "China", "India", "United States", "Indonesia", "Pakistan",
     "Brazil", "Nigeria", "Bangladesh", "Russia", "Mexico",
     "Japan", "Ethiopia", "Philippines", "Egypt", "Vietnam",
-    "DR Congo", "Turkey", "Iran", "Germany", "Thailand",
-    "Portugal"
+    "DR Congo", "Turkey", "Iran", "Germany", "Thailand"
 }
 
 function delete_data()
