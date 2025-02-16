@@ -96,16 +96,17 @@ process_script_benchmark() {
       local SCRIPT_NAME
       BASE_NAME=$(basename "$SCRIPT" .lua)
       DB_SUFFIX=$( [ -n "$DB_INFO" ] && echo "_db_${DB_INFO}" )
+      IS_SELECT=$([[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]] && echo true || echo false)
       if [ -n "$COMBINATION" ]; then
         COMB_SUFFIX="_comb_${COMBINATION}"
-        if $IS_FROM_SELECT_DIR && [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
+        if $IS_FROM_SELECT_DIR && $IS_SELECT; then
           SCRIPT_NAME="${SCRIPT_PATH##*/}${DB_SUFFIX}${COMB_SUFFIX}_select_${BASE_NAME}"
         else
-          CLEAN_NAME=$(basename "$SCRIPT" .lua | sed "s/^${SCRIPT_PATH##*/}_//")
-          SCRIPT_NAME="${SCRIPT_PATH##*/}${DB_SUFFIX}${COMB_SUFFIX}_${CLEAN_NAME}"
+          CLEANED_NAME=$(basename "$SCRIPT" .lua | sed "s/^${SCRIPT_PATH##*/}_//")
+          SCRIPT_NAME="${SCRIPT_PATH##*/}${DB_SUFFIX}${COMB_SUFFIX}_${CLEANED_NAME}"
         fi
       else
-        if $IS_FROM_SELECT_DIR && [[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]]; then
+        if $IS_FROM_SELECT_DIR && $IS_SELECT; then
           BASE_SELECT_NAME=$(basename "$SELECT_SCRIPT" .lua)
           SCRIPT_NAME="${BASE_SELECT_NAME%_*}${DB_SUFFIX}_${BASE_SELECT_NAME##*_}_${BASE_NAME}"
         else
@@ -113,7 +114,11 @@ process_script_benchmark() {
         fi
       fi
       local RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
-      run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME" "$COMBINATION"
+
+      # Call run_benchmark if SELECT_QUERIES is empty or the script is part of SELECT_QUERIES
+      if ! $IS_SELECT || [ "$SELECT_QUERIES" == "null" ] || echo "$SELECT_QUERIES" | grep -q "${BASE_NAME%.lua}"; then
+          run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME" "$COMBINATION"
+      fi
     fi
   done
 
@@ -276,15 +281,15 @@ DBMS_COUNT=${#DBMS_SET[@]}
 # Main benchmark loop
 for SCRIPT_PATH in $SCRIPT_KEYS; do
   DBMS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].db // ["mysql"]')
+  SELECT_QUERIES=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].selects')
   for DB in $(echo "$DBMS" | jq -r '.[]'); do
     prepare_variables "$SCRIPT_PATH" "$DB"
     DB_INFO="$( [ "$DBMS_COUNT" -ne 1 ] && echo "${DB}" )"
     if [[ -n "$EXPORTED_VARS" ]]; then
         IFS=',' read -r -a KEYS <<< "$EXPORTED_VARS"
 
-        # Generate all combinations of key-value pairs
-        COMBINATIONS=$(generate_combinations "" "${KEYS[@]}")
         # Process each combination
+        COMBINATIONS=$(generate_combinations "" "${KEYS[@]}")
         while IFS=',' read -r combination; do
             # Export key-value pairs for the current combination
             IFS=',' read -ra key_value_pairs <<< "$combination"
@@ -292,7 +297,6 @@ for SCRIPT_PATH in $SCRIPT_KEYS; do
               export "$(echo "${pair%%=*}" | tr '[:lower:]' '[:upper:]')=${pair#*=}"
             done
 
-            # Create a directory name for the combination
             COMBINATION_NAME=$(echo "$combination" | sed -E 's/(^|,)num_rows=[^,]*//g;s/^,//;s/,$//' | tr ',' '_' | tr '=' '_')
             LOG_DIR_COMBINATION="$LOG_DIR/$COMBINATION_NAME"
             process_script_benchmark "$DB_INFO" "$SCRIPT_PATH" "$LOG_DIR_COMBINATION" "$INSERT_SCRIPT" "$SELECT_SCRIPT" "$COMBINATION_NAME"
