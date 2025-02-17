@@ -18,7 +18,7 @@ function query_for_country(country)
     ]], country)
 end
 
-function union_mutliple_countries_query()
+function select_union_multiple_countries()
     local test_countries = utils.get_random_countries(countries,5)
     local query_parts = {}
 
@@ -26,11 +26,11 @@ function union_mutliple_countries_query()
         table.insert(query_parts, query_for_country(country))
     end
 
-    local final_query = table.concat(query_parts, " UNION ")
+    local union_multiple_countries_query = table.concat(query_parts, " UNION ")
     print("Executing query for countries: " .. table.concat(countries, ", "))
-    con:query(final_query)
+    con:query(union_multiple_countries_query)
 end
 
 function event()
-    union_mutliple_countries_query()
+    select_union_multiple_countries()
 end

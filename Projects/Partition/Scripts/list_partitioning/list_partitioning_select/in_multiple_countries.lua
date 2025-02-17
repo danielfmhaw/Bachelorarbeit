@@ -9,7 +9,7 @@ local countries = {
     "DR Congo", "Turkey", "Iran", "Germany", "Thailand"
 }
 
-function mutliple_countries_query()
+function select_in_multiple_countries()
     local test_countries = utils.get_random_countries(countries,5)
     local where_clause = {}
 
@@ -17,7 +17,7 @@ function mutliple_countries_query()
         table.insert(where_clause, string.format("'%s'", country))
     end
 
-    local join_query = string.format([[
+    local in_multiple_countries_query = string.format([[
         SELECT *
         FROM KUNDEN k
         JOIN BESTELLUNG b ON k.KUNDEN_ID = b.FK_KUNDEN
@@ -25,9 +25,9 @@ function mutliple_countries_query()
     ]], table.concat(where_clause, ", "))
 
     print("Executing query for these random countries: ", table.concat(test_countries, ", "))
-    con:query(join_query)
+    con:query(in_multiple_countries_query)
 end
 
 function event()
-    mutliple_countries_query()
+    select_in_multiple_countries()
 end

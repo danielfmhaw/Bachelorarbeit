@@ -9,7 +9,7 @@ local countries = {
     "DR Congo", "Turkey", "Iran", "Germany", "Thailand"
 }
 
-function or_multiple_countries_query()
+function select_or_multiple_countries()
     local test_countries = utils.get_random_countries(countries, 5)
     local where_clause = {}
 
@@ -18,7 +18,7 @@ function or_multiple_countries_query()
     end
 
     -- Instead of IN, use OR between each country condition
-    local join_query = string.format([[
+    local or_multiple_countries_query = string.format([[
         SELECT *
         FROM KUNDEN k
         JOIN BESTELLUNG b ON k.KUNDEN_ID = b.FK_KUNDEN
@@ -26,9 +26,9 @@ function or_multiple_countries_query()
     ]], table.concat(where_clause, " OR "))
 
     print("Executing query for these random countries: ", table.concat(test_countries, ", "))
-    con:query(join_query)
+    con:query(or_multiple_countries_query)
 end
 
 function event()
-    or_multiple_countries_query()
+    select_or_multiple_countries()
 end

@@ -9,7 +9,7 @@ local countries = {
     "DR Congo", "Turkey", "Iran", "Germany", "Thailand"
 }
 
-function normal_query()
+function select_without_list_pruning_multiple()
     local test_countries = utils.get_random_countries(countries,5)
     local where_clause = {}
 
@@ -17,7 +17,7 @@ function normal_query()
         table.insert(where_clause, string.format("'%s'", country))
     end
 
-    local join_query = string.format([[
+    local without_list_pruning_multiple_query = string.format([[
         SELECT *
         FROM KUNDEN k
         JOIN BESTELLUNG b ON k.KUNDEN_ID = b.FK_KUNDEN
@@ -25,9 +25,9 @@ function normal_query()
     ]], table.concat(where_clause, ", "))
 
     print("Executing query for these random countries: ", table.concat(test_countries, ", "))
-    con:query(join_query)
+    con:query(without_list_pruning_multiple_query)
 end
 
 function event()
-    normal_query()
+    select_without_list_pruning_multiple()
 end

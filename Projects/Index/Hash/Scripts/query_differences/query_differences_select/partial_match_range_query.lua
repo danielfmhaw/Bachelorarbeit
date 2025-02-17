@@ -1,8 +1,8 @@
 local con = sysbench.sql.driver():connect()
-function select_combined_match_with_range()
+function select_partial_match_range_query()
     con:query("SELECT * FROM KUNDEN WHERE NAME = 'Müller' AND VORNAME BETWEEN 'David' AND 'Laura';")
 end
 
 function event()
-    select_combined_match_with_range()
+    select_partial_match_range_query()
 end
