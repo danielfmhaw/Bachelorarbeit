@@ -23,7 +23,7 @@ function prepare()
              LAND          VARCHAR(100) NOT NULL,
              EMAIL         VARCHAR(255),
              TELEFONNUMMER VARCHAR(20),
-             PRIMARY KEY (KUNDEN_ID, GEBURTSTAG, LAND)
+             PRIMARY KEY (KUNDEN_ID, LAND)
          )
          PARTITION BY LIST COLUMNS(LAND) (
              %s

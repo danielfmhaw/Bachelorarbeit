@@ -13,7 +13,7 @@ function prepare()
              LAND          VARCHAR(100),
              EMAIL         VARCHAR(255),
              TELEFONNUMMER VARCHAR(20),
-             PRIMARY KEY (KUNDEN_ID, GEBURTSTAG)
+             PRIMARY KEY (KUNDEN_ID)
          );
      ]]
 

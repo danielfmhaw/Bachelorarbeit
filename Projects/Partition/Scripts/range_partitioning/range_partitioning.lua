@@ -20,8 +20,6 @@ function prepare()
          ) %s
      ]],partition_sql)
 
-    print("daniel",create_kunden_query)
-
     -- SQL query to create the BESTELLUNG table
     local create_bestellung_query = [[
         CREATE TABLE IF NOT EXISTS BESTELLUNG (
