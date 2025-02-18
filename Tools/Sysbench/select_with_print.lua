@@ -13,7 +13,7 @@ function select_query()
         local bestellung_count = (bestellung_count_result and bestellung_count_result.nrows > 0) and bestellung_count_result:fetch_row()[1] or 0
 
         io.stderr:write(string.format("KUNDEN has %d items, BESTELLUNG has %d items\n", kunden_count, bestellung_count))
-        utils.print_results(con:query("SELECT EXTRACT(YEAR FROM B.BESTELLDATUM) AS Jahr, SUM(B.UMSATZ) AS UmsatzProJahr FROM KUNDEN K JOIN BESTELLUNG B ON K.KUNDEN_ID = B.FK_KUNDEN GROUP BY EXTRACT(YEAR FROM B.BESTELLDATUM);"))
+        utils.print_results(con, "SELECT EXTRACT(YEAR FROM B.BESTELLDATUM) AS Jahr, SUM(B.UMSATZ) AS UmsatzProJahr FROM KUNDEN K JOIN BESTELLUNG B ON K.KUNDEN_ID = B.FK_KUNDEN GROUP BY EXTRACT(YEAR FROM B.BESTELLDATUM);")
         counts_printed = true
     else
         con:query("SELECT EXTRACT(YEAR FROM B.BESTELLDATUM) AS Jahr, SUM(B.UMSATZ) AS UmsatzProJahr FROM KUNDEN K JOIN BESTELLUNG B ON K.KUNDEN_ID = B.FK_KUNDEN GROUP BY EXTRACT(YEAR FROM B.BESTELLDATUM);")

@@ -49,9 +49,9 @@ function insert_data()
             -- Insert into BESTELLUNG, referencing KUNDEN_ID
             local bestellung_query = string.format([[
                 INSERT INTO BESTELLUNG
-                (BESTELLUNG_ID, BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
-                VALUES (%d,'%s', %d, %d, %d);
-            ]], bestellung_id, bestelldatum, artikel_id, kunden_id, umsatz)
+                (BESTELLUNG_ID, BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, LAND, UMSATZ)
+                VALUES (%d,'%s', %d, %d, '%s', %d);
+            ]], bestellung_id, bestelldatum, artikel_id, kunden_id, land, umsatz)
 
             con:query(bestellung_query)
         end

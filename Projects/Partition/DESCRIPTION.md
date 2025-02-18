@@ -22,23 +22,41 @@ cd Tools
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
   -scripts '{
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/without_partitioning": {
-      "selects": ["without_range_pruning"]
+      "selects": ["without_range_failing_pruning","without_range_primary_key"]
     },
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/range_partitioning": {}
   }'
 ```
 
-### Code für Hash-Partitionierung:
+### Code für Range-Partitionierung-Vergleich zwischen RANGE COLUMNS and only RANGE:
 ```bash
 cd ../..
 cd Tools
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
+  -var '{"type":["range_columns","only_range"]}' \
+  -scripts '{
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/range_partitioning": {
+      "vars": "type",
+      "selects": ["with_primary_key","with_pruning"]
+    }
+  }'
+```
+
+### Code für Hash-Partitionierung mit Range:
+```bash
+cd ../..
+cd Tools
+./sysbench_script.sh \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
+  -var '{"partitions_size":[5,50,500]}' \
   -scripts '{
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/without_partitioning": {
-      "selects": ["without_hash_pruning","without_hash_pruning_range"]
+      "selects": ["without_hash_pruning_range"]
     },
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/hash_partitioning": {}
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/hash_partitioning": {
+      "vars": "partitions_size"
+    }
   }'
 ```
 

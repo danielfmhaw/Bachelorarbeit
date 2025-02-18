@@ -116,7 +116,7 @@ process_script_benchmark() {
       local RAW_RESULTS_FILE="$LOG_DIR/${SCRIPT_NAME}.log"
 
       # Call run_benchmark if SELECT_QUERIES is empty or the script is part of SELECT_QUERIES
-      if ! $IS_SELECT || [ "$SELECT_QUERIES" == "null" ] || echo "$SELECT_QUERIES" | grep -q "${BASE_NAME%.lua}"; then
+      if ! $IS_SELECT || [ "$SELECT_QUERIES" == "null" ] || echo "$SELECT_QUERIES" | grep -qw "${BASE_NAME%.lua}"; then
           run_benchmark "$SCRIPT" "run" "$RAW_RESULTS_FILE" "$SCRIPT_NAME" "$COMBINATION"
       fi
     fi

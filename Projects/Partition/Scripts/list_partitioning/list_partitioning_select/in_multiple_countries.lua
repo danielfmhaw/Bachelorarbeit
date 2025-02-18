@@ -1,6 +1,7 @@
 local con = sysbench.sql.driver():connect()
 package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):match("(.*/)") .. "../../../../../Tools/Lua/?.lua"
 local utils = require("utils")
+local explain_executed = false
 
 local countries = {
     "China", "India", "United States", "Indonesia", "Pakistan",
@@ -20,11 +21,15 @@ function select_in_multiple_countries()
     local in_multiple_countries_query = string.format([[
         SELECT *
         FROM KUNDEN k
-        JOIN BESTELLUNG b ON k.KUNDEN_ID = b.FK_KUNDEN
+        JOIN BESTELLUNG b ON k.KUNDEN_ID = b.FK_KUNDEN AND k.LAND = b.LAND
         WHERE k.LAND IN (%s);
     ]], table.concat(where_clause, ", "))
 
-    print("Executing query for these random countries: ", table.concat(test_countries, ", "))
+    if not explain_executed then
+        utils.print_results(con, "EXPLAIN " .. in_multiple_countries_query)
+        explain_executed = true
+    end
+
     con:query(in_multiple_countries_query)
 end
 

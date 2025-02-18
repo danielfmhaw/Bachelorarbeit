@@ -125,7 +125,7 @@
   "range-partition": {
     "scripts": {
       "./Projects/Partition/Scripts/without_partitioning": {
-        "selects": ["without_range_pruning"]
+        "selects": ["without_range_failing_pruning","without_range_primary_key"]
       },
       "./Projects/Partition/Scripts/range_partitioning": {}
     }
@@ -133,10 +133,13 @@
   "hash-partition": {
     "scripts": {
       "./Projects/Partition/Scripts/without_partitioning": {
-        "selects": ["without_hash_pruning","without_hash_pruning_range"]
+        "selects": ["without_hash_pruning_range"]
       },
-      "./Projects/Partition/Scripts/hash_partitioning": {}
-    }
+      "./Projects/Partition/Scripts/hash_partitioning": {
+        "vars": "partitions_size"
+      }
+    },
+    "var": {"partitions_size":[5,50,500]}
   },
   "list-partition": {
     "scripts": {

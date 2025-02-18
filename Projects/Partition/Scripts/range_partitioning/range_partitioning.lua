@@ -1,15 +1,16 @@
 local con = sysbench.sql.driver():connect()
 package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):match("(.*/)") .. "../../../../Tools/Lua/?.lua"
 local utils = require("utils")
+local use_range_columns = (os.getenv("TYPE") or "") == "range_columns"
 
 function prepare()
-     local partition_sql = utils.generate_partition_definition_by_year(1950, 2020, 5)
+     local partition_sql = utils.generate_partition_definition_by_year(1950, 2020, 5, use_range_columns)
      -- SQL query to create the KUNDEN table with range partition
      local create_kunden_query = string.format([[
-         CREATE TABLE IF NOT EXISTS KUNDEN (
-             KUNDEN_ID     INT NOT NULL,
+         CREATE TABLE KUNDEN (
+             KUNDEN_ID     INT,
              NAME          VARCHAR(255),
-             GEBURTSTAG    DATE NOT NULL,
+             GEBURTSTAG    DATE,
              ADRESSE       VARCHAR(255),
              STADT         VARCHAR(100),
              POSTLEITZAHL  VARCHAR(10),
@@ -22,11 +23,11 @@ function prepare()
 
     -- SQL query to create the BESTELLUNG table
     local create_bestellung_query = [[
-        CREATE TABLE IF NOT EXISTS BESTELLUNG (
+        CREATE TABLE BESTELLUNG (
             BESTELLUNG_ID INT PRIMARY KEY,
             BESTELLDATUM DATE,
             ARTIKEL_ID   INT,
-            FK_KUNDEN    INT NOT NULL,
+            FK_KUNDEN    INT,
             UMSATZ       INT
         );
     ]]

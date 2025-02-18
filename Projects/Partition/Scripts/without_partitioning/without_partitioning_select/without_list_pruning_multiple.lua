@@ -1,6 +1,9 @@
 local con = sysbench.sql.driver():connect()
 package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):match("(.*/)") .. "../../../../../Tools/Lua/?.lua"
 local utils = require("utils")
+local explain_executed = false
+package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):match("(.*/)") .. "../../../../../Tools/Lua/?.lua"
+local utils = require("utils")
 
 local countries = {
     "China", "India", "United States", "Indonesia", "Pakistan",
@@ -24,7 +27,11 @@ function select_without_list_pruning_multiple()
         WHERE k.LAND IN (%s);
     ]], table.concat(where_clause, ", "))
 
-    print("Executing query for these random countries: ", table.concat(test_countries, ", "))
+    if not explain_executed then
+        utils.print_results(con, "EXPLAIN " .. without_list_pruning_multiple_query)
+        explain_executed = true
+    end
+
     con:query(without_list_pruning_multiple_query)
 end
 
