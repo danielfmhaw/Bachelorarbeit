@@ -33,7 +33,7 @@ function prepare()
 
     if format and format ~= "" then
         con:query(string.format("SET SESSION binlog_format = '%s';", format:upper()))
-        utils.print_results(con:query("SHOW VARIABLES LIKE 'binlog_format';"))
+        utils.print_results(con, "SHOW VARIABLES LIKE 'binlog_format';")
     end
 
     con:query(create_kunden_query)

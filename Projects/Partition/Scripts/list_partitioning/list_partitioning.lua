@@ -13,14 +13,14 @@ function prepare()
      -- SQL query to create the KUNDEN table without range partition
      local partition_sql = utils.generate_list_partitions(countries)
      local create_kunden_query = string.format([[
-         CREATE TABLE IF NOT EXISTS KUNDEN (
-             KUNDEN_ID     INT NOT NULL,
+         CREATE TABLE KUNDEN (
+             KUNDEN_ID     INT,
              NAME          VARCHAR(255),
-             GEBURTSTAG    DATE NOT NULL,
+             GEBURTSTAG    DATE,
              ADRESSE       VARCHAR(255),
              STADT         VARCHAR(100),
              POSTLEITZAHL  VARCHAR(10),
-             LAND          VARCHAR(100) NOT NULL,
+             LAND          VARCHAR(100),
              EMAIL         VARCHAR(255),
              TELEFONNUMMER VARCHAR(20),
              PRIMARY KEY (KUNDEN_ID, LAND)
@@ -32,12 +32,13 @@ function prepare()
 
     -- SQL query to create the BESTELLUNG table
     local create_bestellung_query = [[
-        CREATE TABLE IF NOT EXISTS BESTELLUNG (
+        CREATE TABLE BESTELLUNG (
             BESTELLUNG_ID INT PRIMARY KEY,
-            BESTELLDATUM DATE,
-            ARTIKEL_ID   INT,
-            FK_KUNDEN    INT NOT NULL,
-            UMSATZ       INT
+            BESTELLDATUM  DATE,
+            ARTIKEL_ID    INT,
+            FK_KUNDEN     INT,
+            LAND          VARCHAR(100),
+            UMSATZ        INT
         );
     ]]
 

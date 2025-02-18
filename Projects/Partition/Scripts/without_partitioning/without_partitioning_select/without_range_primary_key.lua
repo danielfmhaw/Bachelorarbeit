@@ -3,8 +3,8 @@ package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):mat
 local utils = require("utils")
 local explain_executed = false
 
-function select_with_primary_key()
-    local with_primary_key_query = [[
+function select_without_range_direct()
+    local without_range_direct_query = [[
         SELECT *
         FROM KUNDEN k
         JOIN BESTELLUNG b ON k.KUNDEN_ID = b.FK_KUNDEN
@@ -12,13 +12,13 @@ function select_with_primary_key()
     ]];
 
     if not explain_executed then
-        utils.print_results(con, "EXPLAIN " .. with_primary_key_query)
+        utils.print_results(con, "EXPLAIN " .. without_range_direct_query)
         explain_executed = true
     end
 
-    con:query(with_primary_key_query)
+    con:query(without_range_direct_query)
 end
 
 function event()
-    select_with_primary_key()
+    select_without_range_direct()
 end

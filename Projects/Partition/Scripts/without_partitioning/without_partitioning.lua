@@ -3,10 +3,10 @@ local con = sysbench.sql.driver():connect()
 function prepare()
      -- SQL query to create the KUNDEN table without range partition
      local create_kunden_query = [[
-         CREATE TABLE IF NOT EXISTS KUNDEN (
-             KUNDEN_ID     INT NOT NULL,
+         CREATE TABLE KUNDEN (
+             KUNDEN_ID     INT,
              NAME          VARCHAR(255),
-             GEBURTSTAG    DATE NOT NULL,
+             GEBURTSTAG    DATE,
              ADRESSE       VARCHAR(255),
              STADT         VARCHAR(100),
              POSTLEITZAHL  VARCHAR(10),
@@ -19,11 +19,11 @@ function prepare()
 
     -- SQL query to create the BESTELLUNG table
     local create_bestellung_query = [[
-        CREATE TABLE IF NOT EXISTS BESTELLUNG (
+        CREATE TABLE BESTELLUNG (
             BESTELLUNG_ID INT PRIMARY KEY,
             BESTELLDATUM DATE,
             ARTIKEL_ID   INT,
-            FK_KUNDEN    INT NOT NULL,
+            FK_KUNDEN    INT,
             UMSATZ       INT
         );
     ]]

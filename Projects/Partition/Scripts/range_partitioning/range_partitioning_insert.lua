@@ -23,7 +23,7 @@ function insert_data()
     for i = 1, num_rows do
         local kunden_id = i
         local name = string.format("Kunde_%d", i)
-        local geburtstag = string.format("%04d-01-01", math.random(1950, 2020))
+        local geburtstag = string.format("%04d-%02d-%02d", math.random(1950, 2020), math.random(1, 12), math.random(1, 28))
         local adresse = string.format("Address_%d", i)
         local stadt = string.format("City_%d", math.random(1, 100))
         local postleitzahl = string.format("%05d", math.random(10000, 99999))
