@@ -1,4 +1,5 @@
 local con = sysbench.sql.driver():connect()
+local type = os.getenv("TYPE") and tostring(os.getenv("TYPE")) or "HASH"
 local count = tonumber(os.getenv("PARTITIONS_SIZE")) or 5
 
 function prepare()
@@ -16,9 +17,11 @@ function prepare()
             TELEFONNUMMER VARCHAR(20),
             PRIMARY KEY (KUNDEN_ID)
         )
-        PARTITION BY HASH(KUNDEN_ID)
-        PARTITIONS %s;
-    ]], count)
+        PARTITION BY %s (KUNDEN_ID)
+        PARTITIONS %d;
+    ]], type:upper(), count)
+
+    print("daniel",create_kunden_query)
 
     -- SQL query to create the BESTELLUNG table
     local create_bestellung_query = [[
