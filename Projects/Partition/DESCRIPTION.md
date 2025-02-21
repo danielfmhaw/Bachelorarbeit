@@ -28,7 +28,7 @@ cd Tools
   }'
 ```
 
-### Code für Range-Partitionierung-Vergleich zwischen RANGE COLUMNS and only RANGE:
+### Code für Range-Partitionierung-Vergleich zwischen RANGE COLUMNS and only RANGE (nicht in CI/CD enthalten, also pattern.json):
 ```bash
 cd ../..
 cd Tools
@@ -56,6 +56,20 @@ cd Tools
     },
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/hash_partitioning": {
       "vars": "partitions_size"
+    }
+  }'
+```
+
+### Vergleich zwischen Hash-und Key-Partitionierung (nicht in CI/CD enthalten, also pattern.json):
+```bash
+cd ../..
+cd Tools
+./sysbench_script.sh \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
+  -var '{"type":["hash","key"],"partitions_size":[5,100]}' \
+  -scripts '{
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/hash_partitioning": {
+      "vars": "type,partitions_size"
     }
   }'
 ```
