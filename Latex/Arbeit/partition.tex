@@ -4,11 +4,11 @@
 \chapter{Partition}\label{ch:partition}
 In diesem Kapitel analysieren wir die Funktionsweise von Partitionen und das Verhalten des Query-Optimizers.
 Zudem betrachten wir deren Verwendungszweck sowie die verschiedenen Typen.
-Abschließend führen wir Benchmarktests durch, um die jeweiligen Vor- und Nachteile zu bewerten.
+Abschließend führen wir Benchmark-Tests durch, um die jeweiligen Vor- und Nachteile zu bewerten.
 
 \section{Grundlagen}\label{sec:partition-grundlagen}
 Zu Beginn muss zunächst geklärt werden, was eine Partition ist.
-Eine partitionierte Tabelle ist eine logische Einheit, die aus mehreren physischen Subtabellen besteht.
+Eine partitionierte Tabelle ist eine logische Einheit, die aus mehreren physischen Subtabellen besteht (\cite[pp. 265--273]{schwartz2012high}).
 Das System verwaltet die Partitionen intern, sodass der Benutzer nicht bemerkt, wie genau die Daten organisiert sind.
 Dadurch wirken sie für ihn wie eine Blackbox.
 Wir werden gleich sehen, wie man erkennen kann, welche Komponenten-Tabellen intern verwendet werden.
@@ -25,7 +25,7 @@ Außerdem können alle Fremdschlüssel-Bedingungen (engl.\ foreign key constrain
 Zum anderen muss man im Hinterkopf haben, dass es ein Limit an Partitionen pro Tabelle gibt.
 Bei älteren MySQL-Versionen liegt dieses Limit bei 1024 und seit MySQL-Version 8.0 bei 8192 Partitionen (\ref{mysql_nof_partitions}).
 Wie wir später noch sehen werden, sollte man aus verschiedenen Gründen so wenige Partitionen wie möglich definieren.
-Daher hat diese Einschränkung nicht die größte Relevanz, sollte jedoch im Hinterkopf behalten werden.im Hinterkopf gehalten werden sollte.
+Daher hat diese Einschränkung nicht die größte Relevanz, sollte jedoch im Hinterkopf behalten werden.
 
 Da wir die Bedingungen nun geklärt haben, kommen wir als Nächstes zu der Funktionsweise.
 Partitionierte Tabellen bestehen aus mehreren zugrunde liegenden Tabellen, die durch Handler-Objekte repräsentiert werden.
@@ -208,7 +208,7 @@ Dafür müssen wir nur im Codeblock~\ref{lst:create_kunden_partition_hash} das S
 Die KEY-Partitionierung wollen wir aber nicht mit der Referenz vergleichen, sondern nur mit dem Ergebnis von HASH\@.
 
 \section{Analyse}\label{sec:partition-analyse}
-Wie in dem Abschnitt~\ref{sec:partition-durchfuhrung} erklärt, führen wie pro Partitionstyp unterschiedliche Benchmarktests durch.
+Wie in dem Abschnitt~\ref{sec:partition-durchfuhrung} erklärt, führen wie pro Partitionstyp unterschiedliche Benchmark-Tests durch.
 Außerdem vergleichen die Ergebnisse mit jeweils einer Referenz, bei der es keine partitionierten Tabellen gibt.
 
 Bei der Range-Partitionierung fällt auf, dass die Benutzung von \texttt{RANGE} oder \texttt{RANGE COLUMNS} keinerlei Einfluss auf die Performance hat.

@@ -2,7 +2,7 @@
 %! Date = 26.01.25
 
 \chapter{Views}\label{ch:views}
-Im folgenden Kapitel betrachten wir die Performance Vorteile von Sichten (engl.\ Views) in SQL.
+Im folgenden Kapitel betrachten wir die Performance Vorteile von Sichten (engl.\ Views) in SQL\@.
 Zunächst befassen wir uns mit virtuellen Sichten, ihren Vor- und Nachteilen sowie dem Verhalten bei Inserts.
 Danach widmen wir uns materialisierten Sichten, die physisch in der Datenbank gespeichert werden, und deren Implementierung.
 Dabei erklären und nutzen wir Trigger, da MySQL keine native Unterstützung für materialisierte Sichten bietet.
@@ -12,8 +12,8 @@ In den letzten beiden Kapiteln betrachten wir die Durchführung der Benchmarks n
 
 Grundlegend existieren Relationen, bzw.\ Tabellen, die durch das \texttt{CREATE TABLE} – Statement definiert werden, physisch in der Datenbank.
 Damit sind sie persistent, was bedeutet, dass sie dauerhaft existieren und sich nicht ändern, es sei denn, sie werden explizit durch eine SQL-Änderungsanweisung dazu aufgefordert.
-Dies entspricht der Dauerhaftigkeit des ACID-Prinzips \cite{acid_eigenschaften}, die sicherstellt, dass bestätigte Transaktionen dauerhaft gespeichert bleiben und auch bei Systemausfällen nicht verloren gehen.
-Es gibt jedoch eine weitere Klasse von SQL-Relationen, die nicht wie Tabellen physisch gespeichert werden.
+Dies entspricht der Dauerhaftigkeit des ACID-Prinzips~\cite{acid_eigenschaften}, die sicherstellt, dass bestätigte Transaktionen dauerhaft gespeichert bleiben und auch bei Systemausfällen nicht verloren gehen.
+Es gibt jedoch eine weitere Klasse von SQL-Relationen, die nicht wie Tabellen physisch gespeichert werden (\cite[341--349, 353--366]{garcia2008database}, ~\cite[pp. 276--281]{schwartz2012high}).
 Sie werden als virtuelle Sichten bezeichnet.
 Virtuelle Sichten werden durch einen Ausdruck definiert, der einer Abfrage ähnelt und können auch so abgefragt werden, als ob sie tatsächlich physisch existierten.
 In einigen Fällen kann man sogar die Datensätze über die Sicht geändert werden.
@@ -23,7 +23,7 @@ CREATE VIEW <name> AS <definition>;
 \end{lstlisting}
 \vspace{-5pt}
 
-In dem Codeblock \ref{lst:create_view} sehen wir die Struktur der Definition einer View.
+In dem Codeblock~\ref{lst:create_view} sehen wir die Struktur der Definition einer View.
 Als Nächstes müssen wir die \texttt{view-definition} mit einer SQL-Abfrage ersetzen, die den Inhalt der virtuellen Sicht abbilden soll.
 Um dieses Vorgehen mit einem Beispiel näher zu veranschaulichen, nutzen wir die Tabellen Kunden (\ref{lst:create_table_kunde}) und Bestellung (\ref{lst:create_table_bestellung}).
 Nun wollen wir, dass die beiden Tabellen über die \texttt{KUNDEN\_ID} in der Sicht zusammengefügt werden, da die \texttt{KUNDEN\_ID} zum einen der Primärschlüssel der Kundentabelle ist und zum anderen der Fremdschlüssel in Bestellung.
@@ -39,7 +39,7 @@ Die View mit dem Namen \texttt{KUNDEN\_OVERVIEW} hat folgende Struktur:
     style=custom_daniel,
 ]{Scripts/Views/01_create_view.sql}
 
-Wenn wir die Daten dieser virtuellen Sicht abfragen wollen, dann adressieren wir den Namen in der FROM-Klausel und verlassen uns darauf, dass das Datenbankmanagementsystem die benötigten Tupel erzielt (siehe \ref{lst:select-view}).
+Wenn wir die Daten dieser virtuellen Sicht abfragen wollen, dann adressieren wir den Namen in der FROM-Klausel und verlassen uns darauf, dass das Datenbankmanagementsystem die benötigten Tupel erzielt (siehe~\ref{lst:select-view}).
 Dabei operiert das DBMS direkt auf den Relationen, die die virtuelle Sicht definieren.
 In unserem Fall sind das die Kunden- und Bestelltabelle.
 
@@ -52,7 +52,7 @@ ORDER BY Jahr ASC, Gesamtumsatz DESC;
 
 Eine weitere Möglichkeit, die Funktionsweise einer Sicht besser zu verstehen, besteht darin, sie in einer FROM-Klausel durch eine Unterabfrage zu ersetzen, die identisch mit der Sichtdefinition ist.
 Die Unterabfrage müssen wir noch mit einer Tupelvariablen ergänzen, damit wir auch Bezug auf die Tupel nehmen können.
-Die SQL-Abfrage aus \ref{lst:select-without-view} liefert das gleiche Ergebnis wie die aus \ref{lst:select-view}, wenn wir unsere View wie im Beispiel \ref{lst:create_kunden_bestellung_view} definieren.
+Die SQL-Abfrage aus~\ref{lst:select-without-view} liefert das gleiche Ergebnis wie die aus~\ref{lst:select-view}, wenn wir unsere View wie im Beispiel~\ref{lst:create_kunden_bestellung_view} definieren.
 Zu dem Einfluss auf die Performance kommen wir in den späteren Unterkapiteln \nameref{sec:durchfuhrung-der-benchmarks} und \nameref{sec:analyse-der-ergebnisse}.
 
 \lstinputlisting[
@@ -94,9 +94,9 @@ trigger_body;
 \vspace{-5pt}
 
 Das Problem in MySQL mit Triggern ist aber, dass sie nur auf Tabellen angewendet werden können.
-Später werden wir dazu im Kapitel \ref{sec:durchfuhrung-der-benchmarks} noch ein genaueres Beispiel betrachten.
+Später werden wir dazu im Kapitel~\ref{sec:durchfuhrung-der-benchmarks} noch ein genaueres Beispiel betrachten.
 Es bietet sich aber ein weiteres Konzept mit den Stored Procedures an, um Werte in die virtuelle Sicht einzufügen.
-Stored Procedures sind Funktionen, die direkt im DB-Server hinterlegt werden und wie andere integrierte Funktionen, wie z.B. round(), aufgerufen werden können.
+Stored Procedures sind Funktionen, die direkt im DB-Server hinterlegt werden und wie andere integrierte Funktionen, wie z.B.\ round(), aufgerufen werden können.
 
 \begin{lstlisting}[language=SQL,caption=Allgemeine Prozedur Deklaration,label={lst:allg-stored-procedure-dekl}]
 CREATE PROCEDURE stored_procedure_name(IN param1 INT, IN param2 VARCHAR(255))
@@ -131,7 +131,7 @@ Es ist dabei jedoch nicht ausgeschlossen, dass in den zugrunde liegenden Tabelle
 Allgemein sind Sichten so definiert, dass sie eine neue Relation aus Basistabellen durch Ausführen einer Abfrage auf diesen Tabellen erstellen.
 Bisher haben wir Sichten ausschließlich als logische Beschreibungen von Relationen betrachtet.
 In bestimmten Fällen kann es jedoch aus Performancegründen sinnvoll sein, sie zu materialisieren, also die Ergebnisse physisch zu speichern.
-Durch die physische Speicherung verringert sich der Rechenaufwand für Abfragen, da beispielsweise in unserem Fall (siehe \ref{lst:create_kunden_bestellung_view}) der Join nicht erneut ausgeführt werden muss.
+Durch die physische Speicherung verringert sich der Rechenaufwand für Abfragen, da beispielsweise in unserem Fall (siehe~\ref{lst:create_kunden_bestellung_view}) der Join nicht erneut ausgeführt werden muss.
 Die bereits gespeicherten Ergebnisse sind direkt abrufbar.
 Dies führt zu einer schnelleren Antwortzeit der Query, bringt jedoch einen höheren Pflegeaufwand mit sich.
 Passend zu unserer virtuellen Sicht (\ref{lst:create_kunden_bestellung_view}) sieht die Materialisierte wie folgt aus:
@@ -159,7 +159,7 @@ Die inkrementelle Aktualisierung der materialisierten Sicht ist deutlich effizie
 Nicht jedes Datenbankmanagementsystem bietet die inkrementelle Auffrischung an.
 Oracle unterstützt die inkrementelle Auffrischung nativ mit Materialized View Logs.
 In PostgreSQL ist eine manuelle Planung erforderlich, da eine automatische inkrementelle Aktualisierung nicht unterstützt wird (\cite{mat_view_features_per_db}).
-Wenn man die Option \texttt{CONCURRENTLY} beim Aktualisieren einer materialisierten Sicht verwendet, können andere Prozesse weiterhin darauf zugreifen, da die bestehende Sicht erst ersetzt wird, wenn die neue Version fertiggestellt ist (siehe \ref{lst:refresh-materialized-view}).
+Wenn man die Option \texttt{CONCURRENTLY} beim Aktualisieren einer materialisierten Sicht verwendet, können andere Prozesse weiterhin darauf zugreifen, da die bestehende Sicht erst ersetzt wird, wenn die neue Version fertiggestellt ist (siehe~\ref{lst:refresh-materialized-view}).
 
 MySQL bietet gar nicht erst eine Möglichkeit an, um materialisierte Sichten nativ zu erstellen.
 Allerdings kann man die Funktionsweise mithilfe einer physischen Tabelle als Sicht und mit Triggern auf die zugrundeliegenden Tabellen nachstellen, die bei Aktualisierungen Änderungen an der Sichttabelle durchführen.
@@ -188,9 +188,9 @@ WHERE Stadt = 'Berlin' AND Jahr = 2024;
 \end{lstlisting}
 \vspace{-5pt}
 
-In Oracle könnte die Abfrage \ref{lst:select-with-mat-view} intern so umgeschrieben werden, dass stattdessen die Materialized View, die die aggregierten Umsätze enthält, genutzt wird.
+In Oracle könnte die Abfrage~\ref{lst:select-with-mat-view} intern so umgeschrieben werden, dass stattdessen die Materialized View, die die aggregierten Umsätze enthält, genutzt wird.
 Anders sieht dies in PostgreSQL aus, da dort diese automatische Abfrageumschreibung nicht existiert.
-Bei der zweiten Abfrage \ref{lst:select-without-mat-view} wird die materialisierte View nicht verwendet, da sie nicht die Spalten Land und Monat enthält.
+Bei der zweiten Abfrage~\ref{lst:select-without-mat-view} wird die materialisierte View nicht verwendet, da sie nicht die Spalten Land und Monat enthält.
 Deshalb werden in diesem Fall die zugrunde liegenden Tabellen direkt abgefragt und die Abfrage muss explizit auf diese Tabellen zugreifen, um die gewünschten Daten zu erhalten.
 
 \vspace{-5pt}
@@ -262,7 +262,7 @@ Zum einen unterscheiden sich die Mechanismen zur automatischen Generierung von P
 Zum anderen kann in MySQL die Logik eines Triggers direkt in der \texttt{CREATE TRIGGER}-Anweisung definiert werden, während in PostgreSQL ein Trigger eine separate Funktion aufrufen muss, die die Logik enthält und mit \texttt{RETURNS TRIGGER} definiert ist.
 Auch die Deklarierung der Variablen unterscheidet sich, da in PostgreSQL mehrere Variablen in einem \texttt{DECLARE}-Block und in MySQL jede Variable einzeln im \texttt{BEGIN...END}-Block deklariert werden muss.
 
-Als letzten Schritt betrachten wir die native Implementierung in PostgreSQL.
+Als letzten Schritt betrachten wir die native Implementierung in PostgreSQL\@.
 In Postgres kann man direkt die materialisierte Sicht, siehe Beispiel (\ref{lst:create_mat_view}), direkt erstellen und muss nicht eine zusätzliche Tabelle und die passenden Trigger dazu definieren.
 Wie man sieht, ist der Befehl nahezu identisch mit dem Befehl für das Erstellen der virtuellen Sicht (\ref{lst:create_view}).
 Die Select-Befehle sind komplett gleich im Vergleich zur Umsetzung mit dem Trigger und auch die Einfügungen erfolgen erneut auf den darunterliegenden Tabellen.
@@ -274,12 +274,12 @@ REFRESH MATERIALIZED VIEW KUNDEN_MAT_OVERVIEW;
 \end{lstlisting}
 \vspace{-5pt}
 
-Da die Umsetzung von inkrementeller Auffrischung, siehe Kapitel \ref{sec:materialisierte-views}, in Postgres nicht unterstützt wird, muss die materialisierte Sicht immer auf diese Art und Weise aktualisiert werden.
+Da die Umsetzung von inkrementeller Auffrischung, siehe Kapitel~\ref{sec:materialisierte-views}, in Postgres nicht unterstützt wird, muss die materialisierte Sicht immer auf diese Art und Weise aktualisiert werden.
 Den Befehl führen wir nach den \texttt{INSERT} und \texttt{DELETE}-Befehlen auf der Kundentabelle aus.
 Da wir den Einfluss auf die Performance des Befehls untersuchen möchten, führen wir ihn einmal nach jeder Einfügung in die Kundentabelle aus und einmal, nachdem alle Datensätze eingefügt wurden.
 
 Zusammengefasst haben wir damit sechs unterschiedliche Benchmarks, die in zwei unterschiedlichen Graphen vergleichen.
-Zum einen haben wir den Vergleich zwischen keiner View, der virtuellen View und dem Ansatz mit Triggern in MySQL.
+Zum einen haben wir den Vergleich zwischen keiner View, der virtuellen View und dem Ansatz mit Triggern in MySQL\@.
 Zum anderen haben wir auch eine Analyse des MySQL-Ansatzes im Vergleich zum gleichen Ansatz in PostgreSQL sowie der beiden nativen Implementierungen mit unterschiedlichen Aktualisierungshäufigkeiten durchgeführt.
 
 \newpage
@@ -313,7 +313,7 @@ Dies liegt aber auch daran, dass wir relativ wenige Datensätze in den Testtabel
 \end{figure}
 \vspace{-20pt}
 
-Bei dem zweiten Vergleich sehen wir zuallererst einen sehr deutlichen Performanceunterschied beim Ansatz mit den Triggern zwischen Postgres und MySQL.
+Bei dem zweiten Vergleich sehen wir zuallererst einen sehr deutlichen Performanceunterschied beim Ansatz mit den Triggern zwischen Postgres und MySQL\@.
 Begründet werden kann dieser Unterschied mit den verschiedenen Vorteilen des Datenbankmanagementsystems und dessen Umgebung.
 Wir haben beide Systeme mit dem gleichen Ansatz gebenchmarkt, damit wir die Implementierung der nativen materialisierten Sicht, die nur in Postgres möglich ist, besser vergleichen zu können.
 Denn die Ergebnisse der nativen Implementierung sind in Bezug auf die Abfragegeschwindigkeit tatsächlich am performantesten und die Anzahl an Aktualisierungen (\ref{lst:refresh-materialized-view}) hat dabei keinen Einfluss.
