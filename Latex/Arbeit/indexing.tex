@@ -1,14 +1,14 @@
 %! Author = danielmendes
 %! Date = 29.11.24
 
-\chapter{Indexierung und Einfluss auf die Performance}
+\chapter{Indexierung und Einfluss auf die Performance}\label{ch:indexing}
 
-\section{Grundlagen der Indexierung}\label{sec:grundlagen-der-indexierung}
+\section{Grundlagen der Indexierung}\label{sec:indexing-grundlagen-der-indexierung}
 
 Das folgende Thema befasst sich mit der Indexierung und den damit verbundenen Performance-Optimierungen, die näher erläutert werden.
 Zunächst betrachten wir die Grundlagen der Indexierung, anschließend die verschiedenen Arten von Indizes und schließlich deren Auswirkungen auf die Performance.
 
-Indizes (oder auch Indexes) sind Datenstrukturen, die von Speicher-Engines (engl. storage engines) verwendet werden, um unter anderem Zeilen schneller zu finden.
+Indizes (oder auch Indexes) sind Datenstrukturen, die von Speicher-Engines (engl.\ storage engines) verwendet werden, um unter anderem Zeilen schneller zu finden (\cite[pp. 147--189]{schwartz2012high}).
 Sie haben einen großen Einfluss auf die Performance der Datenbank und werden umso wichtiger, je größer die Datenbank wird.
 Weniger ausgelastete Datenbanken können ohne ordnungsgemäße Indizes gut funktionieren, aber die Leistung kann rapide sinken, wenn die Datenmenge wächst.
 Wenn ein solches Problem auftritt, ist die Index-Optimierung oft der effektivste Weg, die Abfrageleistung zu verbessern.
@@ -23,7 +23,8 @@ In MySQL verwendet die Storage-Engine Indizes auf ähnliche Weise.
 Sie durchsucht die Datenstruktur des Indexes nach einem Wert.
 Wird ein Treffer gefunden, kann die Engine die Zeile ermitteln, die den Treffer enthält.
 Betrachten wir dazu folgendes Beispiel:
-\begin{lstlisting}[language=SQL,caption=Variationen,label=select-query-customer]
+
+\begin{lstlisting}[language=SQL,caption=Variationen,label={lst:select-query-customer}]
 SELECT name FROM customer WHERE cust_id = 7;
 \end{lstlisting}
 
@@ -35,8 +36,7 @@ Bei mehreren Spalten ist die Reihenfolge der Spalten im Index entscheidend, da M
 Ein Index über zwei Spalten ist nicht gleichbedeutend mit zwei separaten einspaltigen Indizes.
 Es gibt verschiedene Typen von Indizes, die jeweils für unterschiedliche Zwecke optimiert sind und die im nächsten Abschnitt behandelt werden.
 
-Ein Index für ein bestimmtes Attribut A einer Tabelle ist eine Datenstruktur, die die Suche nach Tupeln mit einem bestimmen Wert für Attribut A effizienter macht.
-
+Ein Index für ein bestimmtes Attribut A einer Tabelle ist eine Datenstruktur, die die Suche nach Tupeln mit einem bestimmen Wert für Attribut A effizienter macht (~\cite[pp. 350--353]{garcia2008database}).
 Wenn Tabellen immer mehr Datensätze enthalten, wird es umso schwieriger alle Tupel zu scannen, um (nur wenige) Tupel zu finden, die zu einer Bedingung passen.
 Besonders nützlich sind Indizes bei Abfragen, die Joins zwischen mehreren Tabellen enthalten, da sie ermöglichen, die Anzahl der zu prüfenden Tupel erheblich zu reduzieren, wenn eine einschränkende Bedingung vorliegt.
 
@@ -76,21 +76,20 @@ Modifikationen sind daher etwa doppelt so teuer wie der Zugriff auf den Index od
 Um den neuen Wert eines Index zu berechnen, müssen wir Annahmen darüber treffen, welche Abfragen und Modifikationen mit hoher Wahrscheinlichkeit auf der Datenbank durchgeführt werden.
 Manchmal haben wir eine Historie von Abfragen, die wir nutzen können, um gute Informationen zu erhalten, unter der Annahme, dass die Zukunft wie die Vergangenheit sein wird.
 
-TODO:Change Example
-\begin{lstlisting}[caption=Tabelle StarsIn Deklaration,label=declaration-starsin]
-StarsIn(movieTitle, movieYear, starName)
+\begin{lstlisting}[caption=Deklaration der Beispieltabelle Fakten,label={lst:declaration-fakten}]
+Fakten(Bestelldatum, Artikel_Id, Kunden_Id, ...)
 \end{lstlisting}
 
-\begin{lstlisting}[language=SQL,caption=Select-Query 1 für Stars in,label=starsin-select-query-1]
-SELECT movieTitle, movieYear FROM StarsIn WHERE starName = s;
+\begin{lstlisting}[language=SQL,caption=1. Select-Query für Fakten,label={lst:fakten-select-query-kunden}]
+SELECT Bestelldatum, Artikel_Id FROM Fakten WHERE Kunden_Id = k;
 \end{lstlisting}
 
-\begin{lstlisting}[language=SQL,caption=Select-Query 2 für Stars in,label=starsin-select-query-2]
-SELECT starName FROM StarsIn WHERE movieTitle = t AND movieYear = y;
+\begin{lstlisting}[language=SQL,caption=2. Select-Query für Fakten,label={lst:fakten-select-query-artikel}]
+SELECT Bestelldatum, Kunden_Id FROM Fakten WHERE Artikel_Id = a;
 \end{lstlisting}
 
-\begin{lstlisting}[language=SQL,caption=Insert-Query 2 für Stars in,label=starsin-insert-query]
-SELECT starName FROM StarsIn WHERE movieTitle = t AND movieYear = y;
+\begin{lstlisting}[language=SQL,caption=Insert-Query für Fakten,label={lst:fakten-insert-query}]
+INSERT INTO Fakten VALUES(d, a, k);
 \end{lstlisting}
 
 \begin{table}[h!]
@@ -98,7 +97,7 @@ SELECT starName FROM StarsIn WHERE movieTitle = t AND movieYear = y;
     \setlength{\arrayrulewidth}{0.4mm}
     \[
         \begin{array}{r|c c c c}
-            \textbf{Action} & \textbf{No Index} & \textbf{Star Index} & \textbf{Movie Index} & \textbf{Both Indexes} \\ \hline
+            \textbf{Action} & \textbf{No Index} & \textbf{Kunde Index} & \textbf{Artikel Index} & \textbf{Both Indexes} \\ \hline
             Q_1 & 10 & 4 & 10 & 4 \\
             Q_2 & 10 & 10 & 4 & 4 \\
             I   & 2  & 4  & 4  & 6 \\ \hline
@@ -111,15 +110,15 @@ SELECT starName FROM StarsIn WHERE movieTitle = t AND movieYear = y;
 
 \textbf{Voraussetzungen}
 \begin{enumerate}
-    \item \texttt{StarsIn} belegt 10 Seiten, daher die Kosten bei gesamter Untersuchung bei 10.
-    \item Im Durchschnitt ist ein Star in 3 Filmen aufgetreten und ein Film hat 3 Stars.
-    \item Selbst mit Index einen Durchschnitt von 3 Tupel für einen Star oder Film, ohne 10.
+    \item Die \texttt{Fakten} belegt 10 Seiten, daher die Kosten bei gesamter Untersuchung bei 10.
+    \item Im Durchschnitt kauft jeder Kunde kauft genau 3 Artikel und ein Artikel wird von 3 Kunden gekauft.
+    \item Selbst mit Index gibt einen Durchschnitt von 3 Tupel für einen Kunden oder Artikel, ohne 10.
     \item Wenn eine Indexseite modifiziert/eingefügt werden muss, ist ein weiterer Festplattenzugriff erforderlich, um die modifizierte Seite zurückzuschreiben.
     \item Für eine Einfügung ohne Index sind auch zwei Festplattenzugriffe nötig.
 \end{enumerate}
 
-Wenn es nur einen Index auf Stars gibt, erfordert Q2 immer noch einen Scan der gesamten Relation (Kosten 10).
-Allerdings kann Q1 beantwortet werden, indem eine Indexseite gelesen wird, um die drei Tupel für einen bestimmten Star zu finden, und anschließend drei weitere Zugriffe erfolgen, um diese Tupel zu finden.
+Wenn es nur einen Index auf Kunde gibt, erfordert Q2 immer noch einen Scan der gesamten Relation (Kosten 10).
+Allerdings kann Q1 beantwortet werden, indem eine Indexseite gelesen wird, um die drei Tupel für einen bestimmten Kunden zu finden, und anschließend drei weitere Zugriffe erfolgen, um diese Tupel zu finden.
 Einfügen I erfordert, dass sowohl eine Seite des Index als auch eine Seite der Daten gelesen und geschrieben wird, was insgesamt 4 Festplattenzugriffe bedeutet.
 
 Die letzte Zeile in Abb.\ 8.3 gibt die durchschnittlichen Kosten einer Aktion an, unter der Annahme, dass der Anteil der Zeit, in der wir Qi ausführen, p1 beträgt und der Anteil der Zeit, in der wir Q2 ausführen, p2 ist.
@@ -129,7 +128,7 @@ Je nach pi und p2 kann jede der vier Optionen (Index/kein Index) die besten durc
 Zum Beispiel, wenn pi = p2 = 0,1, dann ist der Ausdruck 2 + 8pi + 8p2 am kleinsten, sodass wir es bevorzugen würden, keine Indizes zu erstellen.
 
 Das heißt, wenn wir überwiegend Einfügungen durchführen und nur sehr wenige Abfragen, dann wollen wir keinen Index.
-Intuitiv, wenn wir viele Abfragen durchführen und die Anzahl der Abfragen, die Filme und Stars angeben, ungefähr gleich häufig sind, dann sind beide Indizes erwünscht.
+Intuitiv, wenn wir viele Abfragen durchführen und die Anzahl der Abfragen, die Artikel und Kunden angeben, ungefähr gleich häufig sind, dann sind beide Indizes erwünscht.
 Wenn wir nur ein Typ von Query häufig verwenden, dann sollten wir nur den Index definieren, der uns bei dieser hilft.
 
 Das "Tuning" einer Datenbank umfasst nicht nur die Auswahl von Indizes, sondern auch die Festlegung vieler verschiedener Parameter.
@@ -141,17 +140,16 @@ Ein bewährter Ansatz zur Auswahl von Indizes ist das sogenannte „greedy“ - 
 Wenn es einen Index mit positivem Nutzen gibt, wird dieser ausgewählt und anschließend wird eine Neubewertung ausgeführt, wobei davon ausgegangen wird, dass der zuvor ausgewählte Index bereits verfügbar ist.
 Dieser Prozess wird so lange wiederholt, bis es keinen Kandidaten-Index mit positivem Nutzen mehr gibt.
 
-
-\section{B-Baum-Index}
+\section{B-Baum-Index}\label{sec:indexing-b-baum-index}
 
 Indizes werden auf der Ebene der Storage-Engine und nicht auf der Serverebene implementiert.
 Daher sind sie nicht standardisiert und unterscheiden sich je nach Engine.
-Zudem unterstützen nicht alle Engines alle Index-Typen.
+Zudem unterstützen nicht alle Engines alle Indextypen.
 Eine Storage-Engine ist eine Kernkomponente eines Datenbankmanagementsystems (DBMS), die für die Speicherung und Verwaltung der Daten zuständig ist.
 Sie entscheidet, wie Daten physisch organisiert, gespeichert und abgerufen werden.
 Verschiedene Storage-Engines unterscheiden sich in ihrer Indexfunktionalität sowie in der Unterstützung von Transaktionen und Sperrmechanismen.
 
-Der erste zu betrachtende Indextyp ist der B-Baum-Index (engl. B-Tree Index), der auf einer speziellen Baum-Datenstruktur basiert.
+Der erste zu betrachtende Indextyp ist der B-Baum-Index (engl.\ B-Tree Index), der auf einer speziellen Baum-Datenstruktur basiert.
 Diese Struktur wird von den meisten MySQL-Storage-Engines unterstützt.
 Die Implementierung und Nutzung des B-Baum-Indexes kann jedoch je nach verwendeter Storage-Engine variieren.
 
@@ -160,8 +158,8 @@ Ein B-Baum-Index beschleunigt den Datenzugriff, da die Storage-Engine nicht die 
 Stattdessen beginnt die Suche beim Wurzelknoten.
 
 Die Slots im Wurzelknoten enthalten Zeiger auf Kindknoten, und die Storage-Engine folgt diesen Zeigern.
-Der richtige Zeiger wird durch Vergleich der Werte in den Knoten-Seiten (engl. node pages) ermittelt, die die oberen und unteren Grenzen der Werte in den Kindknoten definieren.
-Letztlich stellt die Storage-Engine fest, ob der gewünschte Wert existiert, oder sie erreicht erfolgreich eine Blattseite (engl. leaf page).
+Der richtige Zeiger wird durch Vergleich der Werte in den Knoten-Seiten (engl.\ node pages) ermittelt, die die oberen und unteren Grenzen der Werte in den Kindknoten definieren.
+Letztlich stellt die Storage-Engine fest, ob der gewünschte Wert existiert, oder sie erreicht erfolgreich eine Blattseite (engl.\ leaf page).
 
 \begin{figure}[!ht]
     \centering
@@ -175,18 +173,18 @@ Zwischen dem Wurzelknoten und den Blattseiten können viele Ebenen von Knoten-Se
 Die Tiefe des Baumes hängt von der Größe der Tabelle ab.
 
 Außerdem speichern B-Bäume die indexierten Spalten in einer festgelegten Reihenfolge, was sie besonders nützlich für die Suche nach Datenbereichen macht.
-Beispielsweise kann ein Index auf einem Textfeld (z.B. vom Typ \texttt{VARCHAR}) effizient alle Namen finden, die mit „K“ beginnen, da die Werte in alphabetischer Reihenfolge gespeichert sind.
+Beispielsweise kann ein Index auf einem Textfeld (z.B.\ vom Typ \texttt{VARCHAR}) effizient alle Namen finden, die mit „K“ beginnen, da die Werte in alphabetischer Reihenfolge gespeichert sind.
 
 Der Index sortiert die Werte entsprechend der Reihenfolge der in der \texttt{CREATE TABLE}-Anweisung angegebenen Spalten, beispielsweise des Primärschlüssels (\texttt{last\_name, first\_name, b\_day}).
-B-Baum-Indizes eignen sich gut für Suchen mit dem vollständigen Schlüsselwert (engl. full key value), einem Schlüsselbereich (engl. key range) oder einem Schlüsselpräfix (engl. full key prefix).
+B-Baum-Indizes eignen sich gut für Suchen mit dem vollständigen Schlüsselwert (engl.\ full key value), einem Schlüsselbereich (engl.\ key range) oder einem Schlüsselpräfix (engl.\ full key prefix).
 Beim Schlüsselpräfix ist dies jedoch nur der Fall, wenn die Suche das linkeste Präfix des Indexes verwendet.
 
-Als nächstes betrachten wir die möglichen Abfragen, bei denen B-Baum-Indizes besonders hilfreich sind, um ein besseres Verständnis für ihre optimale Nutzung zu erlangen.
+Als Nächstes betrachten wir die möglichen Abfragen, bei denen B-Baum-Indizes besonders hilfreich sind, um ein besseres Verständnis für ihre optimale Nutzung zu erlangen.
 Eine Übereinstimmung mit dem vollständigen Schlüsselwert liefert Werte für alle Spalten im Index.
 Eine beispielhafte Abfrage wäre die Suche nach allen Einträgen für Max Mustermann, geboren am 2000-01-01, wenn der Schlüssel aus Nachname, Vorname und Geburtsdatum besteht.
 Für diesen Index sind auch Abfragen nützlich, die nur mit dem linken Präfix übereinstimmen, beispielsweise die Suche nach „Mustermann“.
 Eine weitere Möglichkeit ist die Übereinstimmung mit einem Spaltenpräfix, also dem ersten Teil eines Spaltenwerts, etwa alle Nachnamen, die mit „M“ beginnen.
-Ebenso effizient ist der Index bei der Übereinstimmung mit einem Wertebereich, z.B. Nachnamen zwischen „Mustermann“ und „Müller“.
+Ebenso effizient ist der Index bei der Übereinstimmung mit einem Wertebereich, z.B.\ Nachnamen zwischen „Mustermann“ und „Müller“.
 
 Ein B-Baum-Index kann auch genutzt werden, um Abfragen effizient zu unterstützen, bei denen eine Spalte exakt und eine andere innerhalb eines Wertebereichs abgefragt wird.
 Beispielsweise könnte dies eine exakte Übereinstimmung mit dem Nachnamen „Mustermann“ und eine Bereichsabfrage für Vornamen, die mit „Ma“ beginnen, umfassen.
@@ -201,7 +199,6 @@ Beispielsweise ist ein Index, der aus Nachname, Vorname und Geburtsdatum besteht
 
 Für optimale Leistung sollten Indizes mit den gleichen Spalten, jedoch in unterschiedlicher Reihenfolge erstellt werden, um die häufigsten Abfragen zu optimieren.
 Eine Analyse der am häufigsten verwendeten Abfragen kann dabei helfen zu entscheiden, ob zusätzliche Indizes erforderlich sind.
-
 
 \begin{figure}[!ht]
     \centering
@@ -244,25 +241,23 @@ Eine Analyse der am häufigsten verwendeten Abfragen kann dabei helfen zu entsch
     \label{fig:b-tree-query-reads}
 \end{figure}
 
-
-\section{Hash - Index}
+\section{Hash-Index}\label{sec:indexing-hash-index}
 Ein weiterer Indextyp, den wir betrachten, ist der Hash-Index.
 Dieser basiert auf einer Hash-Tabelle und ist daher nur für exakte Suchanfragen geeignet, die alle Spalten im Index verwenden.
 Die Funktionsweise der Storage-Engine lässt sich wie folgt beschreiben: Für jede Zeile wird mithilfe einer Hash-Funktion ein Hash-Wert der indexierten Spalte berechnet.
 Der Hash-Wert (engl.\textit{hash code}) ist eine kleine Zahl, die sich in der Regel von den Hash-Werten anderer Zeilen mit unterschiedlichen Schlüsselwerten unterscheidet.
 
-
 In MySQL unterstützt nur die Memory-Storage-Engine explizite Hash-Indizes.
 Der bereits besprochene Standard-Indextyp für Memory-Tabellen, der B-Baum-Index, ist jedoch ebenfalls möglich.
 Außerdem unterstützt die Memory-Engine keine eindeutigen Hash-Indizes.
-Das bedeutet, wenn mehrere Werte denselben Hash-Wert besitzen, speichert der Index die Zeiger auf die Zeilen (engl. \textit{row pointers}) in demselben Hash-Tabelleneintrag, typischerweise mithilfe einer verketteten Liste (z.B. einer \textit{Linked List}).
+Das bedeutet, wenn mehrere Werte denselben Hash-Wert besitzen, speichert der Index die Zeiger auf die Zeilen (engl. \textit{row pointers}) in demselben Hash-Tabelleneintrag, typischerweise mithilfe einer verketteten Liste (z.B.\ einer \textit{Linked List}).
 Im Gegensatz dazu stellen eindeutige Hash-Indizes sicher, dass für jeden Hash-Wert nur ein einziger Eintrag existiert.
 Bei Konflikten wird ein Mechanismus wie die \textit{Open Addressing}-Strategie (z.B. \textit{Linear Probing} oder \textit{Quadratic Probing}) eingesetzt, um Konflikte zu lösen und den Speicherplatz effizient zu verwalten.
 Hierbei wird versucht, Konflikte direkt innerhalb der Hash-Tabelle zu bewältigen, anstatt auf zusätzliche Datenstrukturen wie verkettete Listen zurückzugreifen.
 
 Um die Berechnung der Hash-Funktion genauer zu erläutern, folgt ein Beispiel:
 
-\begin{lstlisting}[language=SQL,caption=Variationen,label=select-query-hash]
+\begin{lstlisting}[language=SQL,caption=Variationen,label={lst:select-query-hash}]
 SELECT lname FROM testhash WHERE fname = 'Peter';
 \end{lstlisting}
 
@@ -283,21 +278,16 @@ Im Gegensatz dazu können B-Baum-Indizes Sortierungen unterstützen, wenn sie en
 Darüber hinaus ermöglichen Hash-Indizes keine partiellen Schlüsselübereinstimmungen (engl. \textit{partial key matching}).
 Da der Hash-Wert aus dem gesamten indexierten Wert berechnet wird, hilft ein Hash-Index beispielsweise nicht, wenn ein Index aus den Spalten (A, B) besteht und die \texttt{WHERE}-Klausel nur auf A verweist.
 
-
 Ein weiterer Nachteil besteht darin, dass Hash-Indizes keine Bereichsabfragen (engl. \textit{range queries}) unterstützen.
 Sie eignen sich lediglich für Gleichheitsvergleiche, wie die Operatoren \texttt{=} (gleich), \texttt{<=>} (null-sicher gleich) und \texttt{IN()}.
-
 
 Obwohl Hash-Indizes sehr performant sind, können Hash-Kollisionen ihre Leistung beeinträchtigen.
 Wenn viele Werte denselben Hash-Wert aufweisen, muss die Storage-Engine jeden Zeiger in der verketteten Liste durchlaufen und die entsprechenden Werte mit dem Suchwert vergleichen, um die richtige(n) Zeile(n) zu finden.
 
-
 Auch Index-Wartungsoperationen können bei vielen Kollisionen langsamer werden.
 Wenn beispielsweise ein Index auf einer Spalte mit sehr geringer Selektivität erstellt wird und eine Zeile gelöscht werden soll, kann das Finden des entsprechenden Zeigers im Index sehr aufwendig sein, was auch das Löschen der Zeile verzögert.
 
-
 Einige Speicher-Engines, wie beispielsweise InnoDB, können zudem erkennen, wenn bestimmte Index-Werte besonders häufig verwendet werden, und automatisch einen Hash-Index für diese Werte im Speicher (engl.\textit{memory}) erstellen, der zusätzlich zu den vorhandenen B-Baum-Indizes genutzt wird.
-
 
 \begin{figure}[!ht]
     \centering

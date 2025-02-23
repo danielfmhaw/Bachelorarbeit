@@ -2,59 +2,59 @@
 %! Date = 05.01.25
 \chapter{Grundlagen}\label{ch:grundlagen}
 
-In dem diesem Kapitel betrachten wir die Grundlagen der Bachelorarbeit, die in den späteren Kapiteln für die Durchführung der Benchmarktests und Analysen erforderlich sind.
+In dem diesem Kapitel betrachten wir die Grundlagen der Bachelorarbeit, die in den späteren Kapiteln für die Durchführung der Benchmark-Tests und Analysen erforderlich sind.
 Zunächst werden die Auswahl der einzelnen Tools, ihre Funktionsweise und die jeweiligen Vor- und Nachteile evaluiert.
 Anschließend werden die einzelnen Schritte dargestellt, damit man die Tools korrekt verwenden kann.
 Besonders beim Benchmark-Tool untersuchen wir die verschiedenen Argumente, die übergeben werden können, und zeigen anhand eines kurzen Beispiels, wie die Resultate dieses Tools aussehen könnten.
 Danach betrachten wir ein komplexeres Beispiel, welches wir zu großen Teilen bei späteren Tests wiederverwenden können.
-Zu guter Letzt zeigen wir, wie GitHub Actions funktionieren und uns bei den Benchmarktests Aufwand ersparen können und wie wir die Workflows zeitlich und resourcentechnisch optimieren können.
+Zu guter Letzt zeigen wir, wie GitHub Actions funktionieren und uns bei den Benchmark-Tests Aufwand ersparen können und wie wir die Workflows zeitlich und resourcentechnisch optimieren können.
 
 \section{Auswahl der Tools}\label{sec:auswahl-der-tools}
 
-Die Grundlage für diese Bachelorarbeit ist das Verhalten der MySQL – Datenbank \cite{sysbench_mysql} in Bezug auf die unterschiedlichen Aspekte, die im Rahmen dieser Arbeit behandelt werden.
+Die Grundlage für diese Bachelorarbeit ist das Verhalten der MySQL – Datenbank~\cite{sysbench_mysql} in Bezug auf die unterschiedlichen Aspekte, die im Rahmen dieser Arbeit behandelt werden.
 Der folgende Abschnitt beschäftigt sich mit Umsetzung, um dieses Verhalten messbar und veranschaulich mithilfe von Grafiken zu machen.
-Damit wir die Kennzahlen für bestimmte Abfragen an die MySQL – Datenbank bestimmen können, brauchen wir ein zentrales Tool.
-Dieses Tool ist dafür verantwortlich ist die Benchmark - Tests durchzuführen.
+Damit wir die Kennzahlen für bestimmte Abfragen an die MySQL–Datenbank bestimmen können, brauchen wir ein zentrales Tool.
+Dieses Tool ist dafür verantwortlich, die Benchmark-Tests durchzuführen.
 
-Meine Entscheidung ist dabei schlussendlich auf \textbf{Sysbench} \cite{sysbench_repo} gefallen.
-Sysbench ist ein Open-Source-Tool, das ein skriptfähiges, multi-threaded Benchmark-Tool ist, das auf LuaJIT basiert.
+Meine Entscheidung ist dabei schlussendlich auf \textbf{Sysbench}~\cite{sysbench_repo} gefallen.
+Sysbench ist ein Open-Source-Tool, das ein skriptfähiges, multi-threaded Benchmark-Tool ist, das auf LuaJIT basiert (\cite[pp. 50--66]{schwartz2012high}).
 Es wird hauptsächlich für Datenbankbenchmarks verwendet, kann jedoch auch dazu eingesetzt werden, beliebig komplexe Arbeitslasten zu erstellen, die keinen Datenbankserver erfordern.
 Sysbench analysiert dabei Metriken, wie unter anderem Transaktionen pro Sekunde, Latenz und Anzahl an Threads.
 Dabei kann man genauer spezifizieren, wie oft diese Metriken geloggt werden sollen.
 Sysbench ist dabei nicht auf ein einziges Datenbanksystem eingeschränkt, sondern man kann sich zwischen vielen unterschiedlichen Systemen entscheiden.
 
-Im Zuge der Wahl des Benchmark – Tools habe ich auch andere Benchmarking-Tools betrachtet, wie beispielsweise \textbf{Benchbase} \cite{DifallahPCC13} oder \textbf{mybench} \cite{mybench_repo}.
+Im Zuge der Wahl des Benchmark – Tools habe ich auch andere Benchmarking-Tools betrachtet, wie beispielsweise \textbf{Benchbase}~\cite{DifallahPCC13} oder \textbf{mybench}~\cite{mybench_repo}.
 Im Vergleich zu diesen Tools bietet Sysbench jedoch die Vorteile der höheren Skriptfähigkeit und Flexibilität.
 Damit ist gemeint, dass bei Sysbench das erste Projekt mit mehr Aufwand verbunden ist als bei den Alternativen.
 Wenn man aber ein Projekt erstmal erstellt hat, dann ist es sehr individuell und man kann schnelle Änderungen hervornehmen.
 In dem Kapitel (\ref{sec:projektaufbau-mit-beispiel}) betrachten wir ein beispielhaftes Projekt mit Sysbench, bei dem der Einfluss von unterschiedlichen Datentypen als Join-Operator zwischen zwei Tabellen verglichen wird.
-Wenn wir später die Performance von unterschiedliche Index-Typen betrachten, dann müssen wir nur an wenigen Stellen Veränderungen durchführen, die in dem Kapitel genauer besprochen werden.
+Wenn wir später die Performance von unterschiedliche Indextypen betrachten, dann müssen wir nur an wenigen Stellen Veränderungen durchführen, die in dem Kapitel genauer besprochen werden.
 
-Ein weiterer Vorteil von Sysbench ist, dass es als \textbf{de facto Standard} im Bereich der Datenbankbenchmarks angesehen wird \cite{mybench_comparison}.
+Ein weiterer Vorteil von Sysbench ist, dass es als \textbf{de facto Standard} im Bereich der Datenbankbenchmarks angesehen wird~\cite{mybench_comparison}.
 Durch diese Position gibt es viele aktive Nutzer und dadurch bedingt viele verfügbaren Ressourcen.
 Vorteile der anderen Tools sind jedoch die weniger präzise Steuerung der Ergebnisraten und der Transaktionen von Sysbench.
 Zudem ist Sysbench auf das Minimale beschränkt, was den Output angeht, da es, wie schon erwähnt, nur eine Reihe von Log-Dateien gibt und
 die Visualisierung der Ergebnisse muss vom Benutzer selbst mithilfe von anderen Tools umgesetzt werden.
-Anders sieht dies bei dem Tool mybench aus, da es dort die Möglichkeit gibt in Echtzeit umfassende Abbildungen zu betrachten \cite{mybench_user_interface}.
+Anders sieht dies bei dem Tool mybench aus, da es dort die Möglichkeit gibt in Echtzeit umfassende Abbildungen zu betrachten~\cite{mybench_user_interface}.
 Obwohl dieses Feature sehr hilfreich ist, bin ich nach Abwägung der Vor- und Nachteile zu dem Entschluss gekommen, dass die einfachere Bedienung und die Tatsache,
 dass Sysbench der de facto Standard ist, für mich überwiegen, weshalb ich mich für Sysbench entschieden habe.
 
 Nichtsdestotrotz kann nicht komplett auf Graphen verzichtet werden, da Entwicklungen im Laufe einer Zeitmessung in einem Kurvenverlauf deutlich besser zu erkennen sind als in einer Log - Datei.
-Anhand der reinen Zahlen lassen sich unter Umständen Trends von zwei oder etwas mehr unterschiedliche Messungen erkennen, aber besonders wiederkehrende Trends werden aus der schriftlichen Form nicht schnell ersichtbar.
+Anhand der reinen Zahlen lassen sich unter Umständen Trends von zwei oder etwas mehr unterschiedliche Messungen erkennen, aber besonders wiederkehrende Trends werden aus der schriftlichen Form nicht schnell ersichtlich.
 Ganz anders sieht dies bei Graphen mit einer Zeitachse aus.
 Dort werden sofort Trends ersichtlich und auch der Vergleich zwischen den unterschiedlichen Messungen erfolgt deutlich besser.
 
-Um die Kennzahlen, die mithilfe von Sysbench ermittelt worden sind, in eine grafische Darstellung umzuwandeln, gibt es unterschiedliche Tools, die wiederum einige Vor - und Nachteile mit sich bringen.
-Das erste mögliche Tool stellt Gnuplot \cite{gnuplot} dar, mit dem sich CSV – Dateien sehr gut darstellen lassen.
+Um die Kennzahlen, die mithilfe von Sysbench ermittelt worden sind, in eine grafische Darstellung umzuwandeln, gibt es unterschiedliche Tools, die wiederum einige Vor- und Nachteile mit sich bringen.
+Das erste mögliche Tool stellt Gnuplot~\cite{gnuplot} dar, mit dem sich CSV – Dateien sehr gut darstellen lassen.
 Wenn man aber nur bestimmte Spalten aus der Tabelle darstellen lassen, dann kommt man schnell an seine Grenzen.
 Deshalb habe ich mich für eine anpassungsfähigere Alternative entschieden, denn die Transformationen und die grafische Darstellung wird mithilfe eines Python Scripts umgesetzt.
-Für die grafische Darstellung sind dabei die Libraries pandas \cite{reback2020pandas} und matplotlib.pyplot \cite{hunter_2007} verantwortlich.
+Für die grafische Darstellung sind dabei die Libraries pandas~\cite{reback2020pandas} und matplotlib.pyplot~\cite{hunter_2007} verantwortlich.
 
 \section{Einführung in die Tools}\label{sec:einfuhrung-in-die-tools}
 
 Als allererstes muss der MySQL – Server gestartet sein.
 Dabei ist es egal, ob dies lokal auf dem Rechner oder über einen Docker in eines GitHub CI/CD-Workflows erfolgt.
-Das Wichtigste dabei ist es, dass man sich die Zugangsdaten, bestehend aus User - und Passwortdaten, speichert, da diese gebraucht werden, um den Benchmarktest mit Sysbench zu starten.
+Das Wichtigste dabei ist es, dass man sich die Zugangsdaten, bestehend aus User - und Passwortdaten, speichert, da diese gebraucht werden, um den Benchmark-Test mit Sysbench zu starten.
 Nachdem das RDBMS gestartet worden ist, muss zudem eine Datenbank erstellt werden.
 Dies könnte unter anderem so aussehen:
 
@@ -70,16 +70,22 @@ Um sich mit dem Tool Sysbench vertraut zu machen, gehen wir die verschiedenen Ar
 Darunter gehören:
 
 \begin{itemize}
-    \item \texttt{--db-driver}: Gibt den Treiber für die Datenbank an, die Sysbench verwenden soll. In diesem Fall \texttt{mysql}, um die MySQL-Datenbank zu testen.
-    \item \texttt{--mysql-host}: Der Hostname oder die IP-Adresse des MySQL-Servers. Standardmäßig wird \texttt{localhost} verwendet, wenn nichts angegeben wird.
+    \item \texttt{--db-driver}: Gibt den Treiber für die Datenbank an, die Sysbench verwenden soll.
+          In diesem Fall \texttt{mysql}, um die MySQL-Datenbank zu testen.
+    \item \texttt{--mysql-host}: Der Hostname oder die IP-Adresse des MySQL-Servers.
+          Standardmäßig wird \texttt{localhost} verwendet, wenn nichts angegeben wird.
     \item \texttt{--mysql-user}: Der Benutzername, mit dem Sysbench auf die MySQL-Datenbank zugreift.
-    \item \texttt{--mysql-password}: Das Passwort für den MySQL-Benutzer. Falls der Benutzer kein Passwort hat oder der Zugriff über eine andere Authentifizierungsmethode erfolgt, kann dieses Argument weggelassen werden.
-    \item \texttt{--mysql-db}: Der Name der MySQL-Datenbank, auf die zugegriffen wird. In diesem Beispiel \texttt{sbtest}.
+    \item \texttt{--mysql-password}: Das Passwort für den MySQL-Benutzer.
+          Falls der Benutzer kein Passwort hat oder der Zugriff über eine andere Authentifizierungsmethode erfolgt, kann dieses Argument weggelassen werden.
+    \item \texttt{--mysql-db}: Der Name der MySQL-Datenbank, auf die zugegriffen wird.
+          In diesem Beispiel \texttt{sbtest}.
     \item \texttt{--time}: Gibt die Laufzeit des Benchmarks in Sekunden an und muss immer mit angegeben werden.
     \item \texttt{--report-interval}: Gibt das Intervall in Sekunden an, in dem Zwischenergebnisse während des Tests ausgegeben werden.
-    Sofern \texttt{--report-interval} nicht gesetzt wird, werden die Ergebnisse nur am Ende des Tests angezeigt.
-    \item \texttt{--tables}: Die Anzahl der Tabellen, die für den Test erstellt werden sollen. Standardmäßig wird nur eine Tabelle erstellt.
-    \item \texttt{--table-size}: Die Anzahl der Datensätze (Zeilen) pro Tabelle. Muss auch nicht zwingend angegebend werden.
+          Sofern \texttt{--report-interval} nicht gesetzt wird, werden die Ergebnisse nur am Ende des Tests angezeigt.
+    \item \texttt{--tables}: Die Anzahl der Tabellen, die für den Test erstellt werden sollen.
+          Standardmäßig wird nur eine Tabelle erstellt.
+    \item \texttt{--table-size}: Die Anzahl der Datensätze (Zeilen) pro Tabelle.
+          Muss auch nicht zwingend angegeben werden.
 \end{itemize}
 
 Neben den sieben aufgelisteten Argumenten gibt es zwei weitere wichtige Optionen:
@@ -93,7 +99,8 @@ Neben den sieben aufgelisteten Argumenten gibt es zwei weitere wichtige Optionen
 \end{enumerate}
 
 Zunächst schauen wir ein kurzes Demo-Beispiel, denn es gibt die Möglichkeit die Datenbank
-auf Performance zu testen, ohne selbst eigene SQL-Befehle zu schreiben. Dafür gibt es vordefinierte Testtypen von Sysbench.
+auf Performance zu testen, ohne selbst eigene SQL-Befehle zu schreiben.
+Dafür gibt es vordefinierte Testtypen von Sysbench.
 Auf diese Weise kann man schnell die Korrektheit der Einrichtung des Tools überprüfen, bevor man Lua-Scripts
 für die eigenen Bedürfnisse schreibt.
 
@@ -110,9 +117,9 @@ Man kann unter anderen zwischen diesen Testtypen wählen:
 Des Weiteren gibt es auch unterschiedliche Methoden, die mit den Testtypen kombiniert werden können.
 
 \begin{itemize}
-    \item \textbf{prepare}: Bereitet die Datenbank für den Test vor, u.a. das Erstellen von benötigten Tabellen.
-    \item \textbf{run}: Ist die Ausführungsphase des Tests. Je nach Testtyp führt diese Methode die spezifizierten Operationen aus,
-    wie etwa das Einfügen von Daten (oltp\_insert), das Abfragen von Daten (oltp\_read\_only) oder beides (oltp\_read\_only).
+    \item \textbf{prepare}: Bereitet die Datenbank für den Test vor, u.a.\ das Erstellen von benötigten Tabellen.
+    \item \textbf{run}: Ist die Ausführungsphase des Tests.
+    Je nach Testtyp führt diese Methode die spezifizierten Operationen aus, wie etwa das Einfügen von Daten (oltp\_insert), das Abfragen von Daten (oltp\_read\_only) oder beides (oltp\_read\_only).
     Dabei wird die Performance der Datenbank unter der angegebenen Arbeitslast gemessen.
     \item \textbf{cleanup}: Diese Methode sorgt dafür, dass nach Abschluss des Tests alle Testdaten entfernt werden.
     Sie stellt die Datenbank in ihren ursprünglichen Zustand zurück und stellt sicher,
@@ -142,7 +149,7 @@ FATAL: MySQL error: 1146 "Table 'sbtest.sbtest1' doesn't exist"
 Der entstandene Fehler wird offensichtlich dadurch verursacht, dass die Tabelle nicht erstellt worden ist.
 Die Lösung für dieses Problem ist die Ausführung der \texttt{prepare} - Methode vor der \texttt{oltp\_read\_write} - Methode.
 Damit sich die Datenbank wieder im Anfangszustand befindet noch anschließend an die \texttt{oltp\_read\_write} - Methode noch die \texttt{cleanup} aufrufen werden.
-Um sich die manuelle Ausführung dieser drei Befehl in der korrekten Reihenfolge zu sparen, bietet es sich an, ein Shell-Script zu schreiben, indem zuerst die Methoden nacheinander aufgerufen werden.
+Um sich die manuelle Ausführung dieser drei Befehle in der korrekten Reihenfolge zu sparen, bietet es sich an, ein Shell-Script zu schreiben, indem zuerst die Methoden nacheinander aufgerufen werden.
 
 \lstinputlisting[
     language=bash,
@@ -167,9 +174,7 @@ Dies geht mit dem Shell - Kommando \texttt{grep}:
 
 Als letzten Schritt gibt es die Erstellung der Graphen mithilfe von der Tools Gnuplot oder der Python - Library Pandas.
 Die kompletten Scripts \texttt{plot\_sysbench.gp} und \texttt{generatePlot.py} befinden sich am Ende dieser Bachelorarbeit.
-Das Python-Script, das zuständig ist für die Graphgenerierung muss als Argument zum einen
-die CSV-Datei übermittelt bekommen und zum anderen kann es nur eine bestimmte Auswahl an
-Messwerten übergeben, damit nur für diese die Graphen erzeugt werden.
+Das Python-Script, das zuständig ist für die Graphgenerierung muss als Argument zum einen die CSV-Datei übermittelt bekommen und zum anderen kann es nur eine bestimmte Auswahl an Messwerten übergeben, damit nur für diese die Graphen erzeugt werden.
 
 \lstinputlisting[
     language=bash,
@@ -207,7 +212,7 @@ Messwerten übergeben, damit nur für diese die Graphen erzeugt werden.
     \item \textbf{Reads}: Die Anzahl der Leseoperationen.
     \item \textbf{Writes}: Die Anzahl der Schreiboperationen.
     \item \textbf{Other}: Bezieht sich auf andere Arten von Operationen, die weder als Reads noch als Writes kategorisiert werden.
-    \item \textbf{Latency (ms; 95\%)}: Die durchschnittliche Zeit in Millisekunden, die benötigt wird, um Anfragen zu bearbeiten, wobei der Wert im 95. Perzentil betrachtet wird.
+    \item \textbf{Latency (ms; 95\%)}: Die durchschnittliche Zeit in Millisekunden, die benötigt wird, um Anfragen zu bearbeiten, wobei der Wert im 95.\ Perzentil betrachtet wird.
     Niedrigere Werte sind besser, da sie auf schnellere Reaktionszeiten hinweisen.
     \item \textbf{ErrPs (Errors Per Second)}: Die Anzahl der Fehler pro Sekunde.
     Ein niedriger Wert weist auf höhere Stabilität und Zuverlässigkeit des Systems hin.
@@ -226,14 +231,14 @@ In diesen Lua - Dateien können die Implementierungen der einzelnen Methoden sel
 Um das Vorgehen besser erklären zu können, schauen wir uns dafür ein Beispiel an.
 Für das Beispiel wollen wir zwei Tabellen erstellen und anschließend mit zufälligen Testdaten befüllen.
 Die Abfrage, die wir auf Performance testen wollen, ist das Verbinden (Joinen) dieser beiden Tabellen.
-In unserem Fall wollen wir eine Kundentabelle erstellen, die Informationen wie Name, Geburtstag und Adresse enthält, sowie eine Bestelltabelle, die Details wie Artikelnummer, Bestelldatum usw. speichert und einen Bezug zu dem Kunden herstellt, der die Bestellung aufgegeben hat.
+In unserem Fall wollen wir eine Kundentabelle erstellen, die Informationen wie Name, Geburtstag und Adresse enthält, sowie eine Bestelltabelle, die Details wie Artikelnummer, Bestelldatum usw.\ speichert und einen Bezug zu dem Kunden herstellt, der die Bestellung aufgegeben hat.
 Damit wir aber nicht nur ein Beispiel haben, das dargestellt wird, brauchen wir einen Vergleich zwischen zwei verschiedenen Implementierungen.
 Dieser Unterschied zwischen den beiden Implementierungen besteht darin, dass in der einen Version die Tabelle eine Kundennummer vom Typ \texttt{Int} enthält, während in der anderen keine Kundennummer vorhanden ist.
 Stattdessen wird in der Bestelltabelle auf den Namen (Typ \texttt{Varchar}) verwiesen.
 Da Verbundoperationen zu den aufwendigsten Operationen gehören, gehen wir davon aus, dass der kleine Typ \texttt{Int} Performancevorteile gegenüber der anderen Version hat.
-Dies gilt es nun mit den Benchmarktest genauer zu untersuchen.
+Dies gilt es nun mit den Benchmark-Test genauer zu untersuchen.
 
-Für die Durchführen der Benchmarks beginnen wir zunächst unabhängig von Sysbench und den Lua – Skripten mit der Spezifizierung der Tabellen, die erstellt werden sollen.
+Für die Durchführung der Benchmarks beginnen wir zunächst unabhängig von Sysbench und den Lua – Skripten mit der Spezifizierung der Tabellen, die erstellt werden sollen.
 Dies müssen wir einmal mit der Kundennummer und einmal mit dem Namen als Fremdschlüssel der Bestelltabelle machen.
 Damit müssen insgesamt vier unterschiedliche Create Table - Befehle umgesetzt werden.
 So sehen die Create Table für den Fall mit der Kundennummer aus:
@@ -267,7 +272,7 @@ Dies ist ein Auszug aus der \texttt{Prepare} - Funktion:
     basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Grundlagen/03_Prepare_Query.lua}
 
-Wenn die Datenbank beispielsweise in einer Produktivumgebung läuft, dann wollen wir, dass die Benchmarks möglichst wenig Einfluss aus sie haben.
+Wenn die Datenbank beispielsweise in einer Produktivumgebung läuft, dann wollen wir, dass die Benchmarks möglichst wenig Einfluss auf sie haben.
 Damit ist es das Ziel, dass die Datenbank möglichst wieder in ihrem Anfangszustand ist.
 Außerdem sollte der Benchmark beliebig oft nacheinander ausgeführt werden können, ohne zu Problemen zu führen.
 Wenn wir aber eine Tabelle erstellen und nicht wieder löschen, dann würde im nächsten Durchlauf der Create Table - Befehl scheitern.
@@ -289,7 +294,7 @@ Jetzt haben wir das Gerüst für die eigentlichen Insert - und Select - Befehle 
 Bei den Insert - Befehlen können wir entweder mit zufälligen Zahlen die Werte generieren oder wir setzen Listen von Namen fest, aus denen zufällig gewählt werden kann.
 Da wir jedoch keine Kontrolle über diese zufällig erstellten Werte haben, müssen wir beim Insert - Befehl die Bedingung „Insert Ignore“ hinzufügen, damit doppelte Schlüsselwerte ignoriert werden und keine Fehler verursachen.
 Wir müssen hier auch festlegen, wie viele Datensätze für die Kunden erstellt werden und wie viele Bestellungen pro Kunden es geben soll.
-Später werden wir noch eine Möglichkeit kennen lernen, um diese Werte von außen zusteuern.
+Später werden wir noch eine Möglichkeit kennenlernen, um diese Werte von außen zusteuern.
 Um sicherzustellen, dass keine Werte in den Tabellen enthalten sind, können wir alle Datensätze aus den Tabellen entfernen, bevor wir sie hinzufügen.
 Damit die Performance der Insert – Query auch gemessen wird, ist es wichtig, dass die \texttt{insert()} - Funktion in der \texttt{event()} – Funktion aufgerufen wird.
 Sonst kommt es zu diesem Fehler:
@@ -329,7 +334,7 @@ Damit wir die unterschiedlichen Operationen voneinander trennen können, gibt es
 \end{itemize}
 
 Analog muss auch ein Ordner für die Varchar - Vergleich erstellt werden.
-Als Letztes brauchen wir nur einen Orchestrator, der das korrekte Lua - Skript ausführt, die Ergebnisse in die richtige Log - Datei schreibt und anschließend die CSV - Dateien und die Grafiken erstellt.
+Als Letztes brauchen wir nur einen Orchestrator, der das korrekte Lua - Skript ausführt, die Ergebnisse in die richtige Log-Datei schreibt und anschließend die CSV - Dateien und die Grafiken erstellt.
 Dieser Orchestrator ist das Shell - Skript: \texttt{sysbench\_script.sh}.
 
 Zudem möchten wir unser Beispiel erweitern, da es auch möglich sein soll, unterschiedliche Längen von Varchar hinzuzufügen.
@@ -361,7 +366,8 @@ Die Parameter haben folgende Funktion:
 \begin{itemize}[label=--]
     \item \texttt{-out}: Gibt den Pfad an, an welchen der Output-Ordner gespeichert werden soll
     \item \texttt{-var}: Angabe der Variablen und deren Werte, die exportiert werden sollen im JSON-Format
-    \item \texttt{-scripts}: Angabe der Pfade zu den Ordnern, die die Lua-Skripte enthalten. Nach dem Doppelpunkt wird angegeben, welche Variable das Skript benötigt. \texttt{Int\_queries} benötigt keine Variablen, deshalb gibt es auch keinen Doppelpunkt.
+    \item \texttt{-scripts}: Angabe der Pfade zu den Ordnern, die die Lua-Skripte enthalten.
+    Nach dem Doppelpunkt wird angegeben, welche Variable das Skript benötigt. \texttt{Int\_queries} benötigt keine Variablen, deshalb gibt es auch keinen Doppelpunkt.
 \end{itemize}
 
 \label{itm:mehrere_selects}
@@ -371,13 +377,13 @@ Um zu untersuchen, ob ein bestimmter Indextyp bei Abfragen verwendet wird, müss
 Die eigentlichen Tabellen und deren Datensätze müssen dabei nicht immer wieder gleich befüllt werden.
 Wenn wir auch unsere Ordnerstruktur mit dem Int - Query Beispiel zurückkommen, dann könnte man anstelle von \texttt{int\_queries\_select.lua} auch einen Ordner erstellen mit den Namen \texttt{int\_queries\_select}.
 In diesem Ordner können beliebig viele unterschiedliche Lua - Skripts sein, die select – Funktionen haben.
-Dadurch werden alle Select - Befehle auf der gleichen Datenbasis verglichen und so können wir im Kapitel \ref{sec:grundlagen-der-indexierung} erkennen, wann der Index verwendet wird und wann nicht.
+Dadurch werden alle Select - Befehle auf der gleichen Datenbasis verglichen und so können wir im Kapitel~\ref{sec:indexing-grundlagen-der-indexierung} erkennen, wann der Index verwendet wird und wann nicht.
 
 Bevor wir uns das Ergebnis des Befehls anschauen, kommen wir zu der Funktionsweise des Orchestrator - Skript \texttt{sysbench\_script.sh}.
 Im Grundlegenden arbeitet dieses Skript ähnlich wie schon das Skript im Demo - Beispiel, aber durch die zusätzlichen Anwendungsfälle kommt es zu mehr Komplexität.
 
 Zu Beginn des Skripts werden die Umgebungsvariablen aus der Datei \texttt{db.env} geladen.
-Die Variablen helfen zum einen wie bei dem Demo - Beispiel bei die Datenbank - Verbindung und zum anderen können sich auch die Parameter der Benchmarks verändern.
+Die Variablen helfen zum einen wie bei dem Demo-Beispiel bei der Datenbank-Verbindung und zum anderen können sich auch die Parameter der Benchmarks verändern.
 Danach werden die Parameter, die an das Skript übergeben wurden, überprüft.
 Beispielsweise wird sichergegangen, dass die für die Skripts verwendeten Parameter, bei unserem Beispiel length für varchar, tatsächlich auch definiert worden sind mit \texttt{-var}.
 
@@ -388,14 +394,14 @@ Die erste Art von Grafik ist ein Zeitreihendiagramm, welches auf der x-Achse den
 Auf der y-Achse werden in einigen Diagrammen die unterschiedlichen Metriken für jedes einzelne Skript dargestellt, während andere Diagramme die Werte einer bestimmten Metrik auf der y-Achse zeigen und dabei die Ergebnisse verschiedener Skripte vergleichen.
 Dadurch können beispielsweise die Metriken \texttt{Reads} und \texttt{Writes} analysiert werden, um herauszufinden, welches Skript in diesen Bereichen besser abschneidet.
 Danach wird der Output - Ordner erstellt und die Spaltenüberschriften in die CSV – Dateien geschrieben.
-Danach beginnt erst das eigentliche Durchgehen der unterschiedlichen Skripte, die unter dem Argument -script angegeben wurden.
+Anschließend beginnt erst das eigentliche Durchgehen der unterschiedlichen Skripte, die unter dem Argument -script angegeben wurden.
 Zunächst schreibt man die einzelnen Dateien nach dem obigen Schema (\ref{files_structure}) auf, denn als Argument wurde nur der oberste Ordner angegeben.
-Als nächstes kommt eine Fallunterscheidung, die überprüft, ob dieses Skript exportierte Variable nutzt oder nicht.
+Als Nächstes kommt eine Fallunterscheidung, die überprüft, ob dieses Skript exportierte Variable nutzt oder nicht.
 Für den Fall, dass keine Variablen exportiert werden (z.B. \texttt{int\_queries}) wird einfach die Prepare – Funktion aufgerufen, dann \texttt{process\_script\_benchmark} und anschließend die Cleanup - Funktion.
 Wenn aber Variablen exportiert werden, dann müssen weitere Zwischenschritte umgesetzt werden.
 Und zwar müssen alle Kombinationen zwischen den verschiedenen exportierten Variablen generiert werden.
 Wenn es drei Variablen gibt, von denen 2 jeweils 2 Werte und eine letzte nur einen Wert hat, dann gibt es 2 * 2 * 1 = 4 unterschiedliche Kombinationen.
-Als nächstes muss man für alle diese Kombinationen die Schritte ausführen, die man schon bei der Variante ohne exportierte Variable ausgeführt hat und dabei darf man nicht vergessen die Variablen an sich zu exportieren.
+Als Nächstes muss man für alle diese Kombinationen die Schritte ausführen, die man schon bei der Variante ohne exportierte Variable ausgeführt hat und dabei darf man nicht vergessen die Variablen an sich zu exportieren.
 
 \lstinputlisting[
     language=sh,
@@ -405,7 +411,7 @@ Als nächstes muss man für alle diese Kombinationen die Schritte ausführen, di
     basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Grundlagen/08_Main_Loop.sh}
 
-Die Funktion \texttt{process\_script\_benchmark} führt wie beim Demo - Beispiel schon erwähnt, die Methoden prepare, insert, selct und cleanup durch \ref{lst:sysbench_monitor}.
+Die Funktion \texttt{process\_script\_benchmark} führt wie beim Demo - Beispiel schon erwähnt, die Methoden prepare, insert, selct und cleanup durch~\ref{lst:sysbench_monitor}.
 Außerdem überprüft sie auch, ob es sich bei dem Select – Directory um einen Ordner handelt oder nicht.
 Wenn es ein Ordner ist, dann werden alle Dateien in diesem Ordner mit Sysbench durchgeführt, wenn nicht, dann wird an den Ordner nur die Endung \texttt{.lua} hinzugefügt.
 
@@ -418,14 +424,14 @@ Wenn es ein Ordner ist, dann werden alle Dateien in diesem Ordner mit Sysbench d
 ]{Scripts/Grundlagen/09_Process_Script_Benchmark.sh}
 \textbf{INFO:} Die Shell-Ausschnitte sind zum Teil verkürzt und würden auf diese Weise nicht funktionieren.
 
-Die Methode \texttt{run\_benchmark} führt den Sysbench – Befehl (siehe \ref{lst:sysbenchrun}) aus und nur wenn es sich um die Methode \texttt{RUN} handelt, werden die Daten während der Ausführung und die Endstatistiken in je eine CSV - Datei gespeichert.
+Die Methode \texttt{run\_benchmark} führt den Sysbench – Befehl (siehe~\ref{lst:sysbenchrun}) aus und nur wenn es sich um die Methode \texttt{RUN} handelt, werden die Daten während der Ausführung und die Endstatistiken in je eine CSV - Datei gespeichert.
 Aus diesen beiden CSV - Dateien müssen die Insert - und Select - Queries der zugehörigen Skripte wieder vereint werden und die Attribute werden miteinander addiert.
 Der letzte Schritt, der noch fehlt, ist die Erstellung der Graphen.
 
 Wenn wir das komplette Skript für unser Join-Typ-Beispiel ausführen, dann ist das Endresultat ein Output-Ordner, der an angegebener Stelle erstellt wird.
 In diesem Ordner werden verschiedene Grafiken generiert, die die Ergebnisse visualisieren.
-Die erste Art stellen Zeitreihendiagramme dar, die auf der X-Achse den zeitlichen Verlauf zeigen.
-Auf der Y-Achse werden hingegen in einigen Diagrammen die unterschiedlichen Metriken eines einzelnen Skripts dargestellt, während andere Diagramme die Werte einer bestimmten Metrik auf der Y-Achse zeigen und dabei die Ergebnisse verschiedener Skripte vergleichen.
+Die erste Art stellen Zeitreihendiagramme dar, die auf der x-Achse den zeitlichen Verlauf zeigen.
+Auf der y-Achse werden hingegen in einigen Diagrammen die unterschiedlichen Metriken eines einzelnen Skripts dargestellt, während andere Diagramme die Werte einer bestimmten Metrik auf der y-Achse zeigen und dabei die Ergebnisse verschiedener Skripte vergleichen.
 Dadurch können beispielsweise die Metriken "Reads" und "Writes" analysiert werden, um herauszufinden, welches Skript in diesen Bereichen besser abschneidet.
 
 Die zweite Art von Grafik, die erstellt wird, ist ein Hexagon - Diagramm.
@@ -499,10 +505,10 @@ Eine Möglichkeit wäre es gewesen, die Skripte parallel durchlaufen zu lassen, 
 Eine deutlich bessere Variante ist das Automatisieren dieser Befehle unabhängig von dem lokalen Rechner auf virtuellen Maschinen in der Cloud.
 Als Plattform für diese Continuous Integration und Continuous Delivery (CI/CD) habe ich mich für GitHub Actions entschieden (\cite{github_action_doku}).
 Mit GitHub Actions kann man Workflows erstellen, die bei einem bestimmten Event getriggert werden und anschließend eine Anzahl von Aufträgen nacheinander oder gleichzeitig ausführen können.
-Jeder Auftrag (engl. Job) wird innerhalb eines eigenen Runners der virtuellen Maschine in einem Container ausgeführt und mann über einen oder mehrere Schritte (eng. Step) verfügen.
+Jeder Auftrag (engl.\ Job) wird innerhalb eines eigenen Runners der virtuellen Maschine in einem Container ausgeführt und mann über einen oder mehrere Schritte (engl.\ Step) verfügen.
 Die Schritte können wiederum beliebige Shell-Befehle, Skripte oder Aktionen ausführen.
 
-Wie in den Kapiteln \ref{sec:einfuhrung-in-die-tools} und \ref{sec:projektaufbau-mit-beispiel} erklärt, müssen wir das Hauptskript ausführen, in dem die Benchmarktests durchführen werden.
+Wie in den Kapiteln~\ref{sec:einfuhrung-in-die-tools} und~\ref{sec:projektaufbau-mit-beispiel} erklärt, müssen wir das Hauptskript ausführen, in dem die Benchmark-Tests durchführen werden.
 Außerdem benötigen wir auch die Pfade zu den Lua-Skripten, die getestet werden sollen und in einigen Fällen müssen wir auch Variablen definieren, die später exportiert und in den Lua-Skripts verwendet werden.
 Diese Pfade und Variablen müssen wir pro Projekt definieren und zusammen mit je einem Namen in einer JSON-Datei speichern.
 
@@ -513,7 +519,7 @@ Diese Pfade und Variablen müssen wir pro Projekt definieren und zusammen mit je
     style=custom_daniel,
 ]{Scripts/Grundlagen/10_Pattern.json}
 
-Damit wir das Hauptskript ausführen können, müssen wir im ersten Auftrag (engl. Job) die Daten dieser JSON-Datei verarbeiten und bestimmte Variablen, wie beispielweise den Outputordner definieren.
+Damit wir das Hauptskript ausführen können, müssen wir im ersten Auftrag (engl.\ Job) die Daten dieser JSON-Datei verarbeiten und bestimmte Variablen, wie beispielweise den Output-Ordner definieren.
 Zudem müssen wir alle Namen der verschiedenen Projekte in einer Liste zusammenfügen und als Output für den nächsten Job definieren.
 Dieser Job wird erst gestartet, wenn der Erste beendet ist und ist verantwortlich für das eigentliche Durchführen der Benchmarks.
 Da wir die Vorteile des gleichzeitigen Ausführens der Aufträge nutzen wollen, müssen wir die Matrixstrategie verwenden, damit die Benchmarks parallel ausgeführt werden.
@@ -526,12 +532,12 @@ Nach diesen Schritten können wir das Hauptskript ausführen und die Outputdatei
 
 Um Zugriff auf diese Dateien zu erhalten, müssen wir sie als GitHub Artifact hochladen.
 Die GitHub Artifacts können wir anschließend entweder über die GitHub REST Api oder die Übersicht des Workflows in GitHub als Zip-Datei herunterladen.
-Als letzten Auftrag, nach Beendigung beider vorangegangenen Jobs, können wir alle GitHub Artifacts zu diesem Workflow herunterladen und gemeinsam als Artifact wieder hochladen, damit wir z.B. bei 10 Projekten, nicht 10 Zip-Dateien herunterladen und einzeln entpacken müssen, um die Änderungen der Dateien zu überprüfen.
+Als letzten Auftrag, nach Beendigung beider vorangegangenen Jobs, können wir alle GitHub Artifacts zu diesem Workflow herunterladen und gemeinsam als Artifact wieder hochladen, damit wir z.B.\ bei 10 Projekten, nicht 10 Zip-Dateien herunterladen und einzeln entpacken müssen, um die Änderungen der Dateien zu überprüfen.
 Wenn fehlerhafte Änderungen den Workflow triggern, kann es dazu kommen, dass je nach Fehler unterschiedliche Jobs oder Steps nicht erfolgreich ausgeführt werden und damit der komplette Workflow scheitert.
 
-Der Workflow wird in einer YAML-Datei im Ordner \texttt{.github/workflows/} definiert.
+Der Workflow wird in einer YAML-Datei im Ordner ~\texttt{.github/workflows/} definiert.
 Zunächst muss man den Names des Workflows definieren und anschließend, wann er getriggert werden soll.
-Dies kann beispielsweise manuell auf GitHub mit dem Tag \texttt{workflow\_dispatch} oder bei jedem Push mit \texttt{push}, u.a. kann das auch auf bestimmte Dateien oder Ordner einschränken.
+Dies kann beispielsweise manuell auf GitHub mit dem Tag \texttt{workflow\_dispatch} oder bei jedem Push mit \texttt{push}, u.a.\ kann das auch auf bestimmte Dateien oder Ordner einschränken.
 Unter dem Tag \texttt{env} muss man die Umgebungsvariablen definieren, dazu gehören zum Beispiel der Datenbankname oder die Länge der Durchführung des Benchmarks.
 Wenn es sich um vertrauliche Informationen handelt, sollte man GitHub Secrets dafür verwenden.
 Ein Beispiel dafür wäre das Downloaden der Artefakte im letzten Job, um einen gemeinsamen Output-Ordner zu erstellen.
@@ -568,7 +574,7 @@ Deutlich mehr Zeit und Ressourcen kann man aber sparen, wenn man zwischen zwei u
 Denn zum einen gibt es Dateien, die die Ergebnisse von allen Skripten beeinflussen.
 Dazu gehören das Workflow - Skript und die JSON - Datei, aber auch das Orchestrator - Skript und die darin verwendeten Python - Skripte.
 Die Ordner an sich, die in der JSON angegeben werden, die beeinflussen nur sich selbst und nicht die anderen Skripte.
-Beispielweise, wenn ich in Projekt A die Anzahl an Zeilen ändere, die ausgeführt werden, dann ändert dies nichts an dem Ergebnis von Projekt B oder C.
+Beispielweise, wenn ich in Projekt A die Anzahl an Zeilen ändere, die ausgeführt werden, dann ändert dies nichts an dem Ergebnis von Projekt B oder C\@.
 In diesem Beispiel würde es sich anbieten, dass für Projekt A die Benchmarks neu durchgeführt werden, für Projekt B und C könnte hingegen jeweils der letzte erfolgreiche Output Ordner benutzt werden.
 Als Endresultat könnten damit die neue Durchführung von Projekt A zusammen mit der alten Ausführung der Projekte B und C in einer ZIP – Datei hochgeladen werden.
 Dadurch wird nur ein Drittel der eigentlichen Ressourcen verbraucht, wenn man davon ausgehen würde, dass alle 3 Projekte gleich viel Zeit benötigen würden.

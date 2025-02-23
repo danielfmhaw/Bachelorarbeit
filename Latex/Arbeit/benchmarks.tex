@@ -2,59 +2,45 @@
 %! Date = 21.10.24
 \chapter{Einleitung}\label{ch:einleitung}
 
-\section{Einführung in Benchmarks}
+\section{Einführung in Benchmarks}\label{sec:einleitung-einfuehrung}
 
-Benchmarks dienen dazu, praktisch und effektiv zu untersuchen, wie sich ein
-System unter Last verhält. Die wichtigste Erkenntnis, die man aus Benchmarks
-gewinnen kann, sind die Probleme und Fehler, die man systematisch dokumentieren
-und nach Priorität abarbeiten sollte. Das Ziel von Benchmarks ist die Reduzierung
-und Bewertung von unerwünschtem Verhalten sowie die Analyse, wie sich das
-System derzeit und unter simulierten, zukünftigen, anspruchsvolleren Bedingungen
-verhalten könnte.
+Benchmarks dienen dazu, praktisch und effektiv zu untersuchen, wie sich ein System unter Last verhält.
+Die wichtigste Erkenntnis, die man aus Benchmarks gewinnen kann, sind die Probleme und Fehler, die man systematisch dokumentieren und nach Priorität abarbeiten sollte.
+Das Ziel von Benchmarks ist die Reduzierung und Bewertung von unerwünschtem Verhalten sowie die Analyse, wie sich das System derzeit und unter simulierten, zukünftigen, anspruchsvolleren Bedingungen verhalten könnte.
 
-Es gibt zwei verschiedene Techniken für Benchmarks. Die erste zielt darauf ab,
-die Applikation als Ganzes zu testen (full-stack). Dabei wird nicht nur die
-Datenbank getestet, sondern die gesamte Applikation, einschließlich des Webservers,
-des Netzwerks und des Applikationscodes. Der Ansatz dahinter ist, dass ein Nutzer
-genauso lange auf eine Abfrage warten muss, wie das gesamte System benötigt.
-Daher sollte diese Wartezeit so gering wie möglich sein. Es kann dabei vorkommen,
-dass MySQL nicht immer das Bottleneck ist.\footnote{Gemeint ist ein Engpass beim Transport von Daten oder Waren, der maßgeblichen Einfluss auf die Abarbeitungsgeschwindigkeit hat. Optimierungsversuche an anderer Stelle führen oft nur zu geringen oder gar keinen messbaren Verbesserungen der Gesamtsituation. (\cite{bottleneck})}
+Es gibt zwei verschiedene Techniken für Benchmarks (\cite[pp. 35--49]{schwartz2012high}).
+Die erste zielt darauf ab, die Applikation als Ganzes zu testen (full-stack).
+Dabei wird nicht nur die Datenbank getestet, sondern die gesamte Applikation, einschließlich des Webservers,
+des Netzwerks und des Applikationscodes.
+Der Ansatz dahinter ist, dass ein Nutzer genauso lange auf eine Abfrage warten muss, wie das gesamte System benötigt.
+Daher sollte diese Wartezeit so gering wie möglich sein.
+Es kann dabei vorkommen, dass MySQL nicht immer das Bottleneck ist.\footnote{Gemeint ist ein Engpass beim Transport von Daten oder Waren, der maßgeblichen Einfluss auf die Abarbeitungsgeschwindigkeit hat. Optimierungsversuche an anderer Stelle führen oft nur zu geringen oder gar keinen messbaren Verbesserungen der Gesamtsituation. (\cite{bottleneck})}
 
-Full-Stack-Benchmarks haben jedoch auch Nachteile. Sie sind schwieriger zu erstellen
-und insbesondere schwieriger korrekt einzurichten. Wenn man lediglich verschiedene
-Schemas und Abfragen in MySQL auf ihre Performance testen möchte, gibt es sogenannte
-Single-Component-Benchmarks. Diese analysieren ein spezifisches Problem in der
-Applikation und sind deutlich einfacher zu erstellen. Ein weiterer Vorteil besteht
-darin, dass nur ein Teil des gesamten Systems getestet wird, wodurch die Antwortzeiten
+Full-Stack-Benchmarks haben jedoch auch Nachteile.
+Sie sind schwieriger zu erstellen und insbesondere schwieriger korrekt einzurichten.
+Wenn man lediglich verschiedene Schemas und Abfragen in MySQL auf ihre Performance testen möchte, gibt es sogenannte Single-Component-Benchmarks.
+Diese analysieren ein spezifisches Problem in der Applikation und sind deutlich einfacher zu erstellen.
+Ein weiterer Vorteil besteht darin, dass nur ein Teil des gesamten Systems getestet wird, wodurch die Antwortzeiten
 kürzer sind und man schneller Ergebnisse erhält.
 
-Wenn bei Benchmarks schlechte Designentscheidungen getroffen werden, kann dies zu einer
-falschen Interpretation des Systems führen, da die Ergebnisse nicht die Realität widerspiegeln.
-Die Größe des Datensatzes und des Workloads muss realistisch sein. Idealerweise verwendet
-man einen Snapshot\footnote{Snapshots bestehen größtenteils aus Metadaten, die den Zustand Ihrer Daten definieren, und sind keine vollständige Duplikation der Daten auf Ihrer Festplatte. Snapshots werden häufig für Test- und Entwicklungsaufgaben verwendet. (\cite{snapshot}) } des tatsächlichen produktiven Datensatzes.
-Gibt es keine Produktionsdaten, sollten die Daten und der Workload simuliert werden,
-da realistische Benchmarks komplex und zeitaufwendig sein können.
+Wenn bei Benchmarks schlechte Designentscheidungen getroffen werden, kann dies zu einer falschen Interpretation des Systems führen, da die Ergebnisse nicht die Realität widerspiegeln.
+Die Größe des Datensatzes und des Workloads muss realistisch sein.
+Idealerweise verwendet man einen Snapshot\footnote{Snapshots bestehen größtenteils aus Metadaten, die den Zustand Ihrer Daten definieren, und sind keine vollständige Duplikation der Daten auf Ihrer Festplatte. Snapshots werden häufig für Test- und Entwicklungsaufgaben verwendet. (\cite{snapshot}) } des tatsächlichen produktiven Datensatzes.
+Gibt es keine Produktionsdaten, sollten die Daten und der Workload simuliert werden, da realistische Benchmarks komplex und zeitaufwendig sein können.
 
-Häufige Fehler beim Durchführen von Benchmarks sind unter anderem, dass nur ein kleiner Teil
-der tatsächlichen Datensatzgröße verwendet wird und die Datensätze unkorrekt gleichmäßig
-verteilt sind. In der Realität können Hotspots auftreten. Bei zufällig generierten Werten
-kommt es hingegen häufig zu unrealistisch gleichmäßig verteilten Datensätzen. Ein weiterer
-Fehler besteht darin, dass man beim Testen einer Anwendung nicht das tatsächliche
-Benutzerverhalten nachstellt. Wenn gleiche Abfragen in einer Schleife ausgeführt werden,
-muss man außerdem auf das Caching achten, da sonst falsche Annahmen über die Performance
-getroffen werden können. Zudem wird oft die Warmmachphase des Systems vollständig ignoriert.
+Häufige Fehler beim Durchführen von Benchmarks sind unter anderem, dass nur ein kleiner Teil der tatsächlichen Datensatzgröße verwendet wird und die Datensätze unkorrekt gleichmäßig verteilt sind.
+In der Realität können Hotspots auftreten.
+Bei zufällig generierten Werten kommt es hingegen häufig zu unrealistisch gleichmäßig verteilten Datensätzen.
+Ein weiterer Fehler besteht darin, dass man beim Testen einer Anwendung nicht das tatsächliche Benutzerverhalten nachstellt.
+Wenn gleiche Abfragen in einer Schleife ausgeführt werden, muss man außerdem auf das Caching achten, da sonst falsche Annahmen über die Performance getroffen werden können.
+Zudem wird oft die Aufwärmphase des Systems vollständig ignoriert.
 Kurze Benchmarks können schnell zu falschen Annahmen über die Performance des Systems führen.
 
-Um verlässliche Ergebnisse zu erhalten, sollte ein Benchmark ausreichend lange laufen,
-um den stabilen Zustand des Systems zu beobachten, insbesondere bei Servern mit großen
-Datenmengen und viel Speicher. Dabei ist es wichtig, so viele Informationen wie möglich zu
-erfassen und sicherzustellen, dass der Benchmark wiederholbar ist, da unzureichende oder
-fehlerhafte Tests wertlos sind. Außerdem ist es wichtig, die Ergebnisse in einem Diagramm
-darzustellen, da auftretende Phänomene sonst anhand einer tabellarischen Darstellung nicht
-erkannt werden können.
+Um verlässliche Ergebnisse zu erhalten, sollte ein Benchmark ausreichend lange laufen, um den stabilen Zustand des Systems zu beobachten, insbesondere bei Servern mit großen Datenmengen und viel Speicher.
+Dabei ist es wichtig, so viele Informationen wie möglich zu erfassen und sicherzustellen, dass der Benchmark wiederholbar ist, da unzureichende oder fehlerhafte Tests wertlos sind.
+Außerdem ist es wichtig, die Ergebnisse in einem Diagramm darzustellen, da auftretende Phänomene sonst anhand einer tabellarischen Darstellung nicht erkannt werden können.
 
-
-\section{Measures}
+\section{Measures}\label{sec:einleitung-measures}
 \begin{itemize}[label={--}]
     \item \textbf{Durchsatz (Throughput):} Der Durchsatz ist die Anzahl an Transaktionen pro Zeiteinheit.
     Er ist standardisiert, und Datenbankanbieter versuchen, diesen zu optimieren.
@@ -64,7 +50,7 @@ erkannt werden können.
     Von dieser Zeit können aggregierte Antwortzeiten wie Durchschnitt, Maximum, Minimum und Perzentile abgeleitet werden.
     Das Maximum ist oft eine weniger sinnvolle Metrik, da es sich nicht gut wiederholen lässt.
     Daher nutzt man eher Perzentile bei den Antwortzeiten.
-    Wenn beispielsweise das 95. Perzentil der Antwortzeit bei 5 ms liegt, bedeutet dies, dass mit einer Wahrscheinlichkeit von 95 \% die Abfrage in weniger als 5 ms abgeschlossen ist.
+    Wenn beispielsweise das 95.\ Perzentil der Antwortzeit bei 5 ms liegt, bedeutet dies, dass mit einer Wahrscheinlichkeit von 95\% die Abfrage in weniger als 5 ms abgeschlossen ist.
     \item \textbf{Nebenläufigkeit (Concurrency):} Die Nebenläufigkeit auf dem Webserver lässt sich nicht zwangsläufig auf den Datenbankserver übertragen.
     Eine genauere Messung der Gleichzeitigkeit auf dem Webserver besteht darin, zu bestimmen, wie viele gleichzeitige Anfragen zu einem bestimmten Zeitpunkt ausgeführt werden.
     Es kann auch geprüft werden, ob der Durchsatz sinkt oder die Antwortzeiten steigen, wenn die Gleichzeitigkeit zunimmt.
