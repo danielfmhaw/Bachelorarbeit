@@ -21,8 +21,6 @@ function prepare()
         PARTITIONS %d;
     ]], type:upper(), count)
 
-    print("daniel",create_kunden_query)
-
     -- SQL query to create the BESTELLUNG table
     local create_bestellung_query = [[
         CREATE TABLE BESTELLUNG (
