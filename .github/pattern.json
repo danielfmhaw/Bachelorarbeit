@@ -113,6 +113,16 @@
       }
     }
   },
+  "replication-multiple-select-threads": {
+    "scripts": {
+      "./Projects/Replication/Scripts/replication": {
+        "vars": "sel_thr",
+        "db": ["mysql_master_slave","mysql"],
+        "prefixes": "replication_db_mysql_master_slave_comb_sel_thr_8_select,replication_db_mysql_master_slave_comb_sel_thr_16_select,replication_db_mysql_master_slave_comb_sel_thr_32_select"
+      }
+    },
+    "var": {"sel_thr":[8,16,32]}
+  },
   "replication-format-change": {
     "scripts": {
       "./Projects/Replication/Scripts/replication": {
