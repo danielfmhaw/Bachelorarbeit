@@ -130,7 +130,7 @@ process_script_benchmark() {
 run_benchmark() {
   local SCRIPT_PATH="$1" MODE="$2" OUTPUT_FILE="$3" SCRIPT_NAME="${4:-}" COMBINATION="${5:-}"
 
-  if [[ -n "$SCRIPT_NAME" ]] && [ -z "$DB_PORTS" ]; then
+  if [[ -n "$SCRIPT_NAME" && ( -z "$DB_PORTS" || ( "$IS_SELECT" == "false" && -n "$DB_PORTS" ) ) ]]; then
     echo "Running $(basename "$SCRIPT_PATH") for $TIME seconds ..."
   fi
   if [[ "$MODE" == "prepare" ]]; then
@@ -165,6 +165,13 @@ run_benchmark() {
 run_sysbench() {
   local LUA_SCRIPT_PATH="$1" MODE="$2" LOG_FILE="$3" CUSTOM_PORT="${4:-$DB_PORT}"
 
+  if [[ "$LUA_SCRIPT_PATH" == *select* && -n $SEL_THR ]]; then
+     local CUSTOM_THREADS=$((SEL_THR / $(echo ${DB_PORTS:-0} | wc -w)))
+     CUSTOM_THREADS=${CUSTOM_THREADS:-$SEL_THR}
+  else
+     local CUSTOM_THREADS="$THREADS"
+  fi
+
   sysbench \
     --db-driver="$DRIVER" \
     --${DRIVER}-host="$DB_HOST" \
@@ -173,7 +180,7 @@ run_sysbench() {
     --${DRIVER}-password="$DB_PASS" \
     --${DRIVER}-db="$DB_NAME" \
     --time=$TIME \
-    --threads=$THREADS \
+    --threads=$CUSTOM_THREADS \
     --events=$EVENTS \
     --report-interval=$REPORT_INTERVAL \
     "$LUA_SCRIPT_PATH" "$MODE" >> "$LOG_FILE" 2>&1
@@ -238,6 +245,7 @@ prepare_variables(){
   STATS_INSERT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].stats_insert_columns // ""')
   RUNTIME_SELECT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].runtime_select_columns // ""')
   RUNTIME_INSERT_COLUMNS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].runtime_insert_columns // ""')
+  PREFIXES=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].prefixes // ""')
 
   STATS_SELECT_COLUMNS=${STATS_SELECT_COLUMNS:-$STATS_SELECT_COLUMNS_DEFAULT}
   STATS_INSERT_COLUMNS=${STATS_INSERT_COLUMNS:-$STATS_INSERT_COLUMNS_DEFAULT}
@@ -310,11 +318,11 @@ for SCRIPT_PATH in $SCRIPT_KEYS; do
 done
 
 # Statistics csv generated
-python3 "$PYTHON_PATH/generateCombinedCSV.py" "$STATISTICS_FILE_TEMP" "$STATISTICS_FILE" --select_columns "$STATS_SELECT_COLUMNS" --insert_columns "$STATS_INSERT_COLUMNS"
+python3 "$PYTHON_PATH/generateCombinedCSV.py" "$STATISTICS_FILE_TEMP" "$STATISTICS_FILE" --select_columns "$STATS_SELECT_COLUMNS" --insert_columns "$STATS_INSERT_COLUMNS" --prefixes "$PREFIXES"
 echo "Combined CSV file created at $STATISTICS_FILE"
 
 # Outputfile csv generated
-python3 "$PYTHON_PATH/generateCombinedCSV.py" "$RUNTIME_FILE_TEMP" "$RUNTIME_FILE" --select_columns "$RUNTIME_SELECT_COLUMNS" --insert_columns "$RUNTIME_INSERT_COLUMNS"
+python3 "$PYTHON_PATH/generateCombinedCSV.py" "$RUNTIME_FILE_TEMP" "$RUNTIME_FILE" --select_columns "$RUNTIME_SELECT_COLUMNS" --insert_columns "$RUNTIME_INSERT_COLUMNS" --prefixes "$PREFIXES"
 echo "Combined CSV file created at $RUNTIME_FILE"
 
 # Generate plot after all tasks are completed

@@ -27,6 +27,22 @@ cd Tools
   }'
 ```
 
+### Code für Replikation vs No Replikation (Threads auf Master-Replica aufgeteilt):
+```bash
+cd ../..
+cd Tools
+./sysbench_script.sh \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output" \
+  -var '{"sel_thr":[8,16,32]}' \
+  -scripts '{
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Scripts/replication": {
+      "vars": "sel_thr",
+      "db": ["mysql_master_slave","mysql"],
+      "prefixes": "replication_db_mysql_master_slave_comb_sel_thr_8_select,replication_db_mysql_master_slave_comb_sel_thr_16_select,replication_db_mysql_master_slave_comb_sel_thr_32_select"
+    }
+  }'
+```
+
 ### Code für Replikation mit unterschiedlichen Formaten:
 ```bash
 cd ../..
