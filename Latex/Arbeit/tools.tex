@@ -400,7 +400,7 @@ Als Nächstes kommt eine Fallunterscheidung, die überprüft, ob dieses Skript e
 Für den Fall, dass keine Variablen exportiert werden (z.B. \texttt{int\_queries}) wird einfach die Prepare – Funktion aufgerufen, dann \texttt{process\_script\_benchmark} und anschließend die Cleanup - Funktion.
 Wenn aber Variablen exportiert werden, dann müssen weitere Zwischenschritte umgesetzt werden.
 Und zwar müssen alle Kombinationen zwischen den verschiedenen exportierten Variablen generiert werden.
-Wenn es drei Variablen gibt, von denen 2 jeweils 2 Werte und eine letzte nur einen Wert hat, dann gibt es 2 * 2 * 1 = 4 unterschiedliche Kombinationen.
+Wenn es drei Variablen gibt, von denen 2 jeweils 2 Werte und eine letzte nur einen Wert hat, dann gibt es 2 × 2 × 1 = 4 unterschiedliche Kombinationen.
 Als Nächstes muss man für alle diese Kombinationen die Schritte ausführen, die man schon bei der Variante ohne exportierte Variable ausgeführt hat und dabei darf man nicht vergessen die Variablen an sich zu exportieren.
 
 \lstinputlisting[

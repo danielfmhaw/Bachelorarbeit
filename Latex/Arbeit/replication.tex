@@ -169,7 +169,7 @@ Wenn ein Replikat stark hinter dem Master zurückliegt, kann der Slave-I/O-Threa
 Der Replikation-SQL-Thread entfernt diese, sobald er mit deren Verarbeitung fertig ist (dies kann mit der Option relay\_log\_purge geändert werden).
 Wenn das Replikat stark im Rückstand ist, könnte der I/O-Thread tatsächlich den Speicherplatz der Festplatte füllen.
 
-Ein Replikat kann nach einem Absturz leicht beschädigt werden, da die Relay-Logs und die master.info-Datei nicht absturzsicher sind
+Ein Replikat kann nach einem Absturz leicht beschädigt werden, da die Relay-Logs und die master.info-Datei nicht absturzsicher sind.
 
 Der nächste Schritt besteht darin, dem Replikat zu sagen, wie es sich mit dem Master verbinden kann und wie dessen Binary-Logs abspielen wird.
 
@@ -216,16 +216,17 @@ Bei einer warmen Kopie können die Dateien übertragen werden, während der Serv
 
 Im vorherigen Abschnitt wurde erklärt, wie man die Master und vor allem die Replicas korrekt konfiguriert und den Prozess der Replikation startet.
 Es wurde auch erklärt, wie wir das Binlog-Format verändern können und dass wir das Lua-Skript mit den Kunden- und Bestelltabelle verwenden.
-Als Nächstes analysieren wir zwei unterschiedliche Situationen.
+Als Nächstes analysieren wir unterschiedliche Situationen, damit wir die Vorteile verständlicher werden.
 
 Im ersten Vergleich wollen wir die Performanceunterschiede zwischen den Master-Replica-Ansatz und dem Ansatz mit einem MySQL-Server feststellen.
 Beim Master-Replica-Ansatz verwenden wir mit \texttt{ROW} immer den Default-Wert des Binlog-Formats.
 Damit keine Fehler auftreten, müssen wir die beiden Ansätze miteinander kompatibel machen.
-Das Problem dabei ist, dass nicht beide den Standardport von MySQL (3306) gleichzeitig nutzen dürfen.
-Deshalb starten wir den Master mit der Port 3307 und die Replicas inkrementieren diesen Wert jeweils um 1.
-Entsprechend hat die 3.\ Replica den Port 3310.
+Das Problem dabei ist, dass der Standardport von MySQL (3306) nicht gleichzeitig verwendet werden darf.
+Daher starten wir den Master auf Port 3307, und jede Replica erhöht diesen Wert um 1.
+Somit nutzt die dritte Replica den Port 3310.
 Die Anzahl an Replicas können wir in der \texttt{envs.json}-Datei mithilfe der Variablen \texttt{REPLICAS\_COUNT} festlegen.
-Dementsprechend muss es mit der Anzahl lokal oder innerhalb eines Workflowjobs gestarteten und konfigurierten Replicas übereinstimmen.
+Die Voraussetzung dafür ist, dass es lokal mindestens diese Anzahl an gestarteten und konfigurierten Replicas gibt.
+Innerhalb des Workflowjobs muss nichts anpasst werden, da dort der Wert von \texttt{REPLICAS\_COUNT} aus der Datei genommen wird, um die exakte Anzahl an Replicas zu starten.
 Wichtig ist noch zu erwähnen, dass beim Master-Replica logischerweise die Insert-Befehle nur auf dem Master also Port 3307 ausgeführt werden.
 Die Select-Befehle werden sowohl auf dem Master als auch auf den Replicas ausgeführt.
 
@@ -251,16 +252,41 @@ Die Select-Befehle werden sowohl auf dem Master als auch auf den Replicas ausgef
 
 Wenn wir die Ergebnisse aus Abbildung~\ref{fig:replication-vs-no} betrachten, dann fällt auf, dass die Version ohne Replikation am schnellsten ist.
 Danach folgen die Readabfragen auf dem Master auf Port 3307.
-Der Unterschied der beiden liegt bei ~ 15\%.
+Der Unterschied der beiden liegt bei etwa 15\%.
 Nah an dem Ergebnis vom Master ist die erste Replica (3308).
 Überraschenderweise folgen danach die anderen beiden Replicas auf den Ports 3309 und 3310.
 Die Writegeschwindigkeit ist in beim Fall ohne und mit Replikation auf einem ähnlichen Niveau.
 
-Im zweiten Vergleich benutzen wir ausschließlich den Master-Replica-Ansatz.
-Dafür vergleichen wir aber die unterschiedlichen Binlog-Formate, die wir aus~\ref{lst:repl_change_format} kennen.
+In diesem Benchmark wurde der Threads-Wert konstant auf 1 gesetzt, sodass die Leistung eines einzelnen Threads ersichtlich wird.
+Nun betrachten wir ein praxisnahes Szenario: Wenn 8 Nutzer gleichzeitig und unabhängig voneinander Daten abfragen, ohne Änderungen vorzunehmen, ergibt sich eine Last von 8 parallelen Threads.
+Dies kann entweder von einem einzelnen MySQL-Server mit 8 Threads verarbeitet werden oder mit unserem Master-Replica-Ansatz.
+In diesem Fall teilen sich der Master und drei Replicas die Last, sodass jeder von ihnen 2 Threads verarbeitet.
+Dadurch ergibt sich erneut eine Gesamtanzahl von 8 parallelen Threads (4 × 2 = 8).
+Nach diesem Prinzip lassen wir den Benchmark für die folgende Threadanzahlen laufen: 8, 16, 32.
+
+\vspace{-8pt}
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{PNGs/Script/Replication/replication-multiple-select-threads/Reads}
+    \label{replication-multiple-select-threads-reads}
+  \end{subfigure}
+  \vspace{-20pt}
+  \caption[Replikation: Metrikvergleich]{Vergleich von 8 Threads an Single-Server und jeweils 2 an die unters. Ports }
+  \label{fig:replication-multiple-select-threads}
+\end{figure}
+\vspace{-20pt}
+
+Betrachten wir das Ergebnis aus~\ref{fig:replication-multiple-select-threads}, werden die Vorteile der Replikation deutlich.
+Unabhängig von der Anzahl der Threads liegen die Werte mit Replikation stets deutlich über denen des Single-Server-Ansatzes.
+Die Performance des Single-Servers bleibt unabhängig von der Threadanzahl nahezu konstant.
+Bei der Replikation zeigt sich, dass die Kombination von 16 Threads, verteilt auf den Master und 3 Replicas, am effizientesten ist.
+Es folgt der Benchmark mit 32 Threads, während der Vergleichstest mit 8 Threads im Vergleich zu den anderen Master-Replica-Ansätzen am ineffizientesten ist.
+Dennoch sind selbst die 8 Threads mit Replikation deutlich schneller als alle Varianten des Single-Server-Ansatzes.
+
+Im letzten Vergleich verwenden wir ausschließlich den Master-Replica-Ansatz und vergleichen die unterschiedlichen Binlog-Formate, die wir aus~\ref{lst:repl_change_format} kennen.
 Um Variationen zu begrenzen, betrachten wir nur eine Replica pro Master.
-Das ergibt sechs unterschiedliche Leseergebnisse, da wir pro Format zwei Ports abfragen.
-Einmal den Master-Port und einmal den Port der einzigen Replica.
+Daraus ergeben sich sechs unterschiedliche Leseergebnisse, da für jedes der drei Formate sowohl der Master- als auch der Replica-Port abgefragt wird.
 In der Grafik~\ref{fig:replication-format-change} können wir sehen, dass die Unterschiedliche kaum erkennbar sind bei verschiedenen Binlog-Formaten und Ports.
 Und auch die Schreibgeschwindigkeiten verhalten sich bei beiden Varianten sehr ähnlich.
 
@@ -284,8 +310,8 @@ Und auch die Schreibgeschwindigkeiten verhalten sich bei beiden Varianten sehr �
 \vspace{-20pt}
 
 Die Schlussfolgerungen, die wir aus den Messungen gewinnen können, sehen dabei wie folgt aus.
-Wir sehen, dass durch Replication, anders als beispielsweise mit Indexen oder Partitionen, keine deutliche Performancevorteile gewonnen werden.
-Zum einen könnte sich in einer realen Umgebung anders verhalten, aber zum anderen hat die Replikation andere Vorteile.
-Wenn meherere Nutzer auf der Datenbank interagieren und ausschließlich Lesezugriffe benötigen, dann können die Abfragen auf die unterschiedlichen Ports aufgeteilt werden.
-
-TODO: Verteilung auf unterschiedliche Ports durch Sysbench umsetzbar???
+Wir sehen, dass durch Replication, anders als beispielsweise mit Indexen oder Partitionen, bei einem einzelnen Thread keine deutlichen Performancevorteile gewonnen werden können.
+Wenn aber mehrere Nutzer auf der Datenbank interagieren und ausschließlich Lesezugriffe benötigen, dann können die Abfragen auf die unterschiedlichen Ports aufgeteilt werden.
+In diesen Szenarien mit höherer Parallelität und intensiveren Leseoperationen kann Replikation daher signifikante Vorteile bieten.
+Die Auswahl des Binlog-Formats hat bei unserem Benchmark zu keinen Performanzgewinnen geführt.
+Möglicherweise könnte sich jedoch ein anderer Einfluss zeigen, wenn Schreiboperationen ins Spiel kommen oder die Konsistenzanforderungen geändert werden.
