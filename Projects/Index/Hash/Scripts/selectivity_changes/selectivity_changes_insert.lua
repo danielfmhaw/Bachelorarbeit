@@ -1,6 +1,6 @@
 local con = sysbench.sql.driver():connect()
 local num_rows = 800
-local selectivity = tonumber(os.getenv("LENGTH")) or 0
+local max_value = tonumber(os.getenv("PROB")) and 100 / tonumber(os.getenv("PROB")) or 0
 
 function delete_data()
     local delete_kunden_query = "DELETE FROM KUNDEN;"
@@ -14,7 +14,7 @@ function insert_data()
     delete_data()
     for i = 1, num_rows do
         local kunden_id = i
-        local name = string.format("Kunde_%d", math.random(0, selectivity))
+        local name = string.format("Kunde_%d", math.random(0, max_value))
         local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
         local adresse = string.format("Address_%d", i)
         local stadt = string.format("City_%d", math.random(1, 100))

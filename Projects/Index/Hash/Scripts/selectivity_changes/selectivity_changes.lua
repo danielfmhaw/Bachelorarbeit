@@ -15,11 +15,7 @@ function prepare()
         )ENGINE=MEMORY;
     ]]
 
-    local create_indices = [[
-        CREATE INDEX combined_index
-        ON KUNDEN (NAME);
-        USING HASH;
-    ]]
+    local create_indices = "CREATE INDEX hash_index ON KUNDEN (NAME) USING HASH;"
 
     con:query(create_kunden_query)
     con:query(create_indices)
@@ -27,7 +23,7 @@ function prepare()
 end
 
 function cleanup()
-    con:query("DROP INDEX combined_index ON KUNDEN;")
+    con:query("DROP INDEX hash_index ON KUNDEN;")
     con:query("DROP TABLE IF EXISTS KUNDEN;")
 
     print("Cleanup successfully done.")

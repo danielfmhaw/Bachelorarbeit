@@ -17,25 +17,24 @@ Untersucht werden:
     - Nachname + Vorname mit Range (3) => [partial_match_range_query.lua](Scripts/query_differences/query_differences_select/partial_match_range_query.lua)
     - Nachname + Vorname + BDay als Range (4) => [combined_match_with_range.lua](Scripts/query_differences/query_differences_select/combined_match_with_range.lua)
 
-
 ### Code für Selektivität Vergleich:
 ```bash
 cd ../../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output/selectivity_changes" \
-  -var '{"length":[10,100,500]}' \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output" \
+  -var '{"prob":[25,10,5,1]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Scripts/selectivity_changes": {"vars": "length"}
-  }' 
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Scripts/selectivity_changes": {"vars": "prob"}
+  }'
 ```
 
 ### Code unterschiedliche Select - Queries
 ```bash
 cd ../../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output/query_differences" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output" \
   -scripts '{
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Scripts/query_differences": {}
   }'
@@ -44,7 +43,7 @@ cd Tools
 ### Nur Graphen erstellen für Select - Queries (log und csv- files müssen schon bestehen)
 ```bash
 cd ../../..
-cd Tools
+cd Tools/Shell-Scripts
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output/query_differences
+  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output
 ```
