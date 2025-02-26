@@ -17,7 +17,7 @@ Führe das folgende Script aus, um die Benchmarks mit den korrekten Pfaden und P
 ### Code für Range-Partitionierung:
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
   -scripts '{
@@ -31,7 +31,7 @@ cd Tools
 ### Code für Range-Partitionierung-Vergleich zwischen RANGE COLUMNS and only RANGE (nicht in CI/CD enthalten, also pattern.json):
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
   -var '{"type":["range_columns","only_range"]}' \
@@ -46,7 +46,7 @@ cd Tools
 ### Code für Hash-Partitionierung mit Range:
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
   -var '{"partitions_size":[5,50,500]}' \
@@ -63,7 +63,7 @@ cd Tools
 ### Vergleich zwischen Hash-und Key-Partitionierung (nicht in CI/CD enthalten, also pattern.json):
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
   -var '{"type":["hash","key"],"partitions_size":[5,100]}' \
@@ -77,7 +77,7 @@ cd Tools
 ### Code für List-Partitionierung:
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
   -scripts '{
@@ -90,7 +90,7 @@ cd Tools
 
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./generate_graph.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output
 ```

@@ -17,7 +17,7 @@ Führe das folgende Script aus, um die Benchmarks mit den korrekten Pfaden und P
 ### Code für Replikation vs No Replikation:
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output" \
   -scripts '{
@@ -30,7 +30,7 @@ cd Tools
 ### Code für Replikation vs No Replikation (Threads auf Master-Replica aufgeteilt):
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output" \
   -var '{"sel_thr":[8,16,32]}' \
@@ -46,7 +46,7 @@ cd Tools
 ### Code für Replikation mit unterschiedlichen Formaten:
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output" \
   -var '{"format":["statement","row","mixed"]}' \
@@ -60,7 +60,7 @@ cd Tools
 
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./generate_graph.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output
 ```

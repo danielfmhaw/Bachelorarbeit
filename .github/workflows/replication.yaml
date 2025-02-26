@@ -30,9 +30,9 @@ jobs:
 
       - name: Run sysbench script
         run: |
-          chmod +x Tools/sysbench_script.sh
+          chmod +x Tools/Shell-Scripts/sysbench_script.sh
           
-          Tools/sysbench_script.sh \
+          Tools/Shell-Scripts/sysbench_script.sh \
           -out "./Projects/Replication/Output" \
           -scripts '{
            "./Projects/Replication/Scripts/int_queries": {
