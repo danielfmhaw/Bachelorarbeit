@@ -35,12 +35,13 @@ Er liest und spielt Ereignisse aus dem Relay-Log ab und aktualisiert so die Date
 Wenn dieser Thread eine etwa gleich schnelle Verarbeitung wie der I/O-Thread, dann bleibt das Relay-Log normalerweise im Cache des Betriebssystems, sodass Relay-Logs nur sehr geringe Overhead-Kosten haben.
 Die Ereignisse, die der SQL-Thread ausführt, können optional zusätzlich in das eigene Binary-Log des Replicas geschrieben werden.
 
-\begin{figure}[!ht]
+\begin{figure}[H]
   \centering
   \includegraphics[width=.8\textwidth]{PNGs/Textbook/Master_Replica}
-  \caption[Master - Replica - Grafik]{Darstellung der unterschiedlichen Threads}
+  \caption[Master-Replica-Visualisierung]{Darstellung der unterschiedlichen Threads}
   \label{fig:master-replica}
 \end{figure}
+\vspace{-15pt}
 
 Die Abbildung~\ref{fig:master-replica} zeigt nur die beiden Replikation-Threads, die auf dem Replica laufen.
 Zusätzlich gibt es jedoch einen weiteren Thread auf dem Master, da die vom Replica zum Master geöffnete Verbindung einen Thread auf dem Master startet, ähnlich wie jede andere Verbindung zu einem MySQL-Server.
@@ -236,7 +237,6 @@ Die Select-Befehle werden sowohl auf dem Master als auch auf den Replicas ausgef
   \begin{subfigure}[t]{0.48\textwidth}
     \centering
     \includegraphics[width=\textwidth]{PNGs/Script/Replication/replication-vs-no/Reads}
-    \label{replication-vs-no-reads}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.48\textwidth}
@@ -245,8 +245,7 @@ Die Select-Befehle werden sowohl auf dem Master als auch auf den Replicas ausgef
     \label{replication-vs-no-writes}
   \end{subfigure}
   \vspace{-20pt}
-  \caption[Replikation: Metrikvergleich]{Vergleich zwischen dem Master-Replica-Ansatz und einem normalen MySQL-Server }
-  \label{fig:replication-vs-no}
+  \caption[Replikation: Master-Replica-Ansatz vs Single-Server]{Vergleich zwischen dem Master mit 3 Replicas und einem normalen MySQL-Server }
 \end{figure}
 \vspace{-20pt}
 
@@ -272,7 +271,7 @@ Nach diesem Prinzip lassen wir den Benchmark für die folgende Threadanzahlen la
     \label{replication-multiple-select-threads-reads}
   \end{subfigure}
   \vspace{-20pt}
-  \caption[Replikation: Metrikvergleich]{Vergleich von 8 Threads an Single-Server und jeweils 2 an die unters. Ports }
+  \caption[Replikation: Threadanzahl aufgeteilt an Master-Replica]{Vergleich von 8 Threads an Single-Server und jeweils 2 an die unters. Ports }
   \label{fig:replication-multiple-select-threads}
 \end{figure}
 \vspace{-20pt}
@@ -293,18 +292,14 @@ Und auch die Schreibgeschwindigkeiten verhalten sich bei beiden Varianten sehr �
 \begin{figure}[H]
   \centering
   \begin{subfigure}[t]{0.48\textwidth}
-    \centering
     \includegraphics[width=\textwidth]{PNGs/Script/Replication/replication-format-change/statistics}
-    \label{replication-format-change-statistics}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.48\textwidth}
-    \centering
     \includegraphics[width=\textwidth]{PNGs/Script/Replication/replication-format-change/Writes}
-    \label{replication-format-change-writes}
   \end{subfigure}
   \vspace{-20pt}
-  \caption[Replikation: Metrikvergleich]{Vergleich zwischen dem unterschiedlichen Binlog-Typen }
+  \caption[Replikation: Unterschiedlichen Binlog-Typen]{Vergleich zwischen dem unterschiedlichen Binlog-Typen }
   \label{fig:replication-format-change}
 \end{figure}
 \vspace{-20pt}

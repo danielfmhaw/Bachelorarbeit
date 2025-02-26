@@ -297,18 +297,14 @@ Dies liegt aber auch daran, dass wir relativ wenige Datensätze in den Testtabel
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
-        \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Views/view-comparison/Reads}
-        \label{view-comparison-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
-        \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Views/view-comparison/Writes}
-        \label{view-comparison-writes}
     \end{subfigure}
     \vspace{-20pt}
-    \caption[Views: Metrikvergleich]{Vergleich zwischen keiner View, der virtuellen View und dem Ansatz mit Triggern in MySQL}
+    \caption[Views: Keine View, virtuelle View und Ansatz mit Triggern]{Vergleich zwischen keiner View, der virtuellen View und dem Ansatz mit Triggern in MySQL}
     \label{fig:view-comparison-comp-metric}
 \end{figure}
 \vspace{-20pt}
@@ -325,18 +321,14 @@ In unserem Beispiel ist die einmalige Aktualisierung der Sicht besser als das Ve
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
-        \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Views/mat-view-comparison//Reads}
-        \label{mat-view-comparison-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
-        \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Views/mat-view-comparison/Writes}
-        \label{mat-view-comparison-writes}
     \end{subfigure}
     \vspace{-20pt}
-    \caption[Views: Metrikvergleich]{Vergleich zwischen Triggeransatz in MySQL und Postgres, sowie zwei nativen Implementierungen in Postgres unterschiedlicher Aktualisierungshäufigkeit }
+    \caption[Views: Beide Triggeransätze sowie materialisierte Sicht]{Vergleich zwischen Triggeransatz in MySQL und Postgres, sowie zwei nativen Implementierungen in Postgres }
     \label{fig:mat-view-comparison-comp-metric}
 \end{figure}
 \vspace{-20pt}
