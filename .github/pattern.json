@@ -28,9 +28,9 @@
   },
   "selectivity-change": {
     "scripts": {
-      "./Projects/Index/Hash/Scripts/selectivity_changes": {"vars": "length"}
+      "./Projects/Index/Hash/Scripts/selectivity_changes": {"vars": "prob"}
     },
-    "var": {"length": [10, 100, 500]}
+    "var": {"prob":[25,10,5,1]}
   },
   "hash-query-differences": {
     "scripts": {
