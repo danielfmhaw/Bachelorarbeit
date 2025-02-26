@@ -95,7 +95,7 @@ Da wir den für die beiden Variablen den Typen INT gewählt haben und wir überp
     \label{tab:int_values}
 \end{table}
 Für den maximalen Wert von INT werden 32 Bits benötigt: $2^{(32-1)} - 1 = 2147483647$.
-INT(5) und INT(11) können beide die Grenzwerte von INT speichern, weshalb wir bestätigt haben, dass die Breitenangabe keinen Einfluss auf die Speicheranforderungen hat, ansonsten hätten wir einen Fehler bei der Einfügung der Werte bekommen.
+\texttt{INT(5)} und \texttt{INT(11)} können beide die Grenzwerte von INT speichern, weshalb wir bestätigt haben, dass die Breitenangabe keinen Einfluss auf die Speicheranforderungen hat, ansonsten hätten wir einen Fehler bei der Einfügung der Werte bekommen.
 
 Ein spezifischer Typ für eine Festkommazahl ist \texttt{DECIMAL}, die auch für die Speicherung von Ganzzahlen geeignet ist.
 Außerdem kann man bei einer Festkommazahl auch die Genauigkeit angeben, da die maximale Anzahl der Ziffern vor und nach dem Dezimalpunkt definiert werden.
@@ -145,7 +145,7 @@ Wenn das Attribut nicht deklariert wird, dann können u.a.\ auch \texttt{NULL}-W
         \caption{Metriken über den kompletten Zeitraum}
         \label{fig:data-types-null-statistics}
     \end{subfigure}
-    \caption{Vergleich von NULL und NOT NULL}
+    \caption[Datentypen: Null und Not Null]{Vergleich von Null und Not Null}
 \end{figure}
 \vspace{-20pt}
 
@@ -153,13 +153,15 @@ In der erstellten Grafik (siehe Abbildung~\ref{data-types-null-reads}) sind die 
 Anhand der Grafik lässt sich erkennen, dass die Werte für \texttt{NOT NULL} höher liegen als für \texttt{NULL}, bzw \texttt{WITH NULL}.
 Höhere Werte bedeuten, dass mehr Abfragen pro Sekunde durchgeführt werden können, was auf eine bessere Performance hindeutet.
 Deshalb lässt es sich sagen, dass \texttt{NOT NULL} besser performt als \texttt{NULL}, aber wenn man auf die y-Achse schaut, fällt auf, dass die Werte nicht so weit auseinanderliegen, sondern der Unterschied nur marginal ist.
-Daher sollten beim Datenbankentwurf Entscheidungen nicht aus Performancegründen getroffen werden, sondern aus Gründen der Datenintegrität und -konsistenz.
+Daher sollten die Entscheidungen beim Datenbankentwurf nicht hauptsächlich aus Performancegründen getroffen werden, sondern vor allem aus Gründen der Datenintegrität und -konsistenz.
 
 Um zu zeigen, dass man bei der Wahl zwischen unterschiedlichen Datentypen, den simpleren wählen sollte, haben wir erneut die Kundentabelle (\ref{lst:create_table_kunde}) benutzt.
-Für diesen Vergleich haben wir den Datentyp des Schlüsselattributs der Tabelle geändert, zunächst \texttt{INT} und anschließend \texttt{CHAR}.
-An den Ergebnissen fällt auf, dass die Schreibbefehle bei beiden Skripten etwa gleich schnell sind, aber bei den Abfragen gibt es deutliche Unterschiede.
-Hier zeigt sich, dass bei Wertevergleichen \texttt{INT} deutlich schneller ist als \texttt{CHAR} (etwa 50\%).
-Bei der Sortierung ist die Reihenfolge gleich, jedoch fallen die Abstände deutlich geringer aus (\ref{data-types-simpler-reads}).
+Für diesen Vergleich verändern wir jeweils den Datentyp des Schlüsselattributs der Tabelle.
+Zuerst erstellen wir eine Kundentabelle mit einem \texttt{INT}-Primärschlüssel, danach eine mit \texttt{CHAR}.
+An den Ergebnissen im Hexagon~\ref{fig:data-types-simpler-statistics} fällt auf, dass die Schreibbefehle in beiden Fällen etwa gleich schnell sind.
+Aber bei den Abfragen gibt es deutliche Unterschiede.
+Wenn man einen Wertebereich abfragt, dann ist \texttt{INT} deutlich schneller (~50\%) ist als \texttt{CHAR}.
+Bei der Sortierung hat \texttt{INT} ebenfalls einen Vorteil gegenüber \texttt{CHAR}, jedoch fallen die Abstände deutlich geringer aus (\ref{data-types-simpler-reads}).
 
 \vspace{-15pt}
 \begin{figure}[H]
@@ -177,19 +179,24 @@ Bei der Sortierung ist die Reihenfolge gleich, jedoch fallen die Abstände deutl
         \caption{Kennzahlen über den gesamten Zeitraum}
         \label{fig:data-types-simpler-statistics}
     \end{subfigure}
-    \caption{Vergleich von INT und CHAR}
+    \caption[Datentypen: Int und Char]{Vergleich von Int und Char}
 \end{figure}
 \vspace{-20pt}
 
 Als Letztes wollten wir unterschiedliche Datentypen vergleichen.
-Dazu haben wir die gleiche Tabelle wie beim Vergleich von \texttt{INT} und \texttt{CHAR} verwendet, jedoch diesmal unterschiedliche numerische oder Zeichenketten-Typen für den Primärschlüssel benutzt.
+Dazu verwenden wir die gleiche Tabelle wie beim Vergleich von \texttt{INT} und \texttt{CHAR}, setzen diesmal jedoch unterschiedliche numerische oder zeichenkettenbasierte Typen als Primärschlüssel ein.
 Beim Vergleich der numerischen Typen zeigt sich, dass \texttt{DECIMAL} mit deutlichem Abstand am langsamsten ist (Abbildung~\ref{data-types-smaller-number-type-reads}).
 Danach folgt, wie vermutet, der nächstgrößere Datentyp \texttt{BIGINT}.
 Auffällig ist, dass der Unterschied zwischen \texttt{INT}, \texttt{MEDIUMINT} und \texttt{SMALLINT} kleiner ist als erwartet.
 Dies wird vermutlich aber daran liegen, dass wir die Abfragen nur auf eine Tabelle mit wenigen tausend Datensätzen ausgeführt haben.
-In der Produktion mit Hunderttausenden oder Millionen von Datensätzen ist anzunehmen, dass die Unterschiede zwischen den Typen größer wären als in unserem Vergleich.
+In der Praxis mit Hunderttausenden oder Millionen von Datensätzen ist anzunehmen, dass die Unterschiede zwischen den Typen größer wären als in unserem Vergleich.
 
-\vspace{-18pt}
+Beim Vergleich zwischen den beiden Zeichenketten-Typen \texttt{CHAR} und \texttt{VARCHAR} ist unabhängig von der Länge zu erkennen, dass \texttt{VARCHAR} effizienter ist als \texttt{CHAR} (\ref{fig:data-types-smaller-string-type-reads}).
+Im ersten Vergleich wurde jeweils eine Länge von 4 Stellen verwendet und beim zweiten Vergleich eine Länge von 64 Stellen.
+Bei beiden untersuchten Längen ist \texttt{VARCHAR} schneller als \texttt{CHAR}.
+Wenn man sich jedoch die Performance beim Einfügen von Werten anschaut, fällt auf, dass die Unterschiede eher gering sind und es gibt auch stärkere Schwankungen bei den Werten (siehe Abbildung~\ref{fig:data-types-smaller-string-type-writes}).
+
+\vspace{-12pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
@@ -205,18 +212,7 @@ In der Produktion mit Hunderttausenden oder Millionen von Datensätzen ist anzun
         \caption{Unterschiedliche Zeichenketten-Typen}
         \label{fig:data-types-smaller-string-type-reads}
     \end{subfigure}
-    \caption{Vergleich von unterschiedlichen Select-Abfragen}
-\end{figure}
-\vspace{-20pt}
-
-Beim Vergleich zwischen den beiden Zeichenketten-Typen \texttt{CHAR} und \texttt{VARCHAR} ist unabhängig von der Länge zu erkennen, dass \texttt{VARCHAR} effizienter ist als \texttt{CHAR} (\ref{fig:data-types-smaller-string-type-reads}).
-Im ersten Vergleich wurde jeweils eine Länge von 4 Stellen verwendet und beim zweiten Vergleich eine Länge von 64 Stellen.
-Bei beiden untersuchten Längen ist \texttt{VARCHAR} schneller als \texttt{CHAR}.
-Wenn man sich jedoch die Performance beim Einfügen von Werten anschaut, fällt auf, dass die Unterschiede eher gering sind und es gibt auch stärkere Schwankungen bei den Werten (siehe Abbildung~\ref{fig:data-types-smaller-string-type-writes}).
-
-\vspace{-12pt}
-\begin{figure}[H]
-    \centering
+    \newline
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Data_Types/Smaller/string-type/Writes}
@@ -230,7 +226,7 @@ Wenn man sich jedoch die Performance beim Einfügen von Werten anschaut, fällt 
         \caption{Bei unterschiedlichem Befüllungsgrad}
         \label{fig:data-types-smaller-string-type-length-writes}
     \end{subfigure}
-    \caption{Vergleiche von unterschiedlichen Write-Abfragen}
+    \caption[Datentypen: Numerische und zeichenkettenbasierte Typen]{Vergleich von unters. numerischen und zeichenkettenbasierten Typen}
 \end{figure}
 \vspace{-20pt}
 
