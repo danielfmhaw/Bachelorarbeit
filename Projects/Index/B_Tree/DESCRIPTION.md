@@ -19,7 +19,7 @@ Untersucht werden:
 
 ```bash
 cd ../../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/count_row_changes/high_counts" \
   -var '{"length":[500,5000]}' \
@@ -36,7 +36,7 @@ cd Tools
 ### Code für Low Count Vergleich:
 ```bash
 cd ../../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/count_row_changes/low_counts" \
   -var '{"length":[10,40]}' \
@@ -53,7 +53,7 @@ cd Tools
 ### Code unterschiedliche Select - Queries
 ```bash
 cd ../../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/query_differences" \
   -scripts '{
@@ -64,7 +64,7 @@ cd Tools
 ### Nur Graphen erstellen für Select - Queries (log und csv- files müssen schon bestehen)
 ```bash
 cd ../../..
-cd Tools
+cd Tools/Shell-Scripts
 ./generate_graph.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/query_differences
 ```

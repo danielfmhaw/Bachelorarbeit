@@ -19,7 +19,7 @@ Untersucht werden:
 ### Code für Int/Char - Vergleich:
 ```bash
 cd ../../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Simpler/Output" \
   -scripts '{
@@ -31,12 +31,7 @@ cd Tools
 ### Nur Graphen erstellen für Int/Char - Vergleich: (log und csv- files müssen schon bestehen)
 ```bash
 cd ../../..
-cd Tools
+cd Tools/Shell-Scripts
 ./generate_graph.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Simpler/Output
 ```
-
-
-#### Notes
-Ein weiterer allgemeiner Leitsatz ist, dass ein einfacherer Datentyp gut ist, denn es werden weniger CPU-Zyklen benötigt, um Operationen auf einfacheren Datentypen zu verarbeiten.
-Beispielweise ist Integer einfacher zu verarbeiten als Character, da Character Sets und Sortierregeln den Character-Vergleich erschweren.

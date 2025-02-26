@@ -7,7 +7,7 @@ on:
       - '.github/workflows/workflow.yaml'
       - '.github/pattern.json'
       - 'Tools/Python/**'
-      - 'Tools/sysbench_script.sh'
+      - '../../Tools/Shell-Scripts/sysbench_script.sh'
       - 'envs.json'
   workflow_dispatch:
 
@@ -18,7 +18,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       configurations: ${{ steps.prepare-config.outputs.configurations }}
     env:
-      GENERAL_PATHS: "./.github/workflows ./.github/pattern.json ./Tools/Python ./Tools/sysbench_script.sh envs.json"
+      GENERAL_PATHS: "./.github/workflows ./.github/pattern.json ./Tools/Python ./Tools/Shell-Scripts/sysbench_script.sh envs.json"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -111,9 +111,9 @@ jobs:
       - name: Run sysbench script
         if: env.should_run == 'true'
         run: |
-          chmod +x Tools/sysbench_script.sh
+          chmod +x Tools/Shell-Scripts/sysbench_script.sh
 
-          Tools/sysbench_script.sh \
+          Tools/Shell-Scripts/sysbench_script.sh \
             -out "${{ env.output_dir }}" \
             -var '${{ env.var }}' \
             -scripts '${{ env.scripts }}'

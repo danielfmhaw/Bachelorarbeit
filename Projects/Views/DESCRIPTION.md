@@ -18,7 +18,7 @@ Untersucht werden:
 ### Code für View-Vergleich:
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Output" \
   -scripts '{
@@ -31,7 +31,7 @@ cd Tools
 ### Code mit Materialized View-Vergleich:
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Output" \
   -var '{"refresh":["every","once"]}' \
@@ -50,7 +50,7 @@ cd Tools
 ### Nur Graphen erstellen für Select - Queries (log und csv- files müssen schon bestehen)
 ```bash
 cd ../..
-cd Tools
+cd Tools/Shell-Scripts
 ./generate_graph.sh \
   /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Output
 ```

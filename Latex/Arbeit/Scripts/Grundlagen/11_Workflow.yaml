@@ -37,8 +37,8 @@ jobs:
           echo "MySQL is ready!"
       - name: Run sysbench script
         run: |
-          chmod +x Tools/sysbench_script.sh
-          Tools/sysbench_script.sh -out "${{ env.output_dir }}" -var '${{ env.var }}' -scripts:'${{ env.dirs }}'
+          chmod +x Tools/Shell-Scripts/sysbench_script.sh
+          Tools/Shell-Scripts/sysbench_script.sh -out "${{ env.output_dir }}" -var '${{ env.var }}' -scripts:'${{ env.dirs }}'
       - name: Upload individual outputs
         uses: actions/upload-artifact@v4
         with:
