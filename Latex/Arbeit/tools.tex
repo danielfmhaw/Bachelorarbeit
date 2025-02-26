@@ -184,20 +184,16 @@ Das Python-Script, das zuständig ist für die Graphgenerierung muss als Argumen
     basicstyle=\ttfamily\scriptsize,
 ]{Scripts/Tools/04_graph_generation.sh}
 
-\begin{figure}[!ht]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
-        \centering
         \includegraphics[width=\textwidth]{PNGs/Demo/sysbench_output}
-        \label{demo-gnuplot}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
-        \centering
         \includegraphics[width=\textwidth]{PNGs/Demo/Summary}
-        \label{demo-pandas}
     \end{subfigure}
-    \caption[Demo-Graphs: Gnuplot vs. Pandas]{Die Grafik zeigt die erstellten Graphen mit Gnuplot (links) und Pandas (rechts)}
+    \caption[Demo: Gnuplot vs. Pandas]{Die Grafik zeigt die erstellten Graphen mit Gnuplot (links) und Pandas (rechts)}
     \label{fig:demo-graph-generation}
 \end{figure}
 
@@ -377,7 +373,7 @@ Um zu untersuchen, ob ein bestimmter Indextyp bei Abfragen verwendet wird, müss
 Die eigentlichen Tabellen und deren Datensätze müssen dabei nicht immer wieder gleich befüllt werden.
 Wenn wir auch unsere Ordnerstruktur mit dem Int - Query Beispiel zurückkommen, dann könnte man anstelle von \texttt{int\_queries\_select.lua} auch einen Ordner erstellen mit den Namen \texttt{int\_queries\_select}.
 In diesem Ordner können beliebig viele unterschiedliche Lua - Skripts sein, die select – Funktionen haben.
-Dadurch werden alle Select - Befehle auf der gleichen Datenbasis verglichen und so können wir im Kapitel~\ref{sec:indexing-grundlagen-der-indexierung} erkennen, wann der Index verwendet wird und wann nicht.
+Dadurch werden alle Select - Befehle auf der gleichen Datenbasis verglichen und so können wir im Kapitel~\ref{sec:indexing-grundlagen} erkennen, wann der Index verwendet wird und wann nicht.
 
 Bevor wir uns das Ergebnis des Befehls anschauen, kommen wir zu der Funktionsweise des Orchestrator - Skript \texttt{sysbench\_script.sh}.
 Im Grundlegenden arbeitet dieses Skript ähnlich wie schon das Skript im Demo - Beispiel, aber durch die zusätzlichen Anwendungsfälle kommt es zu mehr Komplexität.
@@ -444,15 +440,17 @@ Dadurch ist es auch möglich, dass mehrere Skripte und mehrere Kennzahlen in ein
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Join_Type/int_queries}
+        \caption{\texttt{int\_queries}}
         \label{join-typ-int_queries}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Join_Type/varchar_queries_length_1}
+        \caption{\texttt{varchar\_queries\_length\_1}}
         \label{join-typ-varchar_queries_length_1}
     \end{subfigure}
-    \caption[Join-Typ: Skriptvergleich]{Die Grafik zeigt alle Metriken für die Skripte \texttt{int\_queries} (links) und \texttt{varchar\_queries\_length\_1} (rechts)}
+    \caption[Join-Typ: Skriptvergleich]{Die Grafik zeigt alle Metriken für die jeweiligen Skripte}
     \label{fig:join-typ-comp-script}
 \end{figure}
 \vspace{-20pt}
@@ -473,15 +471,17 @@ Die beiden \texttt{varchar\_queries} sind hier aber überraschenderweise auf ein
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Join_Typ/join-type/Reads}
+        \caption{Reads}
         \label{join-typ-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Join_Typ/join-type/Writes}
+        \caption{Writes}
         \label{join-typ-writes}
     \end{subfigure}
-    \caption[Join-Typ: Metrikvergleich]{Die Grafik zeigt den Vergleich zwischen allen Skripten für die Metriken Reads (links) und Writes (rechts)}
+    \caption[Join-Typ: Metrikvergleich]{Die Grafik zeigt den Vergleich zwischen allen Skripten für die Metriken}
     \label{fig:join-typ-comp-metric}
 \end{figure}
 \vspace{-20pt}

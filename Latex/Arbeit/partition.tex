@@ -1,7 +1,7 @@
 %! Author = danielmendes
 %! Date = 15.02.25
 
-\chapter{Partition}\label{ch:partition}
+\chapter{Partitionen}\label{ch:partitions}
 In diesem Kapitel analysieren wir die Funktionsweise von Partitionen und das Verhalten des Query-Optimizers.
 Zudem betrachten wir deren Verwendungszweck sowie die verschiedenen Typen.
 Abschließend führen wir Benchmark-Tests durch, um die jeweiligen Vor- und Nachteile zu bewerten.
@@ -225,18 +225,14 @@ Bei den Insert-Befehlen sieht es leicht anders aus, aber dort ist der Fall ohne 
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
-		\centering
 		\includegraphics[width=\textwidth]{PNGs/Script/Partition/range-partition/Reads}
-		\label{range-partition-reads}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
-		\centering
 		\includegraphics[width=\textwidth]{PNGs/Script/Partition/range-partition/Writes}
-		\label{range-partition-writes}
 	\end{subfigure}
 	\vspace{-20pt}
-	\caption[Range-Partitionierung: Metrikvergleich]{Vergleich zwischen der Range-Partitionierung und ohne Partition}
+	\caption[Range-Partitionierung: Unterschiedliche Selects mit und ohne Partition]{Vergleich zwischen der Range-Partitionierung und ohne Partition}
 	\label{fig:range-partition}
 \end{figure}
 \vspace{-20pt}
@@ -255,18 +251,14 @@ Die Performance beim Einfügen der Daten ist bei der Partitionierung und dem Ref
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
-		\centering
 		\includegraphics[width=\textwidth]{PNGs/Script/Partition/list-partition/Reads}
-		\label{list-partition-reads}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
-		\centering
 		\includegraphics[width=\textwidth]{PNGs/Script/Partition/list-partition/Writes}
-		\label{list-partition-writes}
 	\end{subfigure}
 	\vspace{-20pt}
-	\caption[List-Partitionierung: Metrikvergleich]{Vergleich zwischen der List-Partitionierung und ohne Partition}
+	\caption[List-Partitionierung: Unterschiedliche Abfragen mit und ohne Partition]{Vergleich zwischen der List-Partitionierung und ohne Partition}
 	\label{fig:list-partition}
 \end{figure}
 \vspace{-20pt}
@@ -290,18 +282,14 @@ Das bestätigt die wichtig von unserem Leitsatz, dass je mehr Partitionen benöt
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
-		\centering
 		\includegraphics[width=\textwidth]{PNGs/Script/Partition/hash-partition/Reads}
-		\label{hash-partition-reads}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[t]{0.48\textwidth}
-		\centering
 		\includegraphics[width=\textwidth]{PNGs/Script/Partition/hash-partition/Writes}
-		\label{hash-partition-writes}
 	\end{subfigure}
 	\vspace{-20pt}
-	\caption[Hash-Partitionierung: Metrikvergleich]{Vergleich zwischen der Hash-Partitionierung und ohne Partition}
+	\caption[Hash-Partitionierung: Variationen der Partitionsanzahl]{Vergleich zwischen der Hash-Partitionierung und ohne Partition}
 	\label{fig:hash-partition}
 \end{figure}
 \vspace{-20pt}

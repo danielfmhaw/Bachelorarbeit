@@ -1,14 +1,14 @@
 %! Author = danielmendes
 %! Date = 29.11.24
 
-\chapter{Indexierung und Einfluss auf die Performance}\label{ch:indexing}
+\chapter{Indexierung}\label{ch:indexing}
 
-\section{Grundlagen der Indexierung}\label{sec:indexing-grundlagen-der-indexierung}
+\section{Grundlagen}\label{sec:indexing-grundlagen}
 
 Das folgende Thema befasst sich mit der Indexierung und den damit verbundenen Performance-Optimierungen, die näher erläutert werden.
 Zunächst betrachten wir die Grundlagen der Indexierung, anschließend die verschiedenen Arten von Indizes und schließlich deren Auswirkungen auf die Performance.
 
-Indizes (oder auch Indexes) sind Datenstrukturen, die von Speicher-Engines (engl.\ storage engines) verwendet werden, um unter anderem Zeilen schneller zu finden (\cite[pp. 147--189]{schwartz2012high}).
+Indizes sind Datenstrukturen, die von Speicher-Engines (engl. \ storage engines) verwendet werden, um unter anderem Zeilen schneller zu finden (\cite[pp. 147--189]{schwartz2012high}).
 Sie haben einen großen Einfluss auf die Performance der Datenbank und werden umso wichtiger, je größer die Datenbank wird.
 Weniger ausgelastete Datenbanken können ohne ordnungsgemäße Indizes gut funktionieren, aber die Leistung kann rapide sinken, wenn die Datenmenge wächst.
 Wenn ein solches Problem auftritt, ist die Index-Optimierung oft der effektivste Weg, die Abfrageleistung zu verbessern.
@@ -97,11 +97,11 @@ INSERT INTO Fakten VALUES(d, a, k);
     \setlength{\arrayrulewidth}{0.4mm}
     \[
         \begin{array}{r|c c c c}
-            \textbf{Action} & \textbf{No Index} & \textbf{Kunde Index} & \textbf{Artikel Index} & \textbf{Both Indexes} \\ \hline
+            \textbf{Aktion} & \textbf{Kein Index} & \textbf{Kunden Index} & \textbf{Artikel Index} & \textbf{Beide Indizes} \\ \hline
             Q_1 & 10 & 4 & 10 & 4 \\
             Q_2 & 10 & 10 & 4 & 4 \\
             I   & 2  & 4  & 4  & 6 \\ \hline
-            \textbf{Average} & 2 + 8p_1 + 8p_2 & 4 + 6p_2 & 4 + 6p_1 & 6 - 2p_1 - 2p_2 \\
+            \textbf{Durchschnitt} & 2 + 8p_1 + 8p_2 & 4 + 6p_2 & 4 + 6p_1 & 6-2p_1-2p_2 \\
         \end{array}
     \]
     \caption[Performance-Vergleich]{Darstellung der unterschiedlichen Queries mit Indexen}
@@ -110,7 +110,7 @@ INSERT INTO Fakten VALUES(d, a, k);
 
 \textbf{Voraussetzungen}
 \begin{enumerate}
-    \item Die \texttt{Fakten} belegt 10 Seiten, daher die Kosten bei gesamter Untersuchung bei 10.
+    \item Die \texttt{Fakten}-Tabelle belegt 10 Seiten, daher die Kosten bei gesamter Untersuchung bei 10.
     \item Im Durchschnitt kauft jeder Kunde kauft genau 3 Artikel und ein Artikel wird von 3 Kunden gekauft.
     \item Selbst mit Index gibt einen Durchschnitt von 3 Tupel für einen Kunden oder Artikel, ohne 10.
     \item Wenn eine Indexseite modifiziert/eingefügt werden muss, ist ein weiterer Festplattenzugriff erforderlich, um die modifizierte Seite zurückzuschreiben.
@@ -136,7 +136,7 @@ Es gibt zahlreiche Tools, die entwickelt wurden, um diese Verantwortung vom Date
 Dabei ermittelt das Tool zuerst die Abfragelast, dann können Einschränkungen festgelegt werden.
 Anschließend werde Kandidaten-Indizes generiert und bewertet und zu guter Letzt wählt man die Index-Sets aus.
 Ein komplexeres Problem tritt beim dritten Schritt auf, wenn bereits gewählte Indizes existieren, da diese beeinflussen können, wie viel Nutzen ein zusätzlicher Index bringt.
-Ein bewährter Ansatz zur Auswahl von Indizes ist das sogenannte „greedy“ - Verfahren, bei dem zunächst ohne ausgewählte Indizes der Nutzen jedes Kandidaten-Index bewertet wird.
+Ein bewährter Ansatz zur Auswahl von Indizes ist das sogenannte „greedy“-Verfahren, bei dem zunächst ohne ausgewählte Indizes der Nutzen jedes Kandidaten-Index bewertet wird.
 Wenn es einen Index mit positivem Nutzen gibt, wird dieser ausgewählt und anschließend wird eine Neubewertung ausgeführt, wobei davon ausgegangen wird, dass der zuvor ausgewählte Index bereits verfügbar ist.
 Dieser Prozess wird so lange wiederholt, bis es keinen Kandidaten-Index mit positivem Nutzen mehr gibt.
 
@@ -149,7 +149,7 @@ Eine Storage-Engine ist eine Kernkomponente eines Datenbankmanagementsystems (DB
 Sie entscheidet, wie Daten physisch organisiert, gespeichert und abgerufen werden.
 Verschiedene Storage-Engines unterscheiden sich in ihrer Indexfunktionalität sowie in der Unterstützung von Transaktionen und Sperrmechanismen.
 
-Der erste zu betrachtende Indextyp ist der B-Baum-Index (engl.\ B-Tree Index), der auf einer speziellen Baum-Datenstruktur basiert.
+Der erste zu betrachtende Indextyp ist der B-Baum-Index (engl. \ B-Tree Index), der auf einer speziellen Baum-Datenstruktur basiert.
 Diese Struktur wird von den meisten MySQL-Storage-Engines unterstützt.
 Die Implementierung und Nutzung des B-Baum-Indexes kann jedoch je nach verwendeter Storage-Engine variieren.
 
@@ -158,13 +158,13 @@ Ein B-Baum-Index beschleunigt den Datenzugriff, da die Storage-Engine nicht die 
 Stattdessen beginnt die Suche beim Wurzelknoten.
 
 Die Slots im Wurzelknoten enthalten Zeiger auf Kindknoten, und die Storage-Engine folgt diesen Zeigern.
-Der richtige Zeiger wird durch Vergleich der Werte in den Knoten-Seiten (engl.\ node pages) ermittelt, die die oberen und unteren Grenzen der Werte in den Kindknoten definieren.
-Letztlich stellt die Storage-Engine fest, ob der gewünschte Wert existiert, oder sie erreicht erfolgreich eine Blattseite (engl.\ leaf page).
+Der richtige Zeiger wird durch Vergleich der Werte in den Knoten-Seiten (engl. \ node pages) ermittelt, die die oberen und unteren Grenzen der Werte in den Kindknoten definieren.
+Letztlich stellt die Storage-Engine fest, ob der gewünschte Wert existiert, oder sie erreicht erfolgreich eine Blattseite (engl. \ leaf page).
 
-\begin{figure}[!ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=.8\textwidth]{PNGs/Textbook/B_Tree_Visualisation}
-    \caption[Binärbaum - Grafik]{Darstellung des binären Baums mit Knoten und Blättern}
+    \includegraphics[width=0.8\textwidth]{PNGs/Textbook/B_Tree_Visualisation}
+    \caption[Binärbaum-Visualisierung]{Darstellung des binären Baums mit Knoten und Blättern (Abbildung 5--1 aus \cite[S. 149]{schwartz2012high})}
     \label{fig:b-tree-visualisation}
 \end{figure}
 
@@ -176,7 +176,7 @@ Außerdem speichern B-Bäume die indexierten Spalten in einer festgelegten Reihe
 Beispielsweise kann ein Index auf einem Textfeld (z.B.\ vom Typ \texttt{VARCHAR}) effizient alle Namen finden, die mit „K“ beginnen, da die Werte in alphabetischer Reihenfolge gespeichert sind.
 
 Der Index sortiert die Werte entsprechend der Reihenfolge der in der \texttt{CREATE TABLE}-Anweisung angegebenen Spalten, beispielsweise des Primärschlüssels (\texttt{last\_name, first\_name, b\_day}).
-B-Baum-Indizes eignen sich gut für Suchen mit dem vollständigen Schlüsselwert (engl.\ full key value), einem Schlüsselbereich (engl.\ key range) oder einem Schlüsselpräfix (engl.\ full key prefix).
+B-Baum-Indizes eignen sich gut für das Suchen mit dem vollständigen Schlüsselwert (engl. \ full key value), einem Schlüsselbereich (engl. \ key range) oder einem Schlüsselpräfix (engl. \ full key prefix).
 Beim Schlüsselpräfix ist dies jedoch nur der Fall, wenn die Suche das linkeste Präfix des Indexes verwendet.
 
 Als Nächstes betrachten wir die möglichen Abfragen, bei denen B-Baum-Indizes besonders hilfreich sind, um ein besseres Verständnis für ihre optimale Nutzung zu erlangen.
@@ -200,52 +200,137 @@ Beispielsweise ist ein Index, der aus Nachname, Vorname und Geburtsdatum besteht
 Für optimale Leistung sollten Indizes mit den gleichen Spalten, jedoch in unterschiedlicher Reihenfolge erstellt werden, um die häufigsten Abfragen zu optimieren.
 Eine Analyse der am häufigsten verwendeten Abfragen kann dabei helfen zu entscheiden, ob zusätzliche Indizes erforderlich sind.
 
-\begin{figure}[!ht]
-    \centering
-    \begin{subfigure}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/high-count/Reads}
-        \label{high-reads}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/high-count/Writes}
-        \label{high-writes}
-    \end{subfigure}
-    \caption[High-Counts: Reads und Writes]{Grafik zeigt die verschiedenen Zeiten (in ms) für Readsabfragen (links) und Schreibbefehle (rechts) mit 500 bzw. 5000 Zeilen}
-    \label{fig:high-b-tree-columns}
-\end{figure}
+Um die Benchmarks durchzuführen, erstellen wir zunächst wieder unsere Kundentabelle (\ref{lst:create_table_kunde}) und definieren folgende B-Tree-Indizes:
 
-\begin{figure}[!ht]
+\vspace{-5pt}
+\begin{lstlisting}[language=SQL,caption=Definition mehrere Indizes,label={lst:indexing-create-multiple}]
+CREATE INDEX idx_stadt ON KUNDEN(STADT);
+CREATE INDEX idx_postleitzahl ON KUNDEN(POSTLEITZAHL);
+CREATE INDEX idx_geburtstag ON KUNDEN(GEBURTSTAG);
+\end{lstlisting}
+\vspace{-5pt}
+
+Um die Effizienz dieser Indizes zu überprüfen, vergleichen wir diese Konfiguration mit einer, bei der nur die Kundentabelle und keine Indizes erstellt werden.
+Anschließend werden in beiden Fälle eine bestimmte Anzahl an Datensätze eingefügt.
+Um die Performance der Select-Abfragen zu messen, führen wir verschiedene Queries an die Datenbank aus, bei denen die Attribute \texttt{GEBURTSTAG}, \texttt{STADT} und \texttt{POSTLEITZAHL} berücksichtigt werden.
+Dazu gehören \texttt{GROUP BY}- und \texttt{COUNT}-Abfragen, bei denen diese Attribute entweder direkt verwendet werden oder in der \texttt{WHERE}-Bedingung eine Rolle spielen.
+Damit es übersichtlich genug bleibt, vergleichen wir 10 Datensätze mit 40 und 400 mit 4000 Zeilen.
+
+\begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/low-count/Reads}
-        \label{low-reads}
+        \caption{Mit 10 und 40 Datensätze}
+        \label{indexing-b-tree-low-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/low-count/Writes}
-        \label{low-writes}
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/high-count/Reads}
+        \caption{Mit 400 und 4000 Zeilen}
+        \label{indexing-b-tree-high-reads}
     \end{subfigure}
-    \caption[Low-Counts: Reads und Writes]{Grafik zeigt die verschiedenen Zeiten (in ms) für Readsabfragen (links) und Schreibbefehle (rechts) mit 10 bzw. 100 Zeilen dar}
-    \label{fig:low-b-tree-columns}
+    \caption[B-Tree-Indexing: Mit Index vs Ohne]{Grafik zeigt Performance mit und ohne Index für Readsabfragen}
+    \label{fig:indexing-vs-no}
 \end{figure}
+\vspace{-15pt}
 
-\begin{figure}[!ht]
+In der Abbildung~\ref{indexing-b-tree-low-reads} können wir erkennen, dass bei 10 Datensätzen die Version ohne Indizes schneller ist als diejenige mit.
+Bei 40, 400 oder 4000 (siehe~\ref{indexing-b-tree-high-reads}) Zeilen sehen wir aber schon die Wirkung, die die Indizes haben können, denn dort ist jeweils die Version mit Indizes effizienter.
+Der Unterschied ist bei der Version mit 40 zwar etwas geringer, aber bei den anderen Fällen sehen einen deutlichen Unterschied.
+Interessant ist, dass es nicht linear oder quadratisch mit der Anzahl an Datensätzen in der Tabelle steigt, sondern bei 400 und 4000 beträgt der Abstand jeweils etwa 500--700 ms.
+Bei der Schreibgeschwindigkeit sind beide Versionen auf einem sehr ähnlichen Niveau, aber tendenziell hat die Version ohne Index einen leichten Vorteil.
+
+Mit dem vorherigen Benchmark können wir die Vorteile eines Benchmarks schon deutlich erkennen.
+Jetzt wollen wir aber auch die Wichtigkeit der richtigen Verwendung des B-Tree-Indexes untersuchen.
+Dazu erstellen wir erneut die Kundentabelle, aber bestimmen dieses Mal nur einen Index.
+
+\vspace{-5pt}
+\begin{lstlisting}[language=SQL,caption=Definition für den 2. Benchmark,label={lst:indexing-create-single}]
+CREATE INDEX combined_index ON KUNDEN(NAME, VORNAME, GEBURTSTAG);
+\end{lstlisting}
+\vspace{-5pt}
+
+Wir befüllen die Tabelle mit einer festgelegten Anzahl an Datensätzen und führen unterschiedliche Select-Befehle aus.
+Mit den verschiedenen Selects können wir erkennen, bei welchen Abfragen der Index am effizientesten ist.
+
+\vspace{-5pt}
+\begin{lstlisting}[language=SQL,caption=Unterschiedliche Where-Bedingungen für B-Tree-Index,label={lst:indexing-b-tree-selects}]
+-- columm_prefix
+WHERE NAME LIKE 'M%';
+-- combined_match_with_range
+WHERE NAME = 'Müller' AND VORNAME = 'Max' AND GEBURTSTAG < '1980-01-01';
+-- exact_with_prefix
+WHERE NAME = 'Müller' AND VORNAME LIKE 'M%' ORDER BY GEBURTSTAG;
+-- full_match
+WHERE NAME = 'Müller' AND VORNAME = 'Max' AND GEBURTSTAG = '1960-01-01';
+-- leftmost_prefix
+WHERE NAME = 'Müller';
+-- not_leftmost
+WHERE GEBURTSTAG < '1980-01-01';
+-- range_values
+WHERE NAME BETWEEN 'Müller' AND 'Schulz';
+-- range_with_like
+WHERE NAME = 'Müller' AND VORNAME LIKE 'M%' AND GEBURTSTAG < '1980-01-01';
+-- skip_columns
+WHERE NAME = 'Müller' AND GEBURTSTAG < '1980-01-01';
+\end{lstlisting}
+\vspace{-5pt}
+
+Anhand der Grafik in Abbildung~\ref{fig:indexing-b-tree-query-reads} lässt sich erkennen, dass der \texttt{full\_match} die höchste Effizienz aufweist.
+Es folgt \texttt{combined\_match\_with\_range}, bei dem die ersten beiden Argumente wie beim \texttt{full\_match} exakt bestimmt sind, während das dritte Argument, das Geburtsdatum, eine größere Flexibilität bietet, da hier alle Kunden berücksichtigt werden, die vor dem 01.\ Januar 1980 geboren wurden.
+Im Anschluss kommt \texttt{range\_with\_like}, bei dem zusätzlich zum Geburtsdatum auch der Vorname mit "M" beginnen muss, jedoch nicht exakt "Max" sein muss.
+Danach folgt \texttt{exact\_with\_prefix}, das dem vorherigen Fall ähnlich ist, jedoch zusätzlich eine aufsteigende Sortierung nach dem Geburtsdatum aufweist.
+Dies zeigt, dass der B-Tree-Index auch für das Sortieren von Spalten genutzt werden kann.
+Es folgt \texttt{skip\_columns}, bei dem der Vorname vollständig ignoriert wird.
+Dadurch werden mehr Zeilen zurückgegeben, was die Performance negativ beeinflusst.
+Anschließend kommt \texttt{leftmost\_prefix}, bei dem nur nach dem Namen gefiltert wird.
+Bei \texttt{column\_prefix}, das direkt darauf folgt, wird statt des Namens „Müller“ jeder Nachname zurückgegeben, der mit „M“ beginnt.
+Schließlich zeigt \texttt{range\_values} alle Namen zwischen „Müller“ und „Schulz“, während bei \texttt{not\_leftmost} ausschließlich nach dem Geburtsdatum gefiltert wird, ohne weitere Kriterien.
+Insgesamt verdeutlicht diese Analyse die entscheidende Rolle des B-Tree-Index, da die Antwortzeiten je nach Art der Abfrage erheblich variieren können.
+
+\begin{figure}[H]
     \centering
-    \includegraphics[width=.8\textwidth]{PNGs/Script/Index/B_Tree/b-tree-query-differences/Reads}
-    \caption[B - Tree - Selects - Ergebnis]{Grafik visualisiert die Unterschiede von verschieden Select - Queries auf dieselben Daten. Je nach Gewschiwndikeit greift der Index besser oder nicht }
-    \label{fig:b-tree-query-reads}
+    \includegraphics[width=.7\textwidth]{PNGs/Script/Index/B_Tree/b-tree-query-differences/Reads}
+    \caption[B-Tree-Indexing: Unterschiedliche Selects mit Index]{Visualisierung von unterschiedlichen Select-Queries mit Index}
+    \label{fig:indexing-b-tree-query-reads}
 \end{figure}
+\vspace{-15pt}
+
+Diese unterschiedlichen Zeiten hängen aber nicht nur davon ab, ob der Index verwendet werden kann, sondern auch wie viele Tupel jeweils zurückgegeben werden.
+Wir können sehen, dass diejenigen Abfragen, die am wenigsten Zeilen zurückgeben, sind auch diejenigen sind, bei denen es die höchste Performance gibt.
+Aber mithilfe des \texttt{EXPLAIN}-Operators können wir tatsächlich herausfinden, ob der definierte Index aus~\ref{lst:indexing-create-single} greift oder nicht.
+Die Analyse von \texttt{EXPLAIN} zeigt, dass \texttt{range\_values} und \texttt{not\_leftmost} die einzigen sind, bei denen der Index nicht verwendet wird und beide sind auch die Langsamsten im Vergleich gewesen.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Select-Query} & \textbf{Anzahl an Zeilen} & \textbf{Index benutzt?} \\
+        \hline
+        full\_match & 0 & ja \\
+        combined\_match\_with\_range & 11 & ja \\
+        range\_with\_like & 39 & ja \\
+        exact\_with\_prefix & 65 & ja \\
+        skip\_columns & 144 & ja \\
+        leftmost\_prefix & 250 & ja \\
+        column\_prefix & 509 & ja \\
+        range\_values & 1313 & nein \\
+        not\_leftmost & 2420 & nein \\
+        \hline
+    \end{tabular}
+    \caption{Ergebnisse der COUNT(*)-Abfragen für B-Tree-Index}
+    \label{tab:indexing_b_tree_count_results}
+\end{table}
+\vspace{-15pt}
+TODO (Daniel): change the select-queries pls
 
 \section{Hash-Index}\label{sec:indexing-hash-index}
 Ein weiterer Indextyp, den wir betrachten, ist der Hash-Index.
 Dieser basiert auf einer Hash-Tabelle und ist daher nur für exakte Suchanfragen geeignet, die alle Spalten im Index verwenden.
 Die Funktionsweise der Storage-Engine lässt sich wie folgt beschreiben: Für jede Zeile wird mithilfe einer Hash-Funktion ein Hash-Wert der indexierten Spalte berechnet.
-Der Hash-Wert (engl.\textit{hash code}) ist eine kleine Zahl, die sich in der Regel von den Hash-Werten anderer Zeilen mit unterschiedlichen Schlüsselwerten unterscheidet.
+Der Hash-Wert (engl. \textit{hash code}) ist eine kleine Zahl, die sich in der Regel von den Hash-Werten anderer Zeilen mit unterschiedlichen Schlüsselwerten unterscheidet.
 
 In MySQL unterstützt nur die Memory-Storage-Engine explizite Hash-Indizes.
 Der bereits besprochene Standard-Indextyp für Memory-Tabellen, der B-Baum-Index, ist jedoch ebenfalls möglich.
@@ -268,49 +353,88 @@ Im letzten Schritt wird der Wert in Zeile 3 mit \texttt{'Peter'} verglichen, um 
 Da die Indizes nur kompakte Hash-Werte speichern, sind Hash-Indizes äußerst platzsparend, und Suchvorgänge erfolgen in hoher Geschwindigkeit.
 
 Ähnlich wie der B-Baum-Index hat auch der Hash-Index einige Einschränkungen, auf die wir nun eingehen:
-
 Da der Index nur Hash-Werte und Zeiger auf Zeilen (engl. \textit{row pointers}) enthält, jedoch nicht die Werte selbst, kann MySQL den Index nicht verwenden, um das Einlesen der Zeilen zu vermeiden.
 Da der Zugriff auf die in den Speicher geladenen Zeilen jedoch sehr schnell ist, wird die Leistung dadurch nicht wesentlich beeinträchtigt.
 
 Ein wesentlicher Nachteil von Hash-Indizes ist, dass sie nicht für Sortierungen verwendet werden können, da die Werte nicht in einer geordneten Reihenfolge gespeichert sind.
 Im Gegensatz dazu können B-Baum-Indizes Sortierungen unterstützen, wenn sie entsprechend erstellt und genutzt werden.
-
 Darüber hinaus ermöglichen Hash-Indizes keine partiellen Schlüsselübereinstimmungen (engl. \textit{partial key matching}).
 Da der Hash-Wert aus dem gesamten indexierten Wert berechnet wird, hilft ein Hash-Index beispielsweise nicht, wenn ein Index aus den Spalten (A, B) besteht und die \texttt{WHERE}-Klausel nur auf A verweist.
-
 Ein weiterer Nachteil besteht darin, dass Hash-Indizes keine Bereichsabfragen (engl. \textit{range queries}) unterstützen.
 Sie eignen sich lediglich für Gleichheitsvergleiche, wie die Operatoren \texttt{=} (gleich), \texttt{<=>} (null-sicher gleich) und \texttt{IN()}.
 
 Obwohl Hash-Indizes sehr performant sind, können Hash-Kollisionen ihre Leistung beeinträchtigen.
 Wenn viele Werte denselben Hash-Wert aufweisen, muss die Storage-Engine jeden Zeiger in der verketteten Liste durchlaufen und die entsprechenden Werte mit dem Suchwert vergleichen, um die richtige(n) Zeile(n) zu finden.
-
 Auch Index-Wartungsoperationen können bei vielen Kollisionen langsamer werden.
 Wenn beispielsweise ein Index auf einer Spalte mit sehr geringer Selektivität erstellt wird und eine Zeile gelöscht werden soll, kann das Finden des entsprechenden Zeigers im Index sehr aufwendig sein, was auch das Löschen der Zeile verzögert.
 
-Einige Speicher-Engines, wie beispielsweise InnoDB, können zudem erkennen, wenn bestimmte Index-Werte besonders häufig verwendet werden, und automatisch einen Hash-Index für diese Werte im Speicher (engl.\textit{memory}) erstellen, der zusätzlich zu den vorhandenen B-Baum-Indizes genutzt wird.
+Einige Speicher-Engines, wie beispielsweise InnoDB, können zudem erkennen, wenn bestimmte Index-Werte besonders häufig verwendet werden, und automatisch einen Hash-Index für diese Werte im Speicher (engl. \textit{memory}) erstellen, der zusätzlich zu den vorhandenen B-Baum-Indizes genutzt wird.
 
-\begin{figure}[!ht]
+Als Nächstes kommen wir zu den Benchmarks mit Hash-Indizes.
+Dazu verwenden wir erneut die Kundentabelle und erstellen nur einen Index für die Spalte \texttt{NAME}.
+Am Ende des \texttt{CREATE INDEX}-Befehl müssen wir \texttt{USING HASH} hinzufügen, damit anstelle des standartmäßigen B-Tree-Index der Hash-Index verwendet wird.
+Danach befüllen wieder die Tabelle mit Testdaten.
+
+Diesmal untersuchen wir beim ersten Benchmark den Einfluss von Hash-Kollisionen für die Performance.
+Um den Grad der Kollisionen zu verändern haben wir eine Variable, die die obere Grenze für die zufällige Generierung einer Zahl, die an dem Namen herangehängt wird, darstellt.
+Anschließend fragen wir alle Zeilen mit dem Wert \texttt{Kunde\_1} für die Spalte \texttt{NAME} ab.
+Wir führen die Tests mit den Kollisionswahrscheinlichkeiten von 25\%, 10\%, 5\% und 1\% durch.
+
+\begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Index/Hash/selectivity-change/Reads}
-        \caption[Hash - Kollisionen - Reads - Ergebnis]{Unterschiede von Readsabfragen}
+        \caption{Unterschiede von Readsabfragen}
         \label{hash-collision-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Index/Hash/selectivity-change/Writes}
-        \caption[Hash - Kollisionen - Writes - Ergebnis]{Unterschiede von Schreibbefehlen}
+        \caption{Unterschiede von Schreibbefehlen}
         \label{hash-collision-writes}
     \end{subfigure}
-    \caption[Hash-Kollisionen: Reads und Writes]{Vergleich der Auswirkungen von Hashkollisionen auf Lese- und Schreibvorgänge in Abhängigkeit von der Anzahl an Hashkollisionen.}
+    \caption[Hash-Indexing: Auswirkungen von Hashkollisionen]{Vergleich der Auswirkungen von Hashkollisionen}
     \label{fig:hash-collision-comparison}
 \end{figure}
+\vspace{-15pt}
 
-\begin{figure}[!ht]
+An den Ergebnissen in Abbildung~\ref{fig:hash-collision-comparison} können wir sehen, dass je geringer die Wahrscheinlichkeit für eine Kollision ist, desto schneller ist die Select-Abfrage.
+Es fällt auch auf, dass die Unterschiede zwischen den verschiedenen Kollisionswahrscheinlichkeiten sehr groß sind.
+Hingegen die Einfüge-Performance ist überraschenderweise bei allen 4 Varianten auf einem ähnlichen Niveau.
+
+Als zweiten Test wollen wir wieder überprüfen, ob der Index bei bestimmten Select-Queries benutzt wird oder nicht.
+Wie erwartbar benutzen wir wieder unsere Kundentabelle und erstellen den gleichen Index wie in Beispiel~\ref{lst:indexing-create-single}.
+Anschließend fügen wir wieder die Testdaten ein und verwenden wieder die Select-Befehle aus~\ref{lst:indexing-b-tree-selects}.
+Dieses Mal benutzen wir aber nicht alle Select-Befehle, sondern nur die folgenden:
+
+\begin{table}[H]
     \centering
-    \includegraphics[width=.8\textwidth]{PNGs/Script/Index/Hash/hash-query-differences/Reads}
-    \caption[Hash - Selects - Ergebnis]{Grafik visualisiert die Unterschiede von verschieden Select - Queries auf dieselben Daten. Je nach Gewschiwndikeit greift der Index besser oder nicht }
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Select-Query} & \textbf{Anzahl an Zeilen} & \textbf{Index benutzt?} \\
+        \hline
+        full\_match & 0 & ja \\
+        combined\_match\_with\_range & 4 & nein \\
+        exact\_with\_prefix & 41 & nein \\
+        leftmost\_prefix & 201 & nein \\
+        \hline
+    \end{tabular}
+    \caption{Ergebnisse der COUNT(*)-Abfragen für B-Tree-Index}
+    \label{tab:indexing_hash_count_results}
+\end{table}
+\vspace{-15pt}
+
+Wie schon aus der Tabelle~\ref{tab:indexing_hash_count_results} ersichtlich wird, wir nur bei \texttt{full\_match} der Index verwendet.
+Diese Erkenntnis können wir auch aus dem Result des Benchmarks (siehe~\ref{fig:hash-query-reads}) erkennen.
+Denn die Query ist um ein Erhebliches schneller als alle anderen (etwa um Faktor 15).
+Alle anderes Queries sind sehr ähnlich, was unter anderem auch der Skalierung geschuldet ist.
+Obwohl \texttt{combined\_match\_with\_range} nur 4 Zeilen zurückgibt und \texttt{leftmost\_prefix} hingegen 201 Datensätze, sind die Unterschiede nur sehr klein.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.7\textwidth]{PNGs/Script/Index/Hash/hash-query-differences/Reads}
+    \caption[Hash-Indexing: Unterschiedliche Abfragen mit Index]{Grafik visualisiert unterschiedlichen Select-Queries mit Index }
     \label{fig:hash-query-reads}
 \end{figure}
