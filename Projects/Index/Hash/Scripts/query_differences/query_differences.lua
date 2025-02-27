@@ -1,4 +1,6 @@
 local con = sysbench.sql.driver():connect()
+local with_index = not (os.getenv("NO") == "index")
+
 function prepare()
     local create_kunden_query = [[
         CREATE TABLE KUNDEN (
@@ -16,18 +18,21 @@ function prepare()
     ]]
 
     local create_indices = [[
-        CREATE INDEX combined_index
-        ON KUNDEN (NAME, VORNAME, GEBURTSTAG);
-        USING HASH;
+        CREATE INDEX combined_index ON KUNDEN (NAME, VORNAME, GEBURTSTAG) USING HASH;
     ]]
 
     con:query(create_kunden_query)
-    con:query(create_indices)
+
+    if with_index then
+        con:query(create_indices)
+    end
     print("Table 'KUNDEN' and index have been successfully created.")
 end
 
 function cleanup()
-    con:query("DROP INDEX combined_index ON KUNDEN;")
+    if with_index then
+        con:query("DROP INDEX combined_index ON KUNDEN;")
+    end
     con:query("DROP TABLE IF EXISTS KUNDEN;")
 
     print("Cleanup successfully done.")
