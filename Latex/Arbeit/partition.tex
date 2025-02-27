@@ -235,11 +235,11 @@ Bei den Insert-Befehlen sieht es leicht anders aus, aber dort ist der Fall ohne 
 	\caption[Range-Partitionierung: Unterschiedliche Selects mit und ohne Partition]{Vergleich zwischen der Range-Partitionierung und ohne Partition}
 	\label{fig:range-partition}
 \end{figure}
-\vspace{-20pt}
+\vspace{-12pt}
 
 Bei der List-Partitionierung~\ref{fig:list-partition} können wir auch einige interessante Beobachtungen machen.
 Beim ersten Fall ist nur ein Land in der WHERE-Bedingung vorhanden.
-Wenn dies so ist, dann hat die Partitionierung einen erheblichen Vorteil gegenüber der Version ohne Partitionierung (siehe rote Linie von with\_pruning\_simple und braune von without\_list\_pruning\_simple).
+Wenn dies so ist, dann hat die Partitionierung einen erheblichen Vorteil gegenüber der Version ohne Partitionierung (siehe rote Linie von \texttt{with\_pruning\_simple} und braune von \texttt{without\_list\_pruning\_simple}).
 Wenn wir statt nur eines Landes mehrere abfragen, sehen wir für die verschiedenen Operatoren unterschiedliche Ergebnisse.
 Die beste Performance erzielt der IN-Operator.
 Dicht darauf folgt der OR-Operator.
@@ -261,7 +261,7 @@ Die Performance beim Einfügen der Daten ist bei der Partitionierung und dem Ref
 	\caption[List-Partitionierung: Unterschiedliche Abfragen mit und ohne Partition]{Vergleich zwischen der List-Partitionierung und ohne Partition}
 	\label{fig:list-partition}
 \end{figure}
-\vspace{-20pt}
+\vspace{-12pt}
 
 Bei der Key-Partitionierung fällt auf, dass es keinen signifikanten Performance-Unterschied zur Hash-Partitionierung gibt, wenn derselbe Datensatz und dieselbe Anzahl von Partitionen verwendet wird.
 Generell ist die Key-Partitionierung häufig stabiler und optimierter ist, insbesondere wenn es um Primärschlüssel geht.
@@ -271,10 +271,10 @@ Auch hier fällt auf, dass die Werte der Abfragen sehr konstant sind.
 Nur bei der Variante mit 500 Partitionen gibt es deutlich sichtbare Schwankungen.
 Diese liegen aber nicht an dem Pruning, denn mit dem SQL-Befehl \texttt{EXPLAIN} sehen wir, dass alle 500 Partitionen benötigt werden und nicht keine Partitionen durch Zufall geprunt werden.
 Die Hash-Partitionierung berechnet aus dem Wert einer bestimmten Spalte mithilfe einer Hash-Funktion einen Hash-Wert und anhand dessen wird die Zeile einer der Partitionen zugewiesen.
-Da der Hash-Wert bei 500 Partitionen mit modulo 500 gebildet wird, landet jeder 500.\ Wert in der gleichen Partition.
+Da der Hash-Wert bei 500 Partitionen mit modulo 500 gebildet wird, landet jeder 500-ste Wert in der gleichen Partition.
 Damit ist klargestellt, dass immer alle Partitionen benutzt werden, was die folgenden Ergebnisse zeigen.
 Zunächst zeigt sich, dass die Abfrage ohne Partitionierung am schnellsten ist.
-Danach kann man der Regel, dass je mehr Partitionen es gibt, desto langsamer wird die Query.
+Danach kann man der Regel folgen, dass je mehr Partitionen es gibt, desto langsamer wird die Query.
 Der Unterschied zwischen ohne Partitionen und 5 Partitionen ist noch überschaubar, aber bei 500 Partitionen sieht man einen sehr deutlichen Unterschied.
 Das bestätigt die wichtig von unserem Leitsatz, dass je mehr Partitionen benötigt werden, desto aufwendiger wird die Suche innerhalb der Partitionsstruktur, was die Performance verringert.
 
@@ -292,4 +292,4 @@ Das bestätigt die wichtig von unserem Leitsatz, dass je mehr Partitionen benöt
 	\caption[Hash-Partitionierung: Variationen der Partitionsanzahl]{Vergleich zwischen der Hash-Partitionierung und ohne Partition}
 	\label{fig:hash-partition}
 \end{figure}
-\vspace{-20pt}
+\vspace{-12pt}
