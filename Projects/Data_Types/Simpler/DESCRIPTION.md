@@ -16,6 +16,9 @@ Untersucht werden:
   - Desc Sort
   - Range Compare
 
+## Durchführung: Ausführung des Benchmarks
+Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und Parametern zu starten.
+
 ### Code für Int/Char - Vergleich:
 ```bash
 cd ../../..

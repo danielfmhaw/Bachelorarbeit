@@ -1,18 +1,23 @@
 # Performance von Replikation
+
 ## Beschreibung
+
+Es wird der Performance - Unterschied von dem Replikationsansatz Master-Replica analysiert.
+Auch der Einfluss der Binlog-Formate wird untersucht
 
 ## Datenbankstruktur
 
+Das Projekt verwendet zwei Tabellen: **KUNDE** und **BESTELLUNG**.
+Außerdem wird das Binlog-Format bei einem Benchmark verändert.
+
 ## Zielsetzung
 Untersucht werden:
-- **Join-Performance**: Wie beeinflusst der FK-Datentyp die Geschwindigkeit von Join-Abfragen?
-- **Insert-Performance**: Wie wirken sich FK-Typen auf die Geschwindigkeit von Insert-Operationen aus?
-
-Die Ergebnisse helfen, fundierte Entscheidungen zur Datenbankgestaltung zu treffen.
+- **Replikation vs No Replikation**: Wie ist die Performance zwischen dem Master-Replica- und dem Single-Server-Ansatz bei je einem Thread?
+- **Replikation vs No Replikation v2**: Wie ist die Performance mit 8 (bzw. 16 oder 32) Threads auf den Single-Server und die Aufteilung der entsprechender auf den Master und alle Replicas?
+- **Binlog-Format**: Wie wirken sich die Binlog-Formate auf die Performance der Operationen aus?
 
 ## Durchführung: Ausführung des Benchmarks
-
-Führe das folgende Script aus, um die Benchmarks mit den korrekten Pfaden und Parametern auszuführen.
+Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und Parametern zu starten.
 
 ### Code für Replikation vs No Replikation:
 ```bash
