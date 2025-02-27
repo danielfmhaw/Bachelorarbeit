@@ -14,6 +14,9 @@ Untersucht werden:
 - Performance – Unterschied zwischen Not Null und Null Spalten
 - Unterschiedliche Abfragen (group by, count etc.) auf den beiden Tabellen
 
+## Durchführung: Ausführung des Benchmarks
+Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und Parametern zu starten.
+
 ### Code für Null
 ```bash
 cd ../../..
@@ -25,6 +28,7 @@ cd Tools/Shell-Scripts
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/not_null": {}
   }'
 ```
+
 ### Nur Graphen erstellen für Null (log und csv- files müssen schon bestehen)
 ```bash
 cd ../../..

@@ -1,4 +1,5 @@
 # Performance von Join-Abfragen
+
 ## Beschreibung
 
 Es wird die **Performance von Join-Abfragen** und **Insert-Operationen** unter Verwendung unterschiedlicher Datentypen für den Join-Operator untersucht. Ziel ist es, die Auswirkungen verschiedener Designs auf die Effizienz dieser Operationen zu analysieren.
@@ -45,17 +46,15 @@ Untersucht werden:
 
 Die Ergebnisse helfen, fundierte Entscheidungen zur Datenbankgestaltung zu treffen.
 
-## Durchführung: Ausführung des Benchmarks
-
-Führe das folgende Script aus, um die Benchmarks mit den korrekten Pfaden und Parametern auszuführen.
-
 ### Schritte:
 
 1. Navigiere in das Verzeichnis `Tools`, wo sich das Script befindet.
 2. Führe das Script `sysbench_script.sh` aus und übergebe die erforderlichen Parameter.
 
-### Code für Join Type - Vergleich:
+## Durchführung: Ausführung des Benchmarks
+Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und Parametern zu starten.
 
+### Code für Join Type - Vergleich:
 ```bash
 cd ../..
 cd Tools/Shell-Scripts

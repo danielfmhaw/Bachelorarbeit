@@ -16,6 +16,9 @@ Untersucht werden:
 - Unterschiedliche Abfragen (group by, count, range comparison etc.) auf den beiden Tabellen
 - Für string werden auch update durchgeführt und verglichen
 
+## Durchführung: Ausführung des Benchmarks
+Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und Parametern zu starten.
+
 ### Code für Number Größenvergleich:
 ```bash
 cd ../../..
