@@ -84,11 +84,15 @@ def plot_metrics(args, datafile, detailed_pngs_dir, combined_pngs_dir):
         measures = [col for col in data.columns if col not in ['Time (s)', 'Script']]
 
     try:
+        # Detailed plots for each measure
         for measure in measures:
-            # Detailed plots for each measure
             plt.figure(figsize=(10, 6))
             script_data_dict = {}
-            for script in scripts:
+            # Sort scripts by the average value of the specified measure in descending order
+            sorted_scripts = sorted(scripts, key=lambda script: data[data['Script'] == script][measure].mean(), reverse=True)
+            color_map = {script: plt.cm.tab10(i % 10) for i, script in enumerate(scripts)}
+
+            for script in sorted_scripts:
                 script_data = data[data['Script'] == script]
                 script_data_values = script_data[[measure]].apply(lambda row: ','.join(row.astype(str)), axis=1).str.cat(sep=',')
                 if script_data_values in script_data_dict:
@@ -100,11 +104,12 @@ def plot_metrics(args, datafile, detailed_pngs_dir, combined_pngs_dir):
             for script_data, scripts_list in script_data_dict.items():
                 script_data_all = data[data['Script'] == scripts_list[0]]
                 label = _get_label(scripts_size, scripts_list)
+                script_color = color_map[scripts_list[0]]
                 if isinstance(label, set):
                     for name in label:
-                        plt.plot(script_data_all['Time (s)'], script_data_all[measure], label=name)
+                        plt.plot(script_data_all['Time (s)'], script_data_all[measure], label=name, color=script_color)
                 else:
-                    plt.plot(script_data_all['Time (s)'], script_data_all[measure], label=label)
+                    plt.plot(script_data_all['Time (s)'], script_data_all[measure], label=label, color=script_color)
 
             plt.title(f'{measure} over Time by Script')
             plt.xlabel('Time (s)')
