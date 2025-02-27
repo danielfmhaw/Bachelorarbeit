@@ -210,10 +210,10 @@ Zudem muss der Nutzen einer Sicht nicht nur anhand der Laufzeitverbesserung, son
 \section{Durchführung der Benchmarks}\label{sec:durchfuhrung-der-benchmarks}
 
 Das Ziel für die Durchführung ist es den Performanceunterschied zwischen einer virtuellen und einer materialisierten Sicht darzustellen.
-Da MySQL keine nativen materialisierten Sichten unterstützt, verfolgen wir einen alternativen Ansatz und vergleichen diesen später mit der nativen Implementierung in PostgreSQL, einem anderen Datenbankmanagementsystem.
+Da MySQL nativ keine materialisierten Sichten unterstützt, verfolgen wir einen alternativen Ansatz und vergleichen diesen später mit der nativen Implementierung in PostgreSQL, einem anderen Datenbankmanagementsystem.
 
-Zuallererst beginnen wir mit der Umsetzung der virtuellen Sicht, für die wir, wie bei den anderen Sichten auch, zunächst die Basistabelle erstellen müssen.
-Als Basistabelle verwenden wir die Tabellen Kunden (\ref{lst:create_table_kunde}) und Bestellung (\ref{lst:create_table_bestellung}) und erstellen die View (\ref{lst:create_kunden_bestellung_view}), die wir schon in Kapitel (\ref{sec:virtuelle-views}) beschrieben haben.
+Zuallererst beginnen wir mit der Umsetzung der virtuellen Sicht, für die wir, wie bei den anderen Sichten auch, zunächst die Basistabellen erstellen müssen.
+Als Basis verwenden wir die Tabellen Kunden (\ref{lst:create_table_kunde}) und Bestellung (\ref{lst:create_table_bestellung}) und erstellen die View (\ref{lst:create_kunden_bestellung_view}), die wir schon in Kapitel~\ref{sec:virtuelle-views} beschrieben haben.
 Es werden Testdaten für die Kunden erstellt, jedem Kunden eine festgelegte Anzahl an Bestellungen zugewiesen und beide in die jeweiligen Tabellen eingefügt.
 Wir fügen keine Datensätze über die virtuelle Sicht ein und sprechen die Sicht bei Select-Befehlen explizit an.
 Da wir die Unterschiede in der Lesegeschwindigkeit möglichst repräsentativ feststellen wollen, betrachten wir mehrere Select-Befehle auf die unterschiedlichen Spalten der virtuellen Sicht.
@@ -238,7 +238,7 @@ Nach dem Einfügen der Testdaten wollen wir wieder die Select-Performance überp
 Wenn wir die Ergebnisse der Select-Befehle betrachten, dann fällt auf, dass die Tabelle \texttt{KUNDEN\_MAT\_OVERVIEW} keine Einträge hat.
 Das Problem beim bisherigen Verfahren liegt daran, dass die beiden Tabellen und \texttt{KUNDEN\_MAT\_OVERVIEW} separat voneinander existierende Tabellen sind und die Einfügungen wirken sich demnach nicht auf die \texttt{KUNDEN\_MAT\_OVERVIEW}-Tabelle aus.
 
-Man kann das mithilfe der Definition von Triggern lösen, die ausgelöst werden, wenn sich Werte in der Bestell- oder Kundentabelle ändern.
+Dieses Problem kann man mithilfe der Definition von Triggern lösen, die ausgelöst werden, wenn sich Werte in der Bestell- oder Kundentabelle ändern.
 Da die beiden Tabellen über die \texttt{KUNDEN\_ID} verknüpft sind, kann der Fremdschlüssel mit der Option \texttt{ON DELETE CASCADE} ausgestattet werden.
 Dadurch werden die Einträge, die in der Kundentabelle gelöscht werden, automatisch auch aus der Bestelltabelle entfernt und man muss nur die Änderungen in der Bestelltabelle als Auslöser für die Trigger beachten.
 In MySQL kann ein Trigger nur für einen Datenbankmanipulationsoperator gleichzeitig verwendet werden (\cite{mysql_trigger_syntax}), weshalb wir für \texttt{INSERT} und \texttt{DELETE} jeweils einen Trigger definieren müssen.
@@ -258,14 +258,14 @@ Ein Nachteil für den Ansatz mit einer normalen Tabelle im Zusammenspiel mit den
 
 Damit wir die Performanceunterschiede zwischen Postgres und MySQL ermitteln können, implementieren wir zusätzlich den Ansatz mit den Triggern auch in Postgres.
 Die Implementierungen für die Insert- und Select-Befehle sind in MySQL und Postgres identisch, bei der Erstellung der Tabellen und Trigger gibt es aber Unterschiede.
-Zum einen unterscheiden sich die Mechanismen zur automatischen Generierung von Primärschlüsseln, da PostgreSQL \texttt{SERIAL} und MySQL \texttt{AUTO\_INCREMENT} verwendet.
+Zum einen unterscheiden sich die Mechanismen zur automatischen Generierung von Primärschlüsseln, da PostgreSQL \texttt{SERIAL} und MySQL \texttt{AUTO\_INCREMENT} dafür verwendet.
 Zum anderen kann in MySQL die Logik eines Triggers direkt in der \texttt{CREATE TRIGGER}-Anweisung definiert werden, während in PostgreSQL ein Trigger eine separate Funktion aufrufen muss, die die Logik enthält und mit \texttt{RETURNS TRIGGER} definiert ist.
 Auch die Deklarierung der Variablen unterscheidet sich, da in PostgreSQL mehrere Variablen in einem \texttt{DECLARE}-Block und in MySQL jede Variable einzeln im \texttt{BEGIN...END}-Block deklariert werden muss.
 
 Als letzten Schritt betrachten wir die native Implementierung in PostgreSQL\@.
-In Postgres kann man direkt die materialisierte Sicht, siehe Beispiel (\ref{lst:create_mat_view}), direkt erstellen und muss nicht eine zusätzliche Tabelle und die passenden Trigger dazu definieren.
+In Postgres kann man die materialisierte Sicht, siehe Beispiel (\ref{lst:create_mat_view}), direkt erstellen und muss nicht eine zusätzliche Tabelle und die passenden Trigger dazu definieren.
 Wie man sieht, ist der Befehl nahezu identisch mit dem Befehl für das Erstellen der virtuellen Sicht (\ref{lst:create_view}).
-Die Select-Befehle sind komplett gleich im Vergleich zur Umsetzung mit dem Trigger und auch die Einfügungen erfolgen erneut auf den darunterliegenden Tabellen.
+Die Select-Befehle sind komplett gleich im Vergleich zur Umsetzung mit dem Trigger und auch die Einfügungen erfolgen erneut nur auf den darunterliegenden Tabellen.
 Wie bereits beim MySQL-Ansatz aufgefallen ist, dass ohne Trigger keine Daten in der Tabelle vorhanden sind, gibt es hier auch keine, es sei denn, man aktualisiert die materialisierte Sicht explizit mit diesem Befehl:
 
 \vspace{-5pt}
@@ -274,13 +274,13 @@ REFRESH MATERIALIZED VIEW KUNDEN_MAT_OVERVIEW;
 \end{lstlisting}
 \vspace{-5pt}
 
-Da die Umsetzung von inkrementeller Auffrischung, siehe Kapitel~\ref{sec:materialisierte-views}, in Postgres nicht unterstützt wird, muss die materialisierte Sicht immer auf diese Art und Weise aktualisiert werden.
-Den Befehl führen wir nach den \texttt{INSERT} und \texttt{DELETE}-Befehlen auf der Kundentabelle aus.
+Da die Umsetzung von inkrementeller Auffrischung, siehe Kapitel~\ref{sec:materialisierte-views}, in Postgres nicht unterstützt wird, muss die materialisierte Sicht immer vollständig aktualisiert werden.
+Den Befehl führen wir jeweils nach den \texttt{INSERT} und \texttt{DELETE}-Befehlen auf der Kundentabelle aus.
 Da wir den Einfluss auf die Performance des Befehls untersuchen möchten, führen wir ihn einmal nach jeder Einfügung in die Kundentabelle aus und einmal, nachdem alle Datensätze eingefügt wurden.
 
-Zusammengefasst haben wir damit sechs unterschiedliche Benchmarks, die in zwei unterschiedlichen Graphen vergleichen.
+Zusammengefasst haben wir damit sechs unterschiedliche Benchmarks, die in zwei unterschiedlichen Graphen verglichen werden.
 Zum einen haben wir den Vergleich zwischen keiner View, der virtuellen View und dem Ansatz mit Triggern in MySQL\@.
-Zum anderen haben wir auch eine Analyse des MySQL-Ansatzes im Vergleich zum gleichen Ansatz in PostgreSQL sowie der beiden nativen Implementierungen mit unterschiedlichen Aktualisierungshäufigkeiten durchgeführt.
+Zum anderen führen wir auch eine Analyse des MySQL-Ansatzes im Vergleich zum gleichen Ansatz in PostgreSQL sowie der beiden nativen Implementierungen mit unterschiedlichen Aktualisierungshäufigkeiten durch.
 
 \newpage
 \section{Analyse der Ergebnisse}\label{sec:analyse-der-ergebnisse}
@@ -307,14 +307,14 @@ Dies liegt aber auch daran, dass wir relativ wenige Datensätze in den Testtabel
     \caption[Views: Keine View, virtuelle View und Ansatz mit Triggern]{Vergleich zwischen keiner View, der virtuellen View und dem Ansatz mit Triggern in MySQL}
     \label{fig:view-comparison-comp-metric}
 \end{figure}
-\vspace{-20pt}
+\vspace{-12pt}
 
 Bei dem zweiten Vergleich sehen wir zuallererst einen sehr deutlichen Performanceunterschied beim Ansatz mit den Triggern zwischen Postgres und MySQL\@.
-Begründet werden kann dieser Unterschied mit den verschiedenen Vorteilen des Datenbankmanagementsystems und dessen Umgebung.
+Begründet werden kann dieser Unterschied mit den verschiedenen Vorteilen des jeweiligen Datenbankmanagementsystems und dessen Umgebung.
 Wir haben beide Systeme mit dem gleichen Ansatz gebenchmarkt, damit wir die Implementierung der nativen materialisierten Sicht, die nur in Postgres möglich ist, besser vergleichen zu können.
 Denn die Ergebnisse der nativen Implementierung sind in Bezug auf die Abfragegeschwindigkeit tatsächlich am performantesten und die Anzahl an Aktualisierungen (\ref{lst:refresh-materialized-view}) hat dabei keinen Einfluss.
 Anders hingegen sieht es bei der Einfüge-Geschwindigkeit aus, da dort die Implementierung, die nach jedem Insert-Befehl aktualisiert nicht am schnellsten, sondern am langsamsten ist.
-Der Vergleich zwischen den DBMS fällt wieder schwer, da die Unterschiede zwischen \texttt{with\_trigger} und \texttt{with\_trigger\_postgres} sehr groß sind (etwa um Faktor 4\-5).
+Der Vergleich zwischen den DBMS fällt wieder schwer, da die Unterschiede zwischen \texttt{with\_trigger} und \texttt{with\_trigger\_postgres} sehr groß sind (etwa um Faktor 2--3).
 Damit wird noch einmal deutlich wie stark die Einfügedauer bei den materialisierten Sichten von der Anzahl an Refreshs abhängig ist, da \texttt{mat\_view\_refresh\_every} unterhalb der Performance von \texttt{with\_trigger} liegt.
 In unserem Beispiel ist die einmalige Aktualisierung der Sicht besser als das Verwenden der Trigger in Postgres.
 
@@ -331,7 +331,7 @@ In unserem Beispiel ist die einmalige Aktualisierung der Sicht besser als das Ve
     \caption[Views: Beide Triggeransätze sowie materialisierte Sicht]{Vergleich zwischen Triggeransatz in MySQL und Postgres, sowie zwei nativen Implementierungen in Postgres }
     \label{fig:mat-view-comparison-comp-metric}
 \end{figure}
-\vspace{-20pt}
+\vspace{-12pt}
 
 Es lässt sich also zusammenfassen, dass virtuelle Sichten keine Auswirkungen auf die Performance haben.
 Dies ist im eigentlichen Sinne aber auch nicht der Absicht der virtuellen Sicht, denn sie ist besser geeignet, um beispielsweise die Organisation der Rechte für unterschiedliche Nutzer der Datenbank zu gewährleisten.

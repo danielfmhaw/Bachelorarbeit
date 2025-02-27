@@ -292,8 +292,20 @@ Insgesamt verdeutlicht diese Analyse die entscheidende Rolle des B-Tree-Index, d
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=.7\textwidth]{PNGs/Script/Index/B_Tree/b-tree-query-differences/Reads}
-    \caption[B-Tree-Indexing: Unterschiedliche Selects mit Index]{Visualisierung von unterschiedlichen Select-Queries mit Index}
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/b-tree-query-differences/Reads}
+        \caption{Mit Index}
+        \label{indexing-b-tree-query-reads-index}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/b-tree-query-differences-no-index/Reads}
+        \caption{Ohne Index}
+        \label{indexing-b-tree-query-reads-no-index}
+    \end{subfigure}
+    \caption[B-Tree-Indexing: Unterschiedliche Selects mit Index und Ohne]{Visualisierung von unterschiedlichen Select-Queries mit und ohne Index}
     \label{fig:indexing-b-tree-query-reads}
 \end{figure}
 \vspace{-15pt}
@@ -421,20 +433,33 @@ Dieses Mal benutzen wir aber nicht alle Select-Befehle, sondern nur die folgende
         leftmost\_prefix & 201 & nein \\
         \hline
     \end{tabular}
-    \caption{Ergebnisse der COUNT(*)-Abfragen für B-Tree-Index}
+    \caption{Ergebnisse der COUNT(*)-Abfragen für Hash-Index}
     \label{tab:indexing_hash_count_results}
 \end{table}
 \vspace{-15pt}
 
 Wie schon aus der Tabelle~\ref{tab:indexing_hash_count_results} ersichtlich wird, wir nur bei \texttt{full\_match} der Index verwendet.
-Diese Erkenntnis können wir auch aus dem Result des Benchmarks (siehe~\ref{fig:hash-query-reads}) erkennen.
+Diese Erkenntnis können wir auch aus dem Result des Benchmarks (siehe~\ref{fig:indexing-hash-query-readsh}) erkennen.
 Denn die Query ist um ein Erhebliches schneller als alle anderen (etwa um Faktor 15).
 Alle anderes Queries sind sehr ähnlich, was unter anderem auch der Skalierung geschuldet ist.
 Obwohl \texttt{combined\_match\_with\_range} nur 4 Zeilen zurückgibt und \texttt{leftmost\_prefix} hingegen 201 Datensätze, sind die Unterschiede nur sehr klein.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=.7\textwidth]{PNGs/Script/Index/Hash/hash-query-differences/Reads}
-    \caption[Hash-Indexing: Unterschiedliche Abfragen mit Index]{Grafik visualisiert unterschiedlichen Select-Queries mit Index }
-    \label{fig:hash-query-reads}
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/Hash/hash-query-differences/Reads}
+        \caption{Mit Index}
+        \label{indexing-hash-query-reads-index}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/Hash/hash-query-differences-no-index/Reads}
+        \caption{Ohne Index}
+        \label{indexing-hash-query-reads-no-index}
+    \end{subfigure}
+    \caption[Hash-Indexing: Unterschiedliche Abfragen mit Index und Ohne]{Grafik visualisiert unterschiedlichen Select-Queries mit und ohne Index}
+    \label{fig:indexing-hash-query-reads}
 \end{figure}
+\vspace{-15pt}
