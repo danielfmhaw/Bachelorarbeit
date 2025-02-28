@@ -39,7 +39,7 @@ jobs:
              "db": ["mysql_master_slave"]
            }
           }'
-          
+
       - name: Cleanup MySQL containers
         run: |
           docker ps -q -f name=mysql-primary | xargs -r docker stop | xargs -r docker rm
@@ -50,5 +50,5 @@ jobs:
       - name: Upload test outputs
         uses: actions/upload-artifact@v4
         with:
-          name: "daniel-test-123"
+          name: "replication-output"
           path: "./Projects/Replication/Output"
