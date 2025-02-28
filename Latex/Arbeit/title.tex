@@ -80,12 +80,29 @@
 
 % Hier ersetzen Sie bitte die vorhandenen Texte durch Ihre eigenen
 % Zusammenfassungen
-Der Arbeit beginnt mit einer kurzen Beschreibung ihrer zentralen Inhalte, in
-der die Thematik und die wesentlichen Resultate skizziert werden.  Diese
-Beschreibung muss sowohl in deutscher als auch in englischer Sprache vorliegen
-und sollte eine Länge von etwa 150 bis 250 Wörtern haben.  Beide Versionen
-zusammen sollten nicht mehr als eine Seite umfassen.  Die Zusammenfassung
-dient u.\,a.\ der inhaltlichen Verortung im Bibliothekskatalog.
+% Aufbau: Motivation → Problemstellung → Lösungsansatz → Ergebnisse → Schlussfolgerungen
+TO-DO weiterverbessern: bisher nur eine erste Skizze der Zusammenfassung.
+
+In modernen Datenbanksystemen, insbesondere bei den weit verbreiteten relationalen Datenbanken, ist die Performance ein entscheidender Faktor.
+Je komplexer die Abfragen und je größer das Datenvolumen, desto länger kann die Ausführungsdauer bestimmter Abfragen sein.
+Eine der größten Herausforderungen besteht darin, eine geeignete Strategie für das Problem auszuwählen.
+
+Abhängig von zusätzlichen Zielen neben der Performance, wie der Verteilung der Daten, gibt es unterschiedliche Lösungskonzepte.
+Es geht auch darum einschätzen zu können, inwiefern sich die Veränderungen bezüglich der Lese- als auch Schreibgeschwindigkeit auswirken.
+Dafür benutzen wir ein Benchmark-Tool sowie verschiedene Tools zur Visualisierung der Ergebnisse.
+
+In der Bachelorarbeit werden verschiedene Lösungsansätze, wie Datentypen, Indexierung, Views, Partitionen und Replikation näher erläutert.
+Zu jedem Thema wird ein Beispiel gegeben, das als Orientierung dient und die Auswirkungen der jeweiligen Änderungen verdeutlicht.
+Unser Fokus liegt auf dem Datenbankmanagementsystem MySQL, jedoch wird im Kapitel zu Views die native Implementierung von materialisierten Views in PostgreSQL analysiert.
+
+Die vorgestellten Optimierungsansätze dieser Arbeit bieten wertvolle Erkenntnisse für Datenbankadministratoren, die leistungsfähige Lösungen in verschiedenen Anwendungsbereichen implementieren möchten.
+\newline
+\newline
+\newline
+Der Arbeit beginnt mit einer kurzen Beschreibung ihrer zentralen Inhalte, in der die Thematik und die wesentlichen Resultate skizziert werden.
+Diese Beschreibung muss sowohl in deutscher als auch in englischer Sprache vorliegen und sollte eine Länge von etwa 150 bis 250 Wörtern haben.
+Beide Versionen zusammen sollten nicht mehr als eine Seite umfassen.
+Die Zusammenfassung dient u.\,a.\ der inhaltlichen Verortung im Bibliothekskatalog.
 
 % Zum Wechseln der Sprache siehe den Kommentar in chap3.tex
 {
@@ -93,10 +110,9 @@ dient u.\,a.\ der inhaltlichen Verortung im Bibliothekskatalog.
     % TODO (Daniel): write text here
     \section*{Abstract}
 
-    The thesis begins with a brief summary of its main contents, outlining the
-    subject matter and the essential findings.  This summary must be provided
-    in German and in English and should range from 150 to 250 words in length.
-    Both versions combined should not comprise more than one page.  Among
-    other things, the abstract is used for library classification.
+    The thesis begins with a brief summary of its main contents, outlining the subject matter and the essential findings.
+    This summary must be provided in German and in English and should range from 150 to 250 words in length.
+    Both versions combined should not comprise more than one page.
+    Among other things, the abstract is used for library classification.
   \end{otherlanguage}
 }
