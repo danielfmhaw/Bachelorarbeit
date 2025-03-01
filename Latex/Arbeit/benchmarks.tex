@@ -14,11 +14,11 @@ Dabei wird nicht nur die Datenbank getestet, sondern die gesamte Applikation, ei
 des Netzwerks und des Applikationscodes.
 Der Ansatz dahinter ist, dass ein Nutzer genauso lange auf eine Abfrage warten muss, wie das gesamte System benötigt.
 Daher sollte diese Wartezeit so gering wie möglich sein.
-Es kann dabei vorkommen, dass MySQL nicht immer das Bottleneck ist.\footnote{Gemeint ist ein Engpass beim Transport von Daten oder Waren, der maßgeblichen Einfluss auf die Abarbeitungsgeschwindigkeit hat. Optimierungsversuche an anderer Stelle führen oft nur zu geringen oder gar keinen messbaren Verbesserungen der Gesamtsituation. (\cite{bottleneck})}
+Es kann dabei vorkommen, dass das DBMS nicht immer das Bottleneck ist.\footnote{Gemeint ist ein Engpass beim Transport von Daten oder Waren, der maßgeblichen Einfluss auf die Abarbeitungsgeschwindigkeit hat. Optimierungsversuche an anderer Stelle führen oft nur zu geringen oder gar keinen messbaren Verbesserungen der Gesamtsituation. (\cite{bottleneck})}
 
 Full-Stack-Benchmarks haben jedoch auch Nachteile.
 Sie sind schwieriger zu erstellen und insbesondere schwieriger korrekt einzurichten.
-Wenn man lediglich verschiedene Schemas und Abfragen in MySQL auf ihre Performance testen möchte, gibt es sogenannte Single-Component-Benchmarks.
+Wenn man lediglich verschiedene Schemas und Abfragen im DBMS auf ihre Performance testen möchte, gibt es sogenannte Single-Component-Benchmarks.
 Diese analysieren ein spezifisches Problem in der Applikation und sind deutlich einfacher zu erstellen.
 Ein weiterer Vorteil besteht darin, dass nur ein Teil des gesamten Systems getestet wird, wodurch die Antwortzeiten
 kürzer sind und man schneller Ergebnisse erhält.

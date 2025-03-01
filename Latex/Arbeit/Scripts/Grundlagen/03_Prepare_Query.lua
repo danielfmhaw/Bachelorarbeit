@@ -1,16 +1,12 @@
 function prepare()
     local create_kunden_query = [[
-        CREATE TABLE KUNDENMITID (
-            ....
-        );
+        CREATE TABLE KUNDEN (...);
     ]]
     local create_bestellung_query = [[
-        CREATE TABLE BESTELLUNGMITID (
-            ...
-        );
+        CREATE TABLE BESTELLUNG (...);
     ]]
 
     db_query(create_kunden_query)
     db_query(create_bestellung_query)
-    print("Tables KUNDENMITID and BESTELLUNGMITID have been successfully created.")
+    print("Tables KUNDEN und BESTELLUNG have been successfully created")
 end
