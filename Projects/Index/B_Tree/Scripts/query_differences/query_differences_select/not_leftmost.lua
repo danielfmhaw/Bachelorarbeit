@@ -8,7 +8,7 @@ function select_not_leftmost()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. not_leftmost_query)
-        utils.print_results(con, not_leftmost_query:gsub("%*", "COUNT(*)"))
+        utils.print_results(con, (not_leftmost_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

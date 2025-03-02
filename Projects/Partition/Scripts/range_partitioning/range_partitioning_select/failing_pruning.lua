@@ -13,6 +13,7 @@ function select_failing_pruning()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. failing_pruning_query)
+        utils.print_results(con, (failing_pruning_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

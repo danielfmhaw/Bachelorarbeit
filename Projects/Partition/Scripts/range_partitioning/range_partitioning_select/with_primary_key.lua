@@ -13,6 +13,7 @@ function select_with_primary_key()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. with_primary_key_query)
+        utils.print_results(con, (with_primary_key_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

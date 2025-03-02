@@ -8,7 +8,7 @@ function select_full_match()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. full_match_query)
-        utils.print_results(con, full_match_query:gsub("%*", "COUNT(*)"))
+        utils.print_results(con, (full_match_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

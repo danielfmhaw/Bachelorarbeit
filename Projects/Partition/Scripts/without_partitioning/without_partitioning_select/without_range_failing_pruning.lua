@@ -13,6 +13,7 @@ function select_without_range_failing_pruning()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. without_range_failing_pruning_query)
+        utils.print_results(con, (without_range_failing_pruning_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

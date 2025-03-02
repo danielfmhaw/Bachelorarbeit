@@ -20,9 +20,9 @@ function prepare()
             BESTELLUNG_ID INT PRIMARY KEY,
             BESTELLDATUM DATE,
             ARTIKEL_ID   INT,
-            FK_KUNDEN    VARCHAR(255) NOT NULL,
+            FK_KUNDEN_NAME    VARCHAR(255) NOT NULL,
             UMSATZ       INT,
-            FOREIGN KEY (FK_KUNDEN) REFERENCES KUNDENMITVARCHAR (NAME)
+            FOREIGN KEY (FK_KUNDEN_NAME) REFERENCES KUNDENMITVARCHAR (NAME)
         );
     ]]
 

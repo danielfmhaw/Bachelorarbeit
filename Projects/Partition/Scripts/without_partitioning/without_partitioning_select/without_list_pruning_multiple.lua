@@ -29,6 +29,7 @@ function select_without_list_pruning_multiple()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. without_list_pruning_multiple_query)
+        utils.print_results(con, (without_list_pruning_multiple_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

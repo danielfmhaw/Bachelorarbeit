@@ -12,10 +12,9 @@ function select_query()
         GROUP BY k.STADT;
     ]]
     if not counts_executed then
-        utils.print_results(con, "SELECT COUNT(*) FROM KUNDEN")
-        utils.print_results(con, "SELECT COUNT(*) FROM BESTELLUNG")
-        utils.print_results(con, "SELECT COUNT(*) FROM KUNDEN k JOIN BESTELLUNG b ON k.KUNDEN_ID = b.FK_KUNDEN")
-
+        utils.print_results(con, "SELECT COUNT(*) FROM KUNDEN k JOIN BESTELLUNG b ON k.KUNDEN_ID = b.FK_KUNDEN", "KUNDENMITBESTELLUNG")
+        utils.print_results(con, "SELECT COUNT(*) FROM KUNDEN", "KUNDEN")
+        utils.print_results(con, "SELECT COUNT(*) FROM BESTELLUNG", "BESTELLUNG")
         counts_executed = true
     end
 

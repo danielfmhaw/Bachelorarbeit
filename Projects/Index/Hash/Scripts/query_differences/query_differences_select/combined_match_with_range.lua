@@ -8,7 +8,7 @@ function select_combined_match_with_range()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. combined_match_with_range_query)
-        utils.print_results(con, combined_match_with_range_query:gsub("%*", "COUNT(*)"))
+        utils.print_results(con, (combined_match_with_range_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 
