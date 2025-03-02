@@ -8,7 +8,7 @@ function select_column_prefix()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. column_prefix_query)
-        utils.print_results(con, column_prefix_query:gsub("%*", "COUNT(*)"))
+        utils.print_results(con, (column_prefix_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

@@ -13,6 +13,7 @@ function select_kunde_id_range()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. kunde_id_range_query)
+        utils.print_results(con, (kunde_id_range_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

@@ -13,6 +13,7 @@ function select_without_hash_pruning_range()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. without_hash_pruning_range_query)
+        utils.print_results(con, (without_hash_pruning_range_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

@@ -26,7 +26,7 @@ function prepare()
     if with_index then
         con:query(create_indices)
     end
-    print("Table 'KUNDEN' and index have been successfully created.")
+    print(with_index and "Table 'KUNDEN' and index have been successfully created." or "Table 'KUNDEN' has been successfully created without an index.")
 end
 
 

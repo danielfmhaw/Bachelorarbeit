@@ -28,6 +28,7 @@ function select_or_multiple_countries()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. or_multiple_countries_query)
+        utils.print_results(con, (or_multiple_countries_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

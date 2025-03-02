@@ -47,7 +47,7 @@ function insert_data()
             -- Insert into BESTELLUNGMITVARCHAR, ignoring duplicates
             local bestellung_query = string.format([[
               INSERT IGNORE INTO BESTELLUNGMITVARCHAR
-              (BESTELLUNG_ID, BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
+              (BESTELLUNG_ID, BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN_NAME, UMSATZ)
               VALUES (%d,'%s', %d, '%s', %d);
             ]],bestellung_id, bestelldatum, artikel_id, name, umsatz)
 

@@ -10,15 +10,20 @@ function utils.randomString(length)
     return result
 end
 
-function utils.print_results(con, query)
+function utils.print_results(con, query, custom)
     result = con:query(query)
     io.stderr:write("----------------------"  .. " START PRINTING " .. "----------------------" .. "\n")
     io.stderr:write("Executed Query: "  .. query:gsub("%s+", " ") .. "\n")
 
+    if custom then
+        io.stderr:write(string.format("CUSTOM_NAME: %s", custom) .. "\n")
+    end
+
     if result and result.nrows > 0 then
+        local is_count_query = string.find(query, "COUNT%(%*%)") ~= nil
         for i = 1, result.nrows do
             local row = result:fetch_row()
-            local output_string = ""
+            local output_string = is_count_query and "COUNT:" or "ROW" .. i .. ":"
             for j = 1, #row do
                 output_string = output_string .. tostring(row[j])
                 if j < #row then

@@ -8,7 +8,7 @@ function select_skip_columns()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. skip_columns_query)
-        utils.print_results(con, skip_columns_query:gsub("%*", "COUNT(*)"))
+        utils.print_results(con, (skip_columns_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

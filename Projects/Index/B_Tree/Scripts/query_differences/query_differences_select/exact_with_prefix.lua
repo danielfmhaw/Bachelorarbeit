@@ -9,7 +9,7 @@ function select_exact_with_prefix()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. exact_with_prefix_query)
-        utils.print_results(con, exact_with_prefix_query:gsub("%*", "COUNT(*)"))
+        utils.print_results(con, (exact_with_prefix_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

@@ -13,6 +13,7 @@ function select_without_list_pruning_simple()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. without_list_pruning_simple_query)
+        utils.print_results(con, (without_list_pruning_simple_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 

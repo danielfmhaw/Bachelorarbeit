@@ -8,7 +8,7 @@ function select_range_with_like()
 
     if not explain_executed then
         utils.print_results(con, "EXPLAIN " .. range_with_like_query)
-        utils.print_results(con, range_with_like_query:gsub("%*", "COUNT(*)"))
+        utils.print_results(con, (range_with_like_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 
