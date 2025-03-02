@@ -96,7 +96,7 @@ process_script_benchmark() {
       local SCRIPT_NAME
       BASE_NAME=$(basename "$SCRIPT" .lua)
       DB_SUFFIX=$( [ -n "$DB_INFO" ] && echo "_db_${DB_INFO}" )
-      IS_SELECT=$([[ "$SCRIPT" == "$SELECT_SCRIPT"/* ]] && echo true || echo false)
+      IS_SELECT=$([[ "$SCRIPT" == "$INSERT_SCRIPT" ]] && echo false  || echo true)
       if [ -n "$COMBINATION" ]; then
         COMB_SUFFIX="_comb_${COMBINATION}"
         if $IS_FROM_SELECT_DIR && $IS_SELECT; then
@@ -316,6 +316,9 @@ for SCRIPT_PATH in $SCRIPT_KEYS; do
     eval $(jq -r --arg env "$DB" '.[$env] | to_entries | .[] | "unset " + .key' "$ABS_PATH/envs.json")
   done
 done
+
+# Extracting the count value from logs
+${ABS_PATH}/Tools/Shell-Scripts/extract_count_from_logs.sh "$OUTPUT_DIR"
 
 # Statistics csv generated
 python3 "$PYTHON_PATH/generateCombinedCSV.py" "$STATISTICS_FILE_TEMP" "$STATISTICS_FILE" --select_columns "$STATS_SELECT_COLUMNS" --insert_columns "$STATS_INSERT_COLUMNS" --prefixes "$PREFIXES"
