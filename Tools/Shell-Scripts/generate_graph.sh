@@ -10,6 +10,9 @@ RUNTIME_FILE_TEMP="$OUTPUT_DIR/sysbench_runtime_temp.csv"
 STATISTICS_FILE="$OUTPUT_DIR/sysbench_statistics.csv"
 STATISTICS_FILE_TEMP="$OUTPUT_DIR/sysbench_statistics_temp.csv"
 
+# Extracting the count value from logs
+./extract_count_from_logs.sh "$OUTPUT_DIR"
+
 # Statistics csv generated
 python3 "$PYTHON_PATH/generateCombinedCSV.py" "$STATISTICS_FILE_TEMP" "$STATISTICS_FILE" --select_columns "Total Time"
 echo "Combined CSV file created at $STATISTICS_FILE"
