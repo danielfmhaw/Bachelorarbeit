@@ -1,5 +1,4 @@
 #!/bin/bash
-# ./extract_count_from_logs.sh /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/b-tree-query-differences
 
 # Überprüfen, ob Outputordner übergeben wurde
 [ -z "$1" ] && { echo "Bitte geben Sie einen Ordner an."; exit 1; }
@@ -16,14 +15,9 @@ find "$log_folder" -type f -name "*.log" | while read -r file; do
     if [[ "$filename" == *_select* ]]; then
       while IFS= read -r line; do
         if [[ "$line" == "Executed Query:"* && "$line" == *"COUNT(*)"* ]]; then
-          read -r custom_name_line
-          if [[ "$custom_name_line" == CUSTOM_NAME:* ]]; then
-              query_name=$(echo "$custom_name_line" | sed 's/CUSTOM_NAME://g' | tr '[:upper:]' '[:lower:]' | xargs)
-              read -r count_value
-              combined_value="${filename}_${query_name},${count_value}"
-          else
-              combined_value="$filename,$custom_name_line"
-          fi
+          custom_name=$(echo "$line" | sed -n 's/.*CustomName:\([^;]*\).*/\1/p' | tr '[:upper:]' '[:lower:]')
+          count_value=$(echo "$line" | sed -n 's/.*CountValue:\([0-9]*\).*/\1/p')
+          combined_value="$filename$( [ "$custom_name" = "nil" ] && echo "" || echo "_$custom_name" ),$count_value"
           IFS=',' read -r query_name count_value <<< "$combined_value"
           if [[ "$count_value" =~ ^[0-9]+$ ]] && ! awk -F, -v k="$query_name" '$1 == k {found=1; exit} END {exit !found}' "$temp_file"; then
               echo "$query_name,$count_value" >> "$temp_file"
