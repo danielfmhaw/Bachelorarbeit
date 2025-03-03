@@ -1,0 +1,5 @@
+LogFile,CountValue
+hash_partitioning_comb_partitions_size_500_select,2002
+hash_partitioning_comb_partitions_size_50_select,2002
+hash_partitioning_comb_partitions_size_5_select,2002
+without_partitioning_select_without_hash_pruning_range,2002

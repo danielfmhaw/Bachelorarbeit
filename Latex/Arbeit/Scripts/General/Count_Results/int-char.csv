@@ -1,0 +1,5 @@
+LogFile,CountValue
+char_column_select_char_range_comp,2766
+int_column_select_int_range_comp,2766
+char_column_select_char_desc_sort,4000
+int_column_select_int_desc_sort,4000

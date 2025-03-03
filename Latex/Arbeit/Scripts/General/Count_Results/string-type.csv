@@ -1,0 +1,5 @@
+LogFile,CountValue
+string_comb_typ_char_4_select,2000
+string_comb_typ_char_64_select,2000
+string_comb_typ_varchar_4_select,2000
+string_comb_typ_varchar_64_select,2000

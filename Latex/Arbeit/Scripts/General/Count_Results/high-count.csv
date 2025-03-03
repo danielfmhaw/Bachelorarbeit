@@ -1,0 +1,5 @@
+LogFile,CountValue
+with_index_comb_length_400_select,400
+without_index_comb_length_400_select,400
+with_index_comb_length_4000_select,4000
+without_index_comb_length_4000_select,4000
