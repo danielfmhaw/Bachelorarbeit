@@ -10,30 +10,67 @@ function utils.randomString(length)
     return result
 end
 
-function utils.print_results(con, query, custom)
-    result = con:query(query)
-    io.stderr:write("----------------------"  .. " START PRINTING " .. "----------------------" .. "\n")
-    io.stderr:write("Executed Query: "  .. query:gsub("%s+", " ") .. "\n")
+function lock_file(file)
+    local lock_file = file:gsub("%.log$", "") .. ".lock"
+    local command = string.format("touch %s", lock_file)
+    local result = os.execute(command)
+    return result == 0
+end
 
-    if custom then
-        io.stderr:write(string.format("CUSTOM_NAME: %s", custom) .. "\n")
+function unlock_file(file)
+    local lock_file = file:gsub("%.log$", "") .. ".lock"
+    local result = os.remove(lock_file)
+    return result == 0
+end
+
+
+local function is_line_in_file(file_name, line)
+    local file = io.open(file_name, "r")
+    if not file then
+        return false
     end
 
-    if result and result.nrows > 0 then
-        local is_count_query = string.find(query, "COUNT%(%*%)") ~= nil
-        for i = 1, result.nrows do
-            local row = result:fetch_row()
-            local output_string = is_count_query and "COUNT:" or "ROW" .. i .. ":"
-            for j = 1, #row do
-                output_string = output_string .. tostring(row[j])
-                if j < #row then
-                    output_string = output_string .. ";"
-                end
-            end
-            io.stderr:write(output_string .. "\n")
+    -- Datei Zeile für Zeile durchsuchen
+    for existing_line in file:lines() do
+        if existing_line == line then
+            file:close()
+            return true
         end
     end
-    io.stderr:write("----------------------"  .. "  END PRINTING  " .. "----------------------" .. "\n" .. "\n")
+
+    file:close()
+    return false
+end
+
+function utils.print_results(con, query, custom)
+    local log_file = os.getenv("LOG_FILE")
+    local query_line = "Executed Query: " .. query:gsub("%s+", " ")
+
+    if lock_file(log_file) and log_file and not is_line_in_file(log_file, query_line) then
+        local result = con:query(query)
+        io.stderr:write("---------------------- START PRINTING ----------------------\n")
+        io.stderr:write(query_line .. "\n")
+
+        if custom then
+            io.stderr:write(string.format("CUSTOM_NAME: %s", custom) .. "\n")
+        end
+
+        if result and result.nrows > 0 then
+            for i = 1, result.nrows do
+                local row = result:fetch_row()
+                local output_string = ""
+                for j = 1, #row do
+                    output_string = output_string .. tostring(row[j])
+                    if j < #row then
+                        output_string = output_string .. ";"
+                    end
+                end
+                io.stderr:write(output_string .. "\n")
+            end
+        end
+        io.stderr:write("----------------------  END PRINTING  ----------------------\n\n")
+    end
+    unlock_file(log_file)
 end
 
 function utils.generate_partition_definition_by_year(start_year, end_year, step, use_range_columns)
