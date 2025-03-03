@@ -129,6 +129,7 @@ process_script_benchmark() {
 
 run_benchmark() {
   local SCRIPT_PATH="$1" MODE="$2" OUTPUT_FILE="$3" SCRIPT_NAME="${4:-}" COMBINATION="${5:-}"
+  export LOG_FILE="$OUTPUT_FILE"
 
   if [[ -n "$SCRIPT_NAME" && ( -z "$DB_PORTS" || ( "$IS_SELECT" == "false" && -n "$DB_PORTS" ) ) ]]; then
     echo "Running $(basename "$SCRIPT_PATH") for $TIME seconds ..."
