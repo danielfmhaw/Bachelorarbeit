@@ -1,0 +1,7 @@
+LogFile,CountValue
+int_comb_datatyp_bigint_64_select,4000
+int_comb_datatyp_decimal_65_select,4000
+int_comb_datatyp_int_32_select,4000
+int_comb_datatyp_mediumint_24_select,4000
+int_comb_datatyp_smallint_13_select,4000
+int_comb_datatyp_smallint_16_select,4000
