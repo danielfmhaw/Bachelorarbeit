@@ -2,7 +2,7 @@ local con = sysbench.sql.driver():connect()
 function prepare()
     -- SQL query to create the KUNDENMITID table without auto-increment for KUNDEN_ID
     local create_kunden_query = [[
-        CREATE TABLE IF NOT EXISTS KUNDENMITID (
+        CREATE TABLE KUNDENMITID (
             KUNDEN_ID     INT PRIMARY KEY,
             NAME          VARCHAR(255),
             GEBURTSTAG    DATE,
@@ -17,7 +17,7 @@ function prepare()
 
     -- SQL query to create the BESTELLUNGMITID table
     local create_bestellung_query = [[
-        CREATE TABLE IF NOT EXISTS BESTELLUNGMITID (
+        CREATE TABLE BESTELLUNGMITID (
             BESTELLUNG_ID INT PRIMARY KEY,
             BESTELLDATUM DATE,
             ARTIKEL_ID   INT,
