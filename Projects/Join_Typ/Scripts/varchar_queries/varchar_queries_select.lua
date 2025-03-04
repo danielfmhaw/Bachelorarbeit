@@ -5,13 +5,13 @@ local explain_executed = false
 
 function select_query()
     if not explain_executed then
-        utils.print_results(con, "SELECT COUNT(*) FROM KUNDENMITVARCHAR k JOIN BESTELLUNGMITVARCHAR b ON k.NAME = b.FK_KUNDEN_NAME;")
+        utils.print_results(con, "SELECT COUNT(*) FROM KUNDENMITVARCHAR k JOIN BESTELLUNGMITVARCHAR b ON k.KUNDEN_ID = b.FK_KUNDEN;")
         explain_executed = true
     end
     local join_query = [[
         SELECT k.STADT, SUM(b.UMSATZ) AS Total_Umsatz
         FROM KUNDENMITVARCHAR k
-        JOIN BESTELLUNGMITVARCHAR b ON k.NAME = b.FK_KUNDEN_NAME
+        JOIN BESTELLUNGMITVARCHAR b ON k.KUNDEN_ID = b.FK_KUNDEN
         GROUP BY k.STADT;
     ]]
     con:query(join_query)

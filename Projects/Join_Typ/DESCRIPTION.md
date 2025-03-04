@@ -12,7 +12,7 @@ Das Projekt verwendet zwei Tabellen: **KUNDE** und **BESTELLUNG**. Die Konfigura
 Die Tabelle enthält Informationen zu Kunden:
 
 ```sql
-CREATE TABLE IF NOT EXISTS KUNDE (
+CREATE TABLE KUNDE (
     KUNDEN_ID     INT AUTO_INCREMENT PRIMARY KEY, -- ID für FK-Referenz
     NAME          VARCHAR(255),
     GEBURTSTAG    DATE,
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS KUNDE (
 Die Tabelle speichert Bestellinformationen und ist über einen Foreign Key mit der Tabelle **KUNDE** verknüpft:
 
 ```sql
-CREATE TABLE IF NOT EXISTS BESTELLUNG (
+CREATE TABLE BESTELLUNG (
     BESTELLUNG_ID INT PRIMARY KEY,
     BESTELLDATUM  DATE,
     ARTIKEL_ID    INT,
@@ -60,7 +60,7 @@ cd ../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Output" \
-  -var '{"length":[1, 64]}' \
+  -var '{"length":[4, 64]}' \
   -scripts '{
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/varchar_queries": {
       "vars": "length"

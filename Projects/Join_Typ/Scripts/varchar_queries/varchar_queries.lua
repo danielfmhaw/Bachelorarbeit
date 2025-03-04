@@ -2,8 +2,8 @@ local con = sysbench.sql.driver():connect()
 function prepare()
     -- Create Table Kunden with varchar as PK
     local create_kunden_query = [[
-        CREATE TABLE IF NOT EXISTS KUNDENMITVARCHAR (
-            NAME          VARCHAR(255) PRIMARY KEY,
+        CREATE TABLE KUNDENMITVARCHAR (
+            KUNDEN_ID     VARCHAR(255) PRIMARY KEY,
             GEBURTSTAG    DATE,
             ADRESSE       VARCHAR(255),
             STADT         VARCHAR(100),
@@ -16,13 +16,13 @@ function prepare()
 
     -- SQL query to create BESTELLUNGMITVARCHAR table
     local create_bestellung_query = [[
-        CREATE TABLE IF NOT EXISTS BESTELLUNGMITVARCHAR (
+        CREATE TABLE BESTELLUNGMITVARCHAR (
             BESTELLUNG_ID INT PRIMARY KEY,
             BESTELLDATUM DATE,
             ARTIKEL_ID   INT,
-            FK_KUNDEN_NAME    VARCHAR(255) NOT NULL,
+            FK_KUNDEN    VARCHAR(255) NOT NULL,
             UMSATZ       INT,
-            FOREIGN KEY (FK_KUNDEN_NAME) REFERENCES KUNDENMITVARCHAR (NAME)
+            FOREIGN KEY (FK_KUNDEN) REFERENCES KUNDENMITVARCHAR (KUNDEN_ID)
         );
     ]]
 

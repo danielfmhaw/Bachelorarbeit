@@ -8,19 +8,15 @@ local num_rows = 700
 local bestellungProKunde = 3
 
 function delete_data()
-    local delete_bestellung_query = "DELETE FROM BESTELLUNGMITVARCHAR;"
-    local delete_kunden_query = "DELETE FROM KUNDENMITVARCHAR;"
-    con:query("START TRANSACTION")
-    con:query(delete_bestellung_query)
-    con:query(delete_kunden_query)
-    con:query("COMMIT")
+    con:query("DELETE FROM BESTELLUNGMITVARCHAR;")
+    con:query("DELETE FROM KUNDENMITVARCHAR;")
 end
 
 -- Function to insert randomized data into KUNDENMITVARCHAR and BESTELLUNGMITVARCHAR
 function insert_data()
     delete_data()
     for i = 1, num_rows do
-        local name = utils.randomString(length) .. string.format("%d", i)
+        local id = tostring(i) .. utils.randomString(length - #tostring(i))
         local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
         local adresse = string.format("Address_%d", i)
         local stadt = string.format("City_%d", math.random(1, 100))
@@ -31,10 +27,10 @@ function insert_data()
 
         -- Insert into KUNDENMITVARCHAR, ignoring duplicates
         local kunden_query = string.format([[
-            INSERT IGNORE INTO KUNDENMITVARCHAR
-            (NAME, GEBURTSTAG, ADRESSE, STADT, POSTLEITZAHL, LAND, EMAIL, TELEFONNUMMER)
+            INSERT INTO KUNDENMITVARCHAR
+            (KUNDEN_ID, GEBURTSTAG, ADRESSE, STADT, POSTLEITZAHL, LAND, EMAIL, TELEFONNUMMER)
             VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
-        ]], name, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
+        ]], id, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
 
         con:query(kunden_query)
 
@@ -46,10 +42,10 @@ function insert_data()
 
             -- Insert into BESTELLUNGMITVARCHAR, ignoring duplicates
             local bestellung_query = string.format([[
-              INSERT IGNORE INTO BESTELLUNGMITVARCHAR
-              (BESTELLUNG_ID, BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN_NAME, UMSATZ)
+              INSERT INTO BESTELLUNGMITVARCHAR
+              (BESTELLUNG_ID, BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
               VALUES (%d,'%s', %d, '%s', %d);
-            ]],bestellung_id, bestelldatum, artikel_id, name, umsatz)
+            ]],bestellung_id, bestelldatum, artikel_id, id, umsatz)
 
             con:query(bestellung_query)
         end
