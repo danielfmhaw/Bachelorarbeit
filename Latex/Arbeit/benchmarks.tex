@@ -2,6 +2,13 @@
 %! Date = 21.10.24
 \chapter{Einleitung}\label{ch:einleitung}
 
+In dieser Bachelorarbeit geht es darum, verschiedene Datenbankobjekte für relationale Datenbanken zu untersuchen.
+Für jedes betrachtete Konzept analysieren wir die Effizienz unterschiedlicher Implementierungen.
+Damit wir dies erreichen können, müssen wir eine Methode zur Messung der Performance der Datenbankobjekte finden.
+Benchmarks sind dafür das geeignete Mittel.
+Aus den Ergebnissen der Benchmarks können wir Rückschlüsse  auf die am besten geeigneten Implementierungen für spezifische Anwendungsfälle zu ziehen.
+Dieses Kapitel behandelt die Grundlagen und verschiedenen Arten von Benchmarks, die relevanten Kennzahlen sowie die Auswahl geeigneter Tools.
+
 \section{Einführung in Benchmarks}\label{sec:einleitung-einfuehrung}
 
 Benchmarks dienen dazu, praktisch und effektiv zu untersuchen, wie sich ein System unter Last verhält.
@@ -9,12 +16,15 @@ Die wichtigste Erkenntnis, die man aus Benchmarks gewinnen kann, sind die Proble
 Das Ziel von Benchmarks ist die Reduzierung und Bewertung von unerwünschtem Verhalten sowie die Analyse, wie sich das System derzeit und unter simulierten, zukünftigen, anspruchsvolleren Bedingungen verhalten könnte.
 
 Es gibt zwei verschiedene Techniken für Benchmarks (\cite[pp. 35--49]{schwartz2012high}).
-Die erste zielt darauf ab, die Applikation als Ganzes zu testen (full-stack).
+Die erste zielt darauf ab, die Applikation als Ganzes zu testen (engl.\ full-stack).
 Dabei wird nicht nur die Datenbank getestet, sondern die gesamte Applikation, einschließlich des Webservers,
 des Netzwerks und des Applikationscodes.
 Der Ansatz dahinter ist, dass ein Nutzer genauso lange auf eine Abfrage warten muss, wie das gesamte System benötigt.
 Daher sollte diese Wartezeit so gering wie möglich sein.
-Es kann dabei vorkommen, dass das DBMS nicht immer das Bottleneck ist.\footnote{Gemeint ist ein Engpass beim Transport von Daten oder Waren, der maßgeblichen Einfluss auf die Abarbeitungsgeschwindigkeit hat. Optimierungsversuche an anderer Stelle führen oft nur zu geringen oder gar keinen messbaren Verbesserungen der Gesamtsituation. (\cite{bottleneck})}
+Es kann dabei vorkommen, dass das DBMS nicht immer das Bottleneck ist.
+Ein Bottleneck ist ein Engpass beim Transport von Daten oder Waren.
+Dieser Enpass hat einen maßgeblichen Einfluss auf die Abarbeitungsgeschwindigkeit.
+Wenn man an anderen Stellen Optimierungsversuche führen es nur zu geringen oder gar keinen messbaren Verbesserungen der Gesamtsituation (\cite{bottleneck}), wenn der Bottleneck unverändert bleibt.
 
 Full-Stack-Benchmarks haben jedoch auch Nachteile.
 Sie sind schwieriger zu erstellen und insbesondere schwieriger korrekt einzurichten.
@@ -25,7 +35,9 @@ kürzer sind und man schneller Ergebnisse erhält.
 
 Wenn bei Benchmarks schlechte Designentscheidungen getroffen werden, kann dies zu einer falschen Interpretation des Systems führen, da die Ergebnisse nicht die Realität widerspiegeln.
 Die Größe des Datensatzes und des Workloads muss realistisch sein.
-Idealerweise verwendet man einen Snapshot\footnote{Snapshots bestehen größtenteils aus Metadaten, die den Zustand Ihrer Daten definieren, und sind keine vollständige Duplikation der Daten auf Ihrer Festplatte. Snapshots werden häufig für Test- und Entwicklungsaufgaben verwendet. (\cite{snapshot}) } des tatsächlichen produktiven Datensatzes.
+Idealerweise verwendet man einen Snapshot des tatsächlichen produktiven Datensatzes.
+Snapshots bestehen größtenteils aus Metadaten, die den Zustand Ihrer Daten definieren, und sind keine vollständige Duplikation der Daten auf Ihrer Festplatte.
+Snapshots werden häufig für Test- und Entwicklungsaufgaben verwendet (\cite{snapshot}).
 Gibt es keine Produktionsdaten, sollten die Daten und der Workload simuliert werden, da realistische Benchmarks komplex und zeitaufwendig sein können.
 
 Häufige Fehler beim Durchführen von Benchmarks sind unter anderem, dass nur ein kleiner Teil der tatsächlichen Datensatzgröße verwendet wird und die Datensätze unkorrekt gleichmäßig verteilt sind.
@@ -40,22 +52,79 @@ Um verlässliche Ergebnisse zu erhalten, sollte ein Benchmark ausreichend lange 
 Dabei ist es wichtig, so viele Informationen wie möglich zu erfassen und sicherzustellen, dass der Benchmark wiederholbar ist, da unzureichende oder fehlerhafte Tests wertlos sind.
 Außerdem ist es wichtig, die Ergebnisse in einem Diagramm darzustellen, da auftretende Phänomene sonst anhand einer tabellarischen Darstellung nicht erkannt werden können.
 
-\section{Measures}\label{sec:einleitung-measures}
-\begin{itemize}[label={--}]
-    \item \textbf{Durchsatz (Throughput):} Der Durchsatz ist die Anzahl an Transaktionen pro Zeiteinheit.
-    Er ist standardisiert, und Datenbankanbieter versuchen, diesen zu optimieren.
-    Meistens werden Transaktionen pro Sekunde (oder manchmal pro Minute) als Einheit verwendet.
-    \item \textbf{Antwortzeiten (Latenz):} Die Antwortzeit misst die gesamte Zeit, die für eine Abfrage benötigt wird.
-    Diese kann, abhängig von der Applikation, in Mikrosekunden (µs), Millisekunden (ms), Sekunden oder Minuten angegeben werden.
-    Von dieser Zeit können aggregierte Antwortzeiten wie Durchschnitt, Maximum, Minimum und Perzentile abgeleitet werden.
-    Das Maximum ist oft eine weniger sinnvolle Metrik, da es sich nicht gut wiederholen lässt.
-    Daher nutzt man eher Perzentile bei den Antwortzeiten.
-    Wenn beispielsweise das 95.\ Perzentil der Antwortzeit bei 5 ms liegt, bedeutet dies, dass mit einer Wahrscheinlichkeit von 95\% die Abfrage in weniger als 5 ms abgeschlossen ist.
-    \item \textbf{Nebenläufigkeit (Concurrency):} Die Nebenläufigkeit auf dem Webserver lässt sich nicht zwangsläufig auf den Datenbankserver übertragen.
-    Eine genauere Messung der Gleichzeitigkeit auf dem Webserver besteht darin, zu bestimmen, wie viele gleichzeitige Anfragen zu einem bestimmten Zeitpunkt ausgeführt werden.
-    Es kann auch geprüft werden, ob der Durchsatz sinkt oder die Antwortzeiten steigen, wenn die Gleichzeitigkeit zunimmt.
-    Beispielsweise benötigt eine Website mit „50.000 Benutzern gleichzeitig“ vielleicht nur 10 oder 15 gleichzeitig laufende Abfragen.
-    \item \textbf{Skalierbarkeit (Scalability):} Skalierbarkeit ist wichtig für Systeme, die ihre Performance unter unterschiedlich starken Workloads beibehalten müssen.
-    Ein ideales System würde doppelt so viele Abfragen beantworten (Throughput), wenn doppelt so viele „Arbeiter“ versuchen, die Aufgaben zu erfüllen.
-    Die meisten Systeme sind jedoch nicht linear skalierbar und zeigen Leistungseinbußen, wenn die Parameter variieren.
-\end{itemize}
+\section{Kennzahlen}\label{sec:einleitung-kennzahlen}
+
+Bevor ein geeignetes Benchmark-Tool auswählen, müssen wir uns erst überlegen, welche Kennzahlen im Datenbankkontext existieren und welche davon für uns besonders relevant sind.
+Unser Benchmark-Tool muss diese Kennzahlen messen können und für uns zugänglich machen.
+
+Die erste Kennzahl, die wir betrachten, ist der Durchsatz (engl.\ throughput) und gibt an, wie viele Transaktionen pro Zeiteinheit durchgeführt werden.
+Meistens werden Transaktionen pro Sekunde oder manchmal pro Minute als Einheit verwendet.
+Ein höher Wert führt hier zu einer besseren Performance.
+Man kann die Transaktion auch in verschiedene Kategorien unterteilen, wie beispielsweise Lese- und Schreibtransaktionen.
+Diese Unterscheidung ist wichtig, da bestimmte Implementierungen schnelle Lese-, aber langsame Schreibtransaktionen zur Folge haben können.
+
+Die nächste Metrik ist die Antwortzeit (engl.\ latency), die die gesamte Zeit misst, die für eine Abfrage benötigt wird.
+Abhängig von der Applikation kann sie in Mikrosekunden (µs), Millisekunden (ms), Sekunden oder sogar Minuten angegeben werden.
+Oft wird die Latenz in einer aggregierten Form angegeben, wie beispielsweise dem Durchschnitt, Maximum, Minimum oder Perzentilen.
+Bei der Betrachtung von Latenzzeiten macht es aber keinen Sinn Maximal- oder Minimalwerte zu betrachten, da diese oft Ausreißer sind und die allgemeine Performance nicht repräsentieren.
+Daher nutzt man eher Perzentile bei den Antwortzeiten.
+Perzentile bezeichnet den Wert, unter dem ein bestimmter Prozentsatz der gemessenen Latenzzeiten liegt.
+Wenn beispielsweise das 95.\ Perzentil der Antwortzeit bei 5 ms liegt, bedeutet dies, dass mit einer Wahrscheinlichkeit von 95\% die Abfrage in weniger als 5 ms abgeschlossen ist (\cite{perzentil_erklaerung}).
+
+Eine weitere Kennzahl ist die Gleichzeitigkeit (engl.\ concurrency), die angibt, wie viele Anfragen gleichzeitig bearbeitet werden können.
+Eine genauere Messung der Gleichzeitigkeit auf dem Webserver besteht darin, zu bestimmen, wie viele gleichzeitige Anfragen zu einem bestimmten Zeitpunkt ausgeführt werden.
+Es kann auch geprüft werden, ob der Durchsatz sinkt oder die Antwortzeiten steigen, wenn die Gleichzeitigkeit zunimmt.
+Beispielsweise benötigt eine Website mit „50.000 Benutzern gleichzeitig“ vielleicht nur 10 oder 15 gleichzeitig laufende Abfragen.
+Ein anderer Messwert, der auch die Leistung mit mehr Nutzern beschreibt, ist die Skalierbarkeit (engl.\ scalability).
+Die Skalierbarkeit beschreibt das Verhalten des Systems, wenn die Anzahl der Benutzer oder die Größe der Datenbank erhöht wird.
+Ein ideales System würde doppelt so viele Abfragen beantworten, wenn doppelt so viele „Arbeiter“ versuchen, die Aufgaben zu erfüllen.
+
+Es gibt noch viele weitere Messgrößen, wie z.B.\ die CPU-Auslastung oder die Verfügbarkeit, aber die oben genannten sind die wichtigsten für unsere Analyse.
+Für das Benchmark-Tool sind die Metriken Durchsatz und Antwortzeit unverzichtbar und sollten daher unbedingt berücksichtigt werden.
+Das Tool sollte auch dazu in der Lage sein, zwischen Lese- und Schreibtransaktionen zu unterscheiden.
+Die anderen Metriken sind vor allem im Zusammenhang mit Mehrbenutzer-Systemen wichtig und spielen daher in dieser Arbeit eine untergeordnete Rolle.
+
+\section{Auswahl der Tools}\label{sec:auswahl-der-tools}
+
+Als Erstes müssen wir ein geeignetes relationales Datenbankmanagementsystem auswählen.
+Für diese Bachelorarbeit haben wir uns für MySQL entschieden, konkret auf die Version 8.0, die am 19.\ April 2018 mit der Veröffentlichung von Version 8.0.11 eingeführt wurde (\cite{mysql_release}).
+Seitdem wird sie kontinuierlich weiterentwickelt, zuletzt mit 8.0.41 am 21.\ Januar 2025.
+Daher wird auch der Schwerpunkt im weiteren Verlauf dieser Arbeit überwiegend auf MySQL liegen.
+
+Die Grundlage dieser Bachelorarbeit ist das Verhalten der MySQL-Datenbank (\cite{sysbench_mysql}) in Bezug auf die unterschiedlichen Konzepte und Strategien, die später behandelt werden.
+Das Ziel ist, dieses Verhalten mithilfe von Grafiken messbar und veranschaulicher zu machen.
+Damit wir die Kennzahlen für bestimmte Abfragen an die MySQL–Datenbank bestimmen können, brauchen wir ein zentrales Tool.
+Dieses Tool ist dafür verantwortlich, die Benchmark-Tests durchzuführen.
+Meine Wahl ist schlussendlich auf \textbf{Sysbench} (\cite{sysbench_repo}) gefallen.
+
+Sysbench ist ein Open-Source-Tool, das ein skriptfähiges, multi-threaded Benchmark-Tool ist, das auf LuaJIT basiert (\cite[pp. 50--66]{schwartz2012high}).
+Es wird hauptsächlich für Datenbankbenchmarks verwendet, kann jedoch auch dazu eingesetzt werden, beliebig komplexe Arbeitslasten zu erstellen, die keinen Datenbankserver erfordern.
+Dabei analysiert Sysbench Metriken, wie unter anderem Transaktionen pro Sekunde, Latenz und Anzahl an Threads.
+Außerdem kann man genauer spezifizieren, wie oft diese Metriken geloggt werden sollen.
+Sysbench ist nicht auf ein einziges Datenbanksystem beschränkt, da man sich für eines aus einer Liste verschiedener DBMS entscheiden kann.
+
+Im Zuge der Wahl des Benchmark-Tools habe ich auch andere Benchmarking-Tools betrachtet, wie beispielsweise \textbf{Benchbase} (\cite{DifallahPCC13}) oder \textbf{mybench} (\cite{mybench_repo}).
+Im Vergleich zu diesen Tools bietet Sysbench jedoch die Vorteile der höheren Skriptfähigkeit und Flexibilität.
+Damit ist gemeint, dass die Verwendung von Sysbench im ersten Projekt aufwendiger ist, aber sobald ein Projekt einmal erstellt wurde, ist es sehr individuell anpassbar und schnelle Änderungen sind möglich.
+Diesen Vorteil werden näher im Kapitel~\ref{sec:projektaufbau-mit-beispiel} veranschaulichen.
+Dort werden wir den Einfluss unterschiedlicher Datentypen als Join-Operator zwischen zwei Tabellen vergleichen.
+Wenn wir in einem späteren Kapitel die Performance verschiedener Indextypen analysieren, können wir viele Aspekte aus den Skripten der Join-Operatoren übernehmen.
+
+Ein weiterer Vorteil von Sysbench ist, dass es als \textbf{de facto Standard} im Bereich der Datenbankbenchmarks angesehen wird (\cite{mybench_comparison}).
+Durch diese Positionierung im Markt gibt es viele aktive Nutzer und dadurch bedingt viele verfügbaren Ressourcen.
+Vorteile der anderen Tools sind jedoch die weniger präzise Steuerung der Ergebnisraten und der Transaktionen von Sysbench.
+Zudem ist Sysbench auf das Minimale beschränkt, was den Output angeht, da es, wie schon erwähnt, nur eine Reihe von Log-Dateien ausgibt.
+Außerdem muss die Visualisierung der Ergebnisse vom Benutzer selbst mithilfe von anderen Tools umgesetzt werden.
+Anders sieht dies bei dem Tool mybench aus, da es dort die Möglichkeit gibt in Echtzeit umfassende Abbildungen zu betrachten (\cite{mybench_user_interface}).
+Obwohl dieses Feature sehr hilfreich ist, bin ich nach Abwägung der Vor- und Nachteile zu dem Entschluss gekommen, dass die einfachere Bedienung und die Tatsache, dass Sysbench der de facto Standard ist, für mich überwiegen, weshalb ich mich für Sysbench entschieden habe.
+
+Nichtsdestotrotz kann nicht komplett auf Graphen verzichtet werden.
+Denn durch Abbildungen können Entwicklungen im Laufe einer Zeitmessung in einem Kurvenverlauf deutlich besser zu erkennen sind als in einer Log-Datei.
+Anhand der reinen Zahlen in einem Log lassen sich unter Umständen Trends von zwei oder etwas mehr unterschiedliche Messungen erkennen, aber besonders zyklische Trends werden häufig ohne Visualisierung nicht schnell ersichtlich.
+Wenn man aber Graphen mit einer Zeitachse hat, dann werden Trends sofort ersichtlich und auch der Vergleich unterschiedlicher Messungen erfolgt deutlich besser.
+
+Um die Kennzahlen, die mithilfe von Sysbench ermittelt worden sind, in eine grafische Darstellung umzuwandeln, gibt es unterschiedliche Tools, die wiederum einige Vor- und Nachteile mit sich bringen.
+Das erste mögliche Tool stellt Gnuplot~\cite{gnuplot} dar, mit dem sich CSV-Dateien sehr gut darstellen lassen.
+Wenn man aber nur bestimmte Spalten aus der Tabelle darstellen will, kommt man schnell an seine Grenzen.
+Deshalb habe ich mich mit einem Python-Script für eine anpassungsfähigere Alternative entschieden.
+Für die grafische Darstellung sind dabei die Bibliotheken pandas (\cite{reback2020pandas}) und matplotlib.pyplot (\cite{hunter_2007}) verantwortlich.

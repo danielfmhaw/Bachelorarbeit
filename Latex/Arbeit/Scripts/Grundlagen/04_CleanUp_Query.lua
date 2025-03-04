@@ -1,8 +1,6 @@
+local con = sysbench.sql.driver():connect()
 function cleanup()
-    local drop_kunden_query = "DROP TABLE IF EXISTS KUNDEN;"
-    local drop_bestellung_query = "DROP TABLE IF EXISTS BESTELLUNG;"
-
-    db_query(drop_bestellung_query)
-    db_query(drop_kunden_query)
+    con:query("DROP TABLE IF EXISTS BESTELLUNG;")
+    con:query("DROP TABLE IF EXISTS KUNDEN;")
     print("Cleanup successfully done")
 end
