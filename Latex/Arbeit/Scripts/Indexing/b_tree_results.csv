@@ -1,0 +1,11 @@
+LogFile,CountValue,Index,Faktor
+
+full_match,0,ja,7.26
+combined_match_with_range,11,ja,6.94
+range_with_like,39,ja,5.78
+exact_with_prefix,65,ja,5.01
+skip_columns,144,ja,3.71
+leftmost_prefix,250,ja,3.08
+column_prefix,509,ja,1.76
+range_values,1313,nein,1.05
+not_leftmost,2420,nein,1.00

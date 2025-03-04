@@ -236,10 +236,16 @@ Damit es übersichtlich bleibt, vergleichen wir einmal 10 Datensätze mit 40 und
 In der Abbildung~\ref{indexing-b-tree-low-reads} können wir erkennen, dass bei 10 Datensätzen die Kundentabelle ohne Indizes schneller ist als diejenige mit.
 Bei 40, 400 oder 4000 (siehe~\ref{indexing-b-tree-high-reads}) Zeilen sehen wir schon die Wirkung, die die Indizes haben können, denn dort ist jeweils die Version mit Indizes effizienter.
 Der Unterschied bei 40 Datensätzen ist zwar etwas geringer, aber in den anderen Fällen sehen noch eindeutigere Unterschiede.
-Interessant ist, dass es nicht linear oder quadratisch mit der Anzahl an Datensätzen in der Tabelle steigt, sondern bei 400 und 4000 Zeilen beträgt der Unterschied zur Tabelle ohne Index jeweils etwa 500--700 ms.
+Interessant ist, dass es nicht linear oder quadratisch mit der Anzahl an Datensätzen in der Tabelle steigt, sondern bei 400 und 4000 Zeilen beträgt der Unterschied zur Tabelle ohne Index jeweils etwa 500--700 Abfragen.
 Bei der Schreibgeschwindigkeit liegen beide auf einem sehr ähnlichen Niveau, wobei die Version ohne Index tendenziell einen leichten Vorteil hat.
 
-\vspace{-5pt}
+Mit dem vorherigen Benchmark können wir die Vorteile eines Indexes schon deutlich erkennen.
+Jetzt wollen wir aber auch die Funktionalität des B-Tree-Indexes in Bezug auf unterschiedliche Selects untersuchen.
+Dazu erstellen wir erneut die Kundentabelle, aber erstellen dieses Mal nur einen Index (siehe~\ref{lst:indexing-create-combined}).
+Anschließend befüllen wir die Tabelle mit einer festgelegten Anzahl an Datensätzen und führen unterschiedliche Select-Befehle aus.
+Im Codeblock~\ref{lst:indexing-b-tree-selects} sehen wir aus Platzgründen nur die Where-Bedingung und am Ende jeder Zeile steht der Name der Query, damit wir später in der Analyse wissen, welcher Query welche Performance bringt.
+
+\newpage
 \begin{lstlisting}[language=SQL,caption=Unterschiedliche Where-Bedingungen für B-Tree-Index,label={lst:indexing-b-tree-selects},basicstyle=\ttfamily\scriptsize]
 WHERE NAME LIKE 'M%'; -- columm_prefix
 WHERE NAME = 'Müller' AND VORNAME = 'Max' AND GEBURTSTAG < '1980-01-01'; -- combined_match_with_range
@@ -253,23 +259,8 @@ WHERE NAME = 'Müller' AND GEBURTSTAG < '1980-01-01'; -- skip_columns
 \end{lstlisting}
 \vspace{-5pt}
 
-Mit dem vorherigen Benchmark können wir die Vorteile eines Indexes schon deutlich erkennen.
-Jetzt wollen wir aber auch die Funktionalität des B-Tree-Indexes in Bezug auf unterschiedliche Selects untersuchen.
-Dazu erstellen wir erneut die Kundentabelle, aber erstellen dieses Mal nur einen Index (siehe~\ref{lst:indexing-create-combined}).
-Anschließend befüllen wir die Tabelle mit einer festgelegten Anzahl an Datensätzen und führen unterschiedliche Select-Befehle aus (\ref{lst:indexing-b-tree-selects}).
-
 Anhand der Grafik in Abbildung~\ref{fig:indexing-b-tree-query-reads} lässt sich erkennen, bei welchen Abfragen der Index am effizientesten ist.
-Es lässt sich erkennen, dass \texttt{full\_match} die höchsten Werte aufweist.
-Es folgt \texttt{combined\_match\_with\_range}, bei dem die ersten beiden Argumente wie beim \texttt{full\_match} exakt bestimmt sind, während das dritte Argument, das Geburtsdatum, eine größere Flexibilität bietet, da hier alle Kunden berücksichtigt werden, die vor dem 01.\ Januar 1980 geboren wurden.
-Im Anschluss kommt \texttt{range\_with\_like}, bei dem zusätzlich zum Geburtsdatum auch der Vorname mit "M" beginnen muss, jedoch nicht exakt "Max" sein muss.
-Danach folgt \texttt{exact\_with\_prefix}, das dem vorherigen Fall ähnlich ist, jedoch zusätzlich eine aufsteigende Sortierung nach dem Geburtsdatum aufweist.
-Dies zeigt, dass der B-Tree-Index auch für das Sortieren von Spalten genutzt werden kann.
-Es folgt \texttt{skip\_columns}, bei dem der Vorname vollständig ignoriert wird.
-Dadurch werden mehr Zeilen zurückgegeben, was die Performance negativ beeinflusst.
-Anschließend kommt \texttt{leftmost\_prefix}, bei dem nur nach dem Namen gefiltert wird.
-Bei \texttt{column\_prefix}, das direkt darauf folgt, wird statt des Namens „Müller“ jeder Nachname zurückgegeben, der mit „M“ beginnt.
-Schließlich zeigt \texttt{range\_values} alle Namen zwischen „Müller“ und „Schulz“, während bei \texttt{not\_leftmost} ausschließlich nach dem Geburtsdatum gefiltert wird, ohne weitere Kriterien.
-Insgesamt verdeutlicht diese Analyse die entscheidende Rolle des B-Tree-Index, da die Antwortzeiten je nach Art der Abfrage erheblich variieren können.
+Auf der linken Seite können wir die Ergebnisse für die Read-Befehle mit Index betrachten und auf der rechten Seite die Werte ohne Index.
 
 \begin{figure}[H]
     \centering
@@ -286,39 +277,62 @@ Insgesamt verdeutlicht diese Analyse die entscheidende Rolle des B-Tree-Index, d
         \caption{Ohne Index}
         \label{indexing-b-tree-query-reads-no-index}
     \end{subfigure}
+    \vspace{-5pt}
     \caption[B-Tree-Indexing: Unterschiedliche Selects mit Index und Ohne]{Visualisierung von unterschiedlichen Select-Queries mit und ohne Index}
     \label{fig:indexing-b-tree-query-reads}
 \end{figure}
 \vspace{-15pt}
 
-Diese unterschiedlichen Zeiten hängen aber nicht nur davon ab, ob der Index verwendet werden kann, sondern auch wie viele Tupel jeweils zurückgegeben werden.
-Wir können sehen, dass diejenigen Abfragen, die am wenigsten Zeilen zurückgeben, sind auch diejenigen sind, bei denen es die höchste Performance gibt.
-Aber mithilfe des \texttt{EXPLAIN}-Operators können wir tatsächlich herausfinden, ob der definierte Index aus~\ref{lst:indexing-create-combined} greift oder nicht.
-Die Analyse von \texttt{EXPLAIN} zeigt, dass \texttt{range\_values} und \texttt{not\_leftmost} die einzigen sind, bei denen der Index nicht verwendet wird und beide sind auch die Langsamsten im Vergleich gewesen.
+Zunächst einmal fällt auf, dass die Reihenfolge für die Werte mit und ohne Index sehr ähnlich ist.
+Bevor wir feststellen, bei welchen Queries der Index benutzt wird, wollen wir die Abfragen aus~\ref{lst:indexing-b-tree-selects} zusammen mit den Ergebnissen näher beschreiben.
 
+Die Abfrage \texttt{full\_match} weist die höchsten Werte auf, da der Name exakt Max Müller und das Geburtsdatum 01.01.1960 sein muss.
+Bei den nachfolgenden Select-Befehlen weichen wir die Bedingungen immer weiter auf und gleichzeitig nimmt die Performance ab.
+Nach \texttt{full\_match} folgt \texttt{combined\_match\_with\_range}, bei dem alle vor 1980 Geborenen einbezogen werden.
+Im Anschluss kommt \texttt{range\_with\_like}, wo der Vorname nur mit "M" beginnen muss.
+Danach folgt \texttt{exact\_with\_prefix}, bei dem zusätzlich zum Vorherigen nach dem Geburtsdatum aufsteigend sortiert wird.
+Es folgt \texttt{skip\_columns}, die den Vornamen vollständig ignoriert.
+Anschließend kommt \texttt{leftmost\_prefix}, bei dem nur nach dem Namen gefiltert wird.
+Bei \texttt{column\_prefix}, wird statt des Namens „Müller“ jeder Nachname zurückgegeben, der mit „M“ beginnt.
+Schließlich zeigt \texttt{range\_values} alle Namen zwischen „Müller“ und „Schulz“, während bei \texttt{not\_leftmost} ausschließlich nach dem Geburtsdatum gefiltert wird.
+
+\vspace{-5pt}
 \begin{table}[H]
     \centering
     \scriptsize
-    \begin{tabular}{|l|l|l|}
+    \begin{tabular}{|l|l|l|l|}
         \hline
-        \textbf{Select-Query} & \textbf{Anzahl an Zeilen} & \textbf{Index benutzt?} \\
+        \textbf{Select-Query} & \textbf{Anzahl an Zeilen} & \textbf{Faktor} & \textbf{Index benutzt?} \\
         \hline
-        full\_match & 0 & ja \\
-        combined\_match\_with\_range & 11 & ja \\
-        range\_with\_like & 39 & ja \\
-        exact\_with\_prefix & 65 & ja \\
-        skip\_columns & 144 & ja \\
-        leftmost\_prefix & 250 & ja \\
-        column\_prefix & 509 & ja \\
-        range\_values & 1313 & nein \\
-        not\_leftmost & 2420 & nein \\
+        full\_match & 0 & 7.26 & ja \\
+        combined\_match\_with\_range & 11 & 6.94 & ja \\
+        range\_with\_like & 39 & 5.78 & ja \\
+        exact\_with\_prefix & 65 & 5.01 & ja \\
+        skip\_columns & 144 & 3.71 & ja \\
+        leftmost\_prefix & 250 & 3.08 & ja \\
+        column\_prefix & 509 & 1.76 & ja \\
+        range\_values & 1313 & 1.05 & nein \\
+        not\_leftmost & 2420 & 1.00 & nein \\
         \hline
     \end{tabular}
     \vspace{3pt}
     \caption{Ergebnisse der COUNT(*)-Abfragen für B-Tree-Index}
     \label{tab:indexing_b_tree_count_results}
 \end{table}
-\vspace{-40pt}
+\vspace{-25pt}
+
+Wenn wir die Ergebnisse mit Index mit denen ohne vergleichen, dann sehen wir, dass die einzige Select-Query mit unterschiedlicher Positionierung \texttt{combined\_match\_with\_range} ist.
+Wir können in der Tabelle~\ref{tab:indexing_b_tree_count_results} sehen, dass diejenigen Abfragen, die am wenigsten Zeilen zurückgeben, sind auch diejenigen sind, bei denen es die höchste Performance gibt.
+Da die Reihenfolge in beiden Fällen fast identisch ist, sollte man meinen, dass der B-Baum-Index gar keinen Einfluss auf die Performance hat.
+Dies gilt aber nur für die Reihenfolge und nicht für die tatsächlichen Werte der einzelnen Abfragen, denn wenn wir diese betrachten, sehen wir deutliche Unterschiede.
+Beispielweise \texttt{full\_match} ist bei Beiden an erster Stelle, aber mit Index ist sie etwa 7--8-mal schneller als ohne Index.
+Der Unterschied zwischen den Versionen ist aber nicht für alle Queries so groß.
+Für \texttt{skip\_columns} liegt der Unterschied ungefähr nur bei Faktor 4.
+Wir können das damit begründen, dass je mehr Spalten aus dem mehrspaltigen Index in der Query benutzt werden, desto größer ist der Faktor.
+Der Faktor hat bei den Queries \texttt{range\_values} und \texttt{not\_leftmost} den Wert 1.
+Das bedeutet, dass der Index keinen Einfluss auf die Performance hat, weshalb wir annehmen, dass er nicht verwendet wird.
+Mithilfe des \texttt{EXPLAIN}-Operators können wir überprüfen, ob diese Annahme wirklich korrekt ist.
+Tatsächlich zeigt die Analyse von \texttt{EXPLAIN}, dass die vermuteten Queries die einzigen sind, bei denen der Index nicht verwendet wird und beide sind auch die Langsamsten im Vergleich gewesen.
 
 \section{Hash-Index}\label{sec:indexing-hash-index}
 Ein weiterer Indextyp, den wir betrachten, ist der Hash-Index.
