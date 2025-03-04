@@ -1,3 +1,4 @@
+local con = sysbench.sql.driver():connect()
 function prepare()
     local create_kunden_query = [[
         CREATE TABLE KUNDEN (...);
@@ -6,7 +7,7 @@ function prepare()
         CREATE TABLE BESTELLUNG (...);
     ]]
 
-    db_query(create_kunden_query)
-    db_query(create_bestellung_query)
+    con:query(create_kunden_query)
+    con:query(create_bestellung_query)
     print("Tables KUNDEN und BESTELLUNG have been successfully created")
 end
