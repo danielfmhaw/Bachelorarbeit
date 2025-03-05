@@ -58,9 +58,11 @@
       "./Projects/Join_Typ/Scripts/varchar_queries": {
         "vars": "length"
       },
-      "./Projects/Join_Typ/Scripts/int_queries": {}
+      "./Projects/Join_Typ/Scripts/int_queries": {
+        "vars": "length"
+      }
     },
-    "var": {"length": [4, 64]}
+    "var": {"length": [4, 16]}
   },
   "null-check": {
     "scripts": {

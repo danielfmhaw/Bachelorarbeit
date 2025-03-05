@@ -1,4 +1,9 @@
 local con = sysbench.sql.driver():connect()
+package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):match("(.*/)") .. "../../../../Tools/Lua/?.lua"
+local utils = require("utils")
+
+local length = tonumber(os.getenv("LENGTH")) or 0
+
 local num_rows = 700
 local bestellungProKunde = 3
 
@@ -11,7 +16,7 @@ end
 function insert_data()
     delete_data()
     for i = 1, num_rows do
-        local kunden_id = i
+        local kunden_id = i .. utils.randomNumber(length - #tostring(num_rows))
         local name = string.format("Kunde_%d", i)
         local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
         local adresse = string.format("Address_%d", i)

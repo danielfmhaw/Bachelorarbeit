@@ -60,12 +60,14 @@ cd ../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Output" \
-  -var '{"length":[4, 64]}' \
+  -var '{"length":[4, 16]}' \
   -scripts '{
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/varchar_queries": {
       "vars": "length"
     },
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/int_queries": {}
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/int_queries": {
+      "vars": "length"
+    }
   }'
 ```
 

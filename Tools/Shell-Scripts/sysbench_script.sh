@@ -20,7 +20,7 @@ while [[ $# -gt 0 ]]; do
     -var) JSON_VARIABLES="$2"; shift 2 ;;
     -scripts)
         SCRIPTS=$(echo "$2" | tr -d '\n' | sed 's/[[:space:]]*{/{/g' | sed 's/}[[:space:]]*/}/g' | sed 's/: /:/g' | sed 's/, /,/g')
-        SCRIPT_KEYS=$(echo "$SCRIPTS" | jq -r 'keys[]')
+        SCRIPT_DIRS=$(echo "$SCRIPTS" | jq -r 'keys[]')
         shift 2
         ;;
     *) usage ;;
@@ -32,13 +32,13 @@ if [ -z "$OUTPUT_DIR" ] || [ "${#SCRIPTS[@]}" -eq 0 ]; then
     usage
 fi
 
-for SCRIPT_KEY in $SCRIPT_KEYS; do
-    VARS_VALUE=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_KEY" '.[$key].vars // ""')
+for SCRIPT_DIR in $SCRIPT_DIRS; do
+    VARS_VALUE=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_DIR" '.[$key].vars // ""')
     if [[ -n "$VARS_VALUE" ]]; then
         IFS=',' read -ra VARS_LIST <<< "$VARS_VALUE"
         for VAR in "${VARS_LIST[@]}"; do
             if ! echo "$JSON_VARIABLES" | jq -e ".\"$VAR\"" >/dev/null 2>&1; then
-                echo "Error: The variable '$VAR' in query '$SCRIPT_KEY' is not defined in JSON_VARIABLES"
+                echo "Error: The variable '$VAR' for dir '$SCRIPT_DIR' is not defined in JSON_VARIABLES"
             fi
         done
     fi
@@ -279,7 +279,7 @@ generate_combinations() {
 
 # Get number of DBMS used in all scripts
 DBMS_SET=()
-for SCRIPT_PATH in $SCRIPT_KEYS; do
+for SCRIPT_PATH in $SCRIPT_DIRS; do
   for db in $(jq -r --arg key "$SCRIPT_PATH" '.[$key].db // ["mysql"] | .[]' <<< "$SCRIPTS"); do
     [[ ! " ${DBMS_SET[*]} " =~ (^|[[:space:]])$db($|[[:space:]]) ]] && DBMS_SET+=("$db")
   done
@@ -287,7 +287,7 @@ done
 DBMS_COUNT=${#DBMS_SET[@]}
 
 # Main benchmark loop
-for SCRIPT_PATH in $SCRIPT_KEYS; do
+for SCRIPT_PATH in $SCRIPT_DIRS; do
   DBMS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].db // ["mysql"]')
   SELECT_QUERIES=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].selects')
   for DB in $(echo "$DBMS" | jq -r '.[]'); do
