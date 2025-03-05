@@ -132,7 +132,7 @@ Deshalb vergleichen wir jeweils eine partitionierte Tabelle mit einer nicht Part
 Dieses Verfahren wenden wir auf alle Partitionsmethoden, die in dem Unterkapitel~\ref{sec:partition-grundlagen} angesprochen haben.
 Abhängig vom Typen stellen wir zusätzlich leicht unterschiedliche Abfragen.
 
-Zunächst benutzen wir erneut als Basis die Kundentabelle (\ref{lst:create_table_kunde}) und die Bestelltabelle (\ref{lst:create_table_bestellung}).
+Zunächst benutzen wir erneut als Basis die Kundentabelle (\ref{lst:tools-create-table-kunde}) und die Bestelltabelle (\ref{lst:tools-create-table-bestellung}).
 Die Tabelle, die wir auf unterschiedliche Partitionen verteilen wollen, ist die Kundentabelle.
 Wir müssen aber noch beide Tabellen etwas anpassen, da es, wie schon erwähnt, einige Einschränkungen für partitionierte Tabellen gibt.
 Zum einen muss bei der Bestelltabelle bei allen Typen die Fremdschlüssel-Bedingung entfernt werden und zum anderen muss der Primärschlüssel der Kundentabelle angepasst werden.
@@ -187,7 +187,7 @@ Zunächst joinen wir, wie zuvor, die Kundentabelle mit der Bestelltabelle und in
 Genau die gleiche Query verwenden wir beim Vergleich mit der Referenz ohne Partition.
 Zusätzlich wollen wir die Performance untersuchen, wenn aus der Liste an Ländern zufällig fünf ausgewählt werden und alle Kunden nur aus einem dieser fünf Ländern kommen.
 Dazu testen wir 3 verschiedene Ansätze.
-Zum einen über den \texttt{OR}-Operator, den anderen mithilfe des \texttt{IN}-Operators und als Letztes fragen wir die 5 Länder, wie im ersten Beispiel, einzeln ab und verbinden die Ergebnisse der 5 Antworten mithilfe des \texttt{UNION}-Operators.
+Zum einen über den \texttt{OR}-Operator, den anderen mithilfe des \texttt{IN}-Operators und als letztes fragen wir die 5 Länder, wie im ersten Beispiel, einzeln ab und verbinden die Ergebnisse der 5 Antworten mithilfe des \texttt{UNION}-Operators.
 
 Bei der Hash-Partitionierung müssen wir am wenigsten verändern und nur die Zeilen aus dem Codeblock~\ref{lst:create_kunden_partition_hash} am Ende des Create Kunden-Befehls hinzufügen.
 In diesem Fall testen wir auch nur eine einzige Select-Query, die wieder beide Tabellen joined und in der WHERE-Bedingung überprüft, ob die \texttt{KUNDEN\_ID} zwischen den Werten 1000 und 2000 liegt.

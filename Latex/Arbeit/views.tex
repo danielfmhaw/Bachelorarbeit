@@ -25,7 +25,7 @@ CREATE VIEW <name> AS <definition>;
 
 In dem Codeblock~\ref{lst:create_view} sehen wir die Struktur der Definition einer View.
 Als Nächstes müssen wir die \texttt{view-definition} mit einer SQL-Abfrage ersetzen, die den Inhalt der virtuellen Sicht abbilden soll.
-Um dieses Vorgehen mit einem Beispiel näher zu veranschaulichen, nutzen wir die Tabellen Kunden (\ref{lst:create_table_kunde}) und Bestellung (\ref{lst:create_table_bestellung}).
+Um dieses Vorgehen mit einem Beispiel näher zu veranschaulichen, nutzen wir die Tabellen Kunden (\ref{lst:tools-create-table-kunde}) und Bestellung (\ref{lst:tools-create-table-bestellung}).
 Nun wollen wir, dass die beiden Tabellen über die \texttt{KUNDEN\_ID} in der Sicht zusammengefügt werden, da die \texttt{KUNDEN\_ID} zum einen der Primärschlüssel der Kundentabelle ist und zum anderen der Fremdschlüssel in Bestellung.
 Um in die SQL-Abfrage noch etwas mehr Komplexität zu bekommen, wollen wir neben der Join-Operation zusätzlich den Umsatz pro Jahr und pro Stadt aggregieren.
 Diese Aggregation könnte beispielsweise von einem Marketingteam genutzt werden, um schwache Regionen zu identifizieren und gezielt in diesen nachzusteuern.
@@ -213,7 +213,7 @@ Das Ziel für die Durchführung ist es den Performanceunterschied zwischen einer
 Da MySQL nativ keine materialisierten Sichten unterstützt, verfolgen wir einen alternativen Ansatz und vergleichen diesen später mit der nativen Implementierung in PostgreSQL, einem anderen Datenbankmanagementsystem.
 
 Zuallererst beginnen wir mit der Umsetzung der virtuellen Sicht, für die wir, wie bei den anderen Sichten auch, zunächst die Basistabellen erstellen müssen.
-Als Basis verwenden wir die Tabellen Kunden (\ref{lst:create_table_kunde}) und Bestellung (\ref{lst:create_table_bestellung}) und erstellen die View (\ref{lst:create_kunden_bestellung_view}), die wir schon in Kapitel~\ref{sec:virtuelle-views} beschrieben haben.
+Als Basis verwenden wir die Tabellen Kunden (\ref{lst:tools-create-table-kunde}) und Bestellung (\ref{lst:tools-create-table-bestellung}) und erstellen die View (\ref{lst:create_kunden_bestellung_view}), die wir schon in Kapitel~\ref{sec:virtuelle-views} beschrieben haben.
 Es werden Testdaten für die Kunden erstellt, jedem Kunden eine festgelegte Anzahl an Bestellungen zugewiesen und beide in die jeweiligen Tabellen eingefügt.
 Wir fügen keine Datensätze über die virtuelle Sicht ein und sprechen die Sicht bei Select-Befehlen explizit an.
 Da wir die Unterschiede in der Lesegeschwindigkeit möglichst repräsentativ feststellen wollen, betrachten wir mehrere Select-Befehle auf die unterschiedlichen Spalten der virtuellen Sicht.
