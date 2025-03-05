@@ -125,7 +125,7 @@ Allerdings hat \texttt{TIMESTAMP} einen viel kleineren Bereich an erlaubten Wert
 \section{Analyse der Benchmarks}\label{sec:data-types-analyse-der-benchmarks}
 
 Der erste Leitsatz, den wir untersuchen, besagt, dass Spalten nach Möglichkeit als \texttt{NOT NULL} deklariert werden sollten.
-Für den Nachweis benutzen wir erneut die Kundentabelle (\ref{lst:create_table_kunde}).
+Für den Nachweis benutzen wir erneut die Kundentabelle (\ref{lst:tools-create-table-kunde}).
 Diesmal erstellen wir eine Tabelle, bei der das Attribut \texttt{NOT NULL} für alle Spalten deklariert wird, sowie eine Tabelle ohne dieses Attribut.
 Wenn das Attribut nicht deklariert wird, dann können u.a.\ auch \texttt{NULL}-Werte in die Tabelle eingefügt werden.
 
@@ -155,7 +155,7 @@ Höhere Werte bedeuten, dass mehr Abfragen pro Sekunde durchgeführt werden kön
 Deshalb lässt es sich sagen, dass \texttt{NOT NULL} besser performt als \texttt{NULL}, aber wenn man auf die y-Achse schaut, fällt auf, dass die Werte nicht so weit auseinanderliegen, sondern der Unterschied nur marginal ist.
 Daher sollten die Entscheidungen beim Datenbankentwurf nicht hauptsächlich aus Performancegründen getroffen werden, sondern vor allem aus Gründen der Datenintegrität und -konsistenz.
 
-Um zu zeigen, dass man bei der Wahl zwischen unterschiedlichen Datentypen, den simpleren wählen sollte, haben wir erneut die Kundentabelle (\ref{lst:create_table_kunde}) benutzt.
+Um zu zeigen, dass man bei der Wahl zwischen unterschiedlichen Datentypen, den simpleren wählen sollte, haben wir erneut die Kundentabelle (\ref{lst:tools-create-table-kunde}) benutzt.
 Für diesen Vergleich verändern wir jeweils den Datentyp des Schlüsselattributs der Tabelle.
 Zuerst erstellen wir eine Kundentabelle mit einem \texttt{INT}-Primärschlüssel, danach eine mit \texttt{CHAR}.
 An den Ergebnissen im Hexagon~\ref{fig:data-types-simpler-statistics} fällt auf, dass die Schreibbefehle in beiden Fällen etwa gleich schnell sind.
@@ -183,7 +183,7 @@ Bei der Sortierung hat \texttt{INT} ebenfalls einen Vorteil gegenüber \texttt{C
 \end{figure}
 \vspace{-20pt}
 
-Als Letztes wollten wir unterschiedliche Datentypen vergleichen.
+Als letztes wollten wir unterschiedliche Datentypen vergleichen.
 Dazu verwenden wir die gleiche Tabelle wie beim Vergleich von \texttt{INT} und \texttt{CHAR}, setzen diesmal jedoch unterschiedliche numerische oder zeichenkettenbasierte Typen als Primärschlüssel ein.
 Beim Vergleich der numerischen Typen zeigt sich, dass \texttt{DECIMAL} mit deutlichem Abstand am langsamsten ist (Abbildung~\ref{data-types-smaller-number-type-reads}).
 Danach folgt, wie vermutet, der nächstgrößere Datentyp \texttt{BIGINT}.
