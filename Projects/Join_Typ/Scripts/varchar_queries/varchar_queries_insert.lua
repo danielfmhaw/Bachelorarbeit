@@ -16,7 +16,7 @@ end
 function insert_data()
     delete_data()
     for i = 1, num_rows do
-        local id = tostring(i) .. utils.randomString(length - #tostring(i))
+        local kunden_id = tostring(i) .. utils.randomString(length - #tostring(num_rows))
         local geburtstag = string.format("19%02d-%02d-%02d", math.random(50, 99), math.random(1, 12), math.random(1, 28))
         local adresse = string.format("Address_%d", i)
         local stadt = string.format("City_%d", math.random(1, 100))
@@ -30,7 +30,7 @@ function insert_data()
             INSERT INTO KUNDENMITVARCHAR
             (KUNDEN_ID, GEBURTSTAG, ADRESSE, STADT, POSTLEITZAHL, LAND, EMAIL, TELEFONNUMMER)
             VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
-        ]], id, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
+        ]], kunden_id, geburtstag, adresse, stadt, postleitzahl, land, email, telefonnummer)
 
         con:query(kunden_query)
 
@@ -45,7 +45,7 @@ function insert_data()
               INSERT INTO BESTELLUNGMITVARCHAR
               (BESTELLUNG_ID, BESTELLDATUM, ARTIKEL_ID, FK_KUNDEN, UMSATZ)
               VALUES (%d,'%s', %d, '%s', %d);
-            ]],bestellung_id, bestelldatum, artikel_id, id, umsatz)
+            ]],bestellung_id, bestelldatum, artikel_id, kunden_id, umsatz)
 
             con:query(bestellung_query)
         end

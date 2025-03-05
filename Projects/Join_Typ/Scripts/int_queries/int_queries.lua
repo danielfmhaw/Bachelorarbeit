@@ -3,7 +3,7 @@ function prepare()
     -- SQL query to create the KUNDENMITID table without auto-increment for KUNDEN_ID
     local create_kunden_query = [[
         CREATE TABLE KUNDENMITID (
-            KUNDEN_ID     INT PRIMARY KEY,
+            KUNDEN_ID     BIGINT PRIMARY KEY,
             NAME          VARCHAR(255),
             GEBURTSTAG    DATE,
             ADRESSE       VARCHAR(255),
@@ -21,7 +21,7 @@ function prepare()
             BESTELLUNG_ID INT PRIMARY KEY,
             BESTELLDATUM DATE,
             ARTIKEL_ID   INT,
-            FK_KUNDEN    INT NOT NULL,
+            FK_KUNDEN    BIGINT NOT NULL,
             UMSATZ       INT,
             FOREIGN KEY (FK_KUNDEN) REFERENCES KUNDENMITID (KUNDEN_ID)
         );
