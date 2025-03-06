@@ -197,7 +197,7 @@ Für optimale Leistung kann es auch erforderlich sein, dass Indizes mit den glei
 Auf diese Weise könnten mehr Kombinationen abgedeckt und zusätzlich einige Abfragen optimiert werden.
 
 Im nächsten Abschnitt führen wir die Benchmarks durch, um das Verständnis für die Funktionsweise des B-Baum-Indexes zu bestätigen.
-Dafür erstellen wir zunächst wieder die Kundentabelle (\ref{lst:create_table_kunde}) und definieren für den ersten Vergleich folgende Indizes:
+Dafür erstellen wir zunächst wieder die Kundentabelle (\ref{lst:tools-create-table-kunde}) und definieren für den ersten Vergleich folgende Indizes:
 
 \vspace{-5pt}
 \begin{lstlisting}[language=SQL,caption=Definition mehrere Indizes,label={lst:indexing-create-multiple}]
@@ -241,7 +241,7 @@ Bei der Schreibgeschwindigkeit liegen beide auf einem sehr ähnlichen Niveau, wo
 
 Mit dem vorherigen Benchmark können wir die Vorteile eines Indexes schon deutlich erkennen.
 Jetzt wollen wir aber auch die Funktionalität des B-Tree-Indexes in Bezug auf unterschiedliche Selects untersuchen.
-Dazu erstellen wir erneut die Kundentabelle, aber erstellen dieses Mal nur einen Index (siehe~\ref{lst:indexing-create-combined}).
+Dazu erstellen wir erneut die Kundentabelle, aber dieses Mal definieren wir nur einen Index (siehe~\ref{lst:indexing-create-combined}).
 Anschließend befüllen wir die Tabelle mit einer festgelegten Anzahl an Datensätzen und führen unterschiedliche Select-Befehle aus.
 Im Codeblock~\ref{lst:indexing-b-tree-selects} sehen wir aus Platzgründen nur die Where-Bedingung und am Ende jeder Zeile steht der Name der Query, damit wir später in der Analyse wissen, welcher Query welche Performance bringt.
 
@@ -262,6 +262,7 @@ WHERE NAME = 'Müller' AND GEBURTSTAG < '1980-01-01'; -- skip_columns
 Anhand der Grafik in Abbildung~\ref{fig:indexing-b-tree-query-reads} lässt sich erkennen, bei welchen Abfragen der Index am effizientesten ist.
 Auf der linken Seite können wir die Ergebnisse für die Read-Befehle mit Index betrachten und auf der rechten Seite die Werte ohne Index.
 
+\vspace{-5pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
@@ -283,18 +284,11 @@ Auf der linken Seite können wir die Ergebnisse für die Read-Befehle mit Index 
 \end{figure}
 \vspace{-15pt}
 
-Zunächst einmal fällt auf, dass die Reihenfolge für die Werte mit und ohne Index sehr ähnlich ist.
-Bevor wir feststellen, bei welchen Queries der Index benutzt wird, wollen wir die Abfragen aus~\ref{lst:indexing-b-tree-selects} zusammen mit den Ergebnissen näher beschreiben.
-
-Die Abfrage \texttt{full\_match} weist die höchsten Werte auf, da der Name exakt Max Müller und das Geburtsdatum 01.01.1960 sein muss.
-Bei den nachfolgenden Select-Befehlen weichen wir die Bedingungen immer weiter auf und gleichzeitig nimmt die Performance ab.
-Nach \texttt{full\_match} folgt \texttt{combined\_match\_with\_range}, bei dem alle vor 1980 Geborenen einbezogen werden.
-Im Anschluss kommt \texttt{range\_with\_like}, wo der Vorname nur mit "M" beginnen muss.
-Danach folgt \texttt{exact\_with\_prefix}, bei dem zusätzlich zum Vorherigen nach dem Geburtsdatum aufsteigend sortiert wird.
-Es folgt \texttt{skip\_columns}, die den Vornamen vollständig ignoriert.
-Anschließend kommt \texttt{leftmost\_prefix}, bei dem nur nach dem Namen gefiltert wird.
-Bei \texttt{column\_prefix}, wird statt des Namens „Müller“ jeder Nachname zurückgegeben, der mit „M“ beginnt.
-Schließlich zeigt \texttt{range\_values} alle Namen zwischen „Müller“ und „Schulz“, während bei \texttt{not\_leftmost} ausschließlich nach dem Geburtsdatum gefiltert wird.
+Zunächst fällt auf, dass die Reihenfolge für die Werte mit und ohne Index komplett identisch ist.
+Dies ist direkt erkennbar, da die Legenden beider Grafiken nach dem durchschnittlichen Wert über die gesamte Zeit sortiert sind.
+Damit wir aber die richtigen Schlüsse aus der Grafik ziehen können, müssen wir herausfinden, wie viele Zeilen die unterschiedlichen Queries zurückgeben.
+Dazu führen wir die Abfragen zusätzlich mit dem \texttt{COUNT(*)}-Operator durch und schreiben die Ergebnisse auch in die log-Datei.
+Anschließend entnehmen wir die Werte und fügen sie in einer Tabelle zusammen.
 
 \vspace{-5pt}
 \begin{table}[H]
@@ -304,15 +298,15 @@ Schließlich zeigt \texttt{range\_values} alle Namen zwischen „Müller“ und 
         \hline
         \textbf{Select-Query} & \textbf{Anzahl an Zeilen} & \textbf{Faktor} & \textbf{Index benutzt?} \\
         \hline
-        full\_match & 0 & 7.26 & ja \\
-        combined\_match\_with\_range & 11 & 6.94 & ja \\
-        range\_with\_like & 39 & 5.78 & ja \\
-        exact\_with\_prefix & 65 & 5.01 & ja \\
-        skip\_columns & 144 & 3.71 & ja \\
-        leftmost\_prefix & 250 & 3.08 & ja \\
-        column\_prefix & 509 & 1.76 & ja \\
-        range\_values & 1313 & 1.05 & nein \\
-        not\_leftmost & 2420 & 1.00 & nein \\
+        full\_match & 0 & 6.42 & ja \\
+        combined\_match\_with\_range & 13 & 5.78 & ja \\
+        range\_with\_like & 31 & 5.22 & ja \\
+        exact\_with\_prefix & 51 & 5.14 & ja \\
+        skip\_columns & 147 & 3.47 & ja \\
+        leftmost\_prefix & 263 & 2.73 & ja \\
+        column\_prefix & 551 & 1.69 & ja \\
+        range\_values & 1343 & 0.96 & nein \\
+        not\_leftmost & 2371 & 0.98 & nein \\
         \hline
     \end{tabular}
     \vspace{3pt}
@@ -321,18 +315,17 @@ Schließlich zeigt \texttt{range\_values} alle Namen zwischen „Müller“ und 
 \end{table}
 \vspace{-25pt}
 
-Wenn wir die Ergebnisse mit Index mit denen ohne vergleichen, dann sehen wir, dass die einzige Select-Query mit unterschiedlicher Positionierung \texttt{combined\_match\_with\_range} ist.
-Wir können in der Tabelle~\ref{tab:indexing_b_tree_count_results} sehen, dass diejenigen Abfragen, die am wenigsten Zeilen zurückgeben, sind auch diejenigen sind, bei denen es die höchste Performance gibt.
-Da die Reihenfolge in beiden Fällen fast identisch ist, sollte man meinen, dass der B-Baum-Index gar keinen Einfluss auf die Performance hat.
-Dies gilt aber nur für die Reihenfolge und nicht für die tatsächlichen Werte der einzelnen Abfragen, denn wenn wir diese betrachten, sehen wir deutliche Unterschiede.
-Beispielweise \texttt{full\_match} ist bei Beiden an erster Stelle, aber mit Index ist sie etwa 7--8-mal schneller als ohne Index.
-Der Unterschied zwischen den Versionen ist aber nicht für alle Queries so groß.
-Für \texttt{skip\_columns} liegt der Unterschied ungefähr nur bei Faktor 4.
-Wir können das damit begründen, dass je mehr Spalten aus dem mehrspaltigen Index in der Query benutzt werden, desto größer ist der Faktor.
-Der Faktor hat bei den Queries \texttt{range\_values} und \texttt{not\_leftmost} den Wert 1.
-Das bedeutet, dass der Index keinen Einfluss auf die Performance hat, weshalb wir annehmen, dass er nicht verwendet wird.
-Mithilfe des \texttt{EXPLAIN}-Operators können wir überprüfen, ob diese Annahme wirklich korrekt ist.
-Tatsächlich zeigt die Analyse von \texttt{EXPLAIN}, dass die vermuteten Queries die einzigen sind, bei denen der Index nicht verwendet wird und beide sind auch die Langsamsten im Vergleich gewesen.
+Anhand der Spalte \texttt{Anzahl an Zeilen} können wir erkennen, dass die Queries, die am wenigsten Zeilen zurückgeben, auch diejenigen sind, bei denen es die höchste Performance gibt.
+Deshalb ist auch die Reihenfolge mit und ohne Index gleich, weshalb man meinen könnte, dass der Index keinen Einfluss auf die Performance hat.
+Dies betrifft aber nur die Reihenfolge, nicht jedoch die Werte der Abfragen, da wir hier deutliche Unterschiede sehen.
+Anschaulich wird das mit der Betrachtung der Spalte \texttt{Faktor}.
+Um den Wert zu berechnen, entnehmen wir die Werte aus der Gesamtstatistik und teilen die mit Index durch die ohne Index.
+Damit können wir sehen, dass \texttt{full\_match} zwar bei beiden Versionen am schnellsten im Vergleich ist, aber mit Index etwa 6-mal schneller als ohne ist.
+Es lässt sich auch erkennen, dass je weniger Zeilen zurückgegeben werden, desto größer ist der Faktor.
+Bei den Queries \texttt{range\_values} und \texttt{not\_leftmost} liegt der Faktor sehr nah 1, was bedeutet, dass der Index keinen Einfluss auf die Performance hat.
+Deshalb stellt sich auch die Frage, ob der Index überhaupt verwendet wird.
+Um das zu überprüfen, verwenden wir den \texttt{EXPLAIN}-Operator, loggen wieder das Ergebnis und fügen es der Tabelle hinzu (siehe Spalte \texttt{Index benutzt?}).
+Und tatsächlich sehen wir, dass die vermuteten Queries die einzigen sind, bei denen der Index nicht verwendet wird.
 
 \section{Hash-Index}\label{sec:indexing-hash-index}
 Ein weiterer Indextyp, den wir betrachten, ist der Hash-Index.
@@ -356,9 +349,12 @@ Hierbei wird versucht, Konflikte direkt innerhalb der Hash-Tabelle zu bewältige
 Die eindeutigen Hash-Indizes werden nicht von der Memory-Engine in MySQL unterstützt.
 
 Um die Verwendung des Hash-Indexes zu veranschaulichen, benutzen folgt folgendes Beispiel:
+
+\vspace{-5pt}
 \begin{lstlisting}[language=SQL]
 SELECT * FROM KUNDEN WHERE NAME = 'Peter';
 \end{lstlisting}
+\vspace{-8pt}
 
 Zunächst berechnet MySQL den Hash-Wert für \texttt{'Peter'} und verwendet diesen, um den entsprechenden Zeiger im Index zu finden.
 Angenommen, die Hash-Funktion liefert für \texttt{'Peter'} den Wert \textbf{7654}.
@@ -383,80 +379,72 @@ Am Ende des \texttt{CREATE INDEX}-Befehl müssen wir \texttt{USING HASH} hinzuf�
 Danach befüllen wieder die Tabelle mit Testdaten.
 
 Diesmal untersuchen wir beim ersten Benchmark den Einfluss von Hash-Kollisionen für die Performance.
-Um den Grad der Kollisionen zu verändern haben wir eine Variable, die die obere Grenze für die zufällige Generierung einer Zahl, die an dem Namen herangehängt wird, darstellt.
-Anschließend fragen wir alle Zeilen mit dem Wert \texttt{Kunde\_1} für die Spalte \texttt{NAME} ab.
-Wir führen die Tests mit den Kollisionswahrscheinlichkeiten von 25\%, 10\%, 5\% und 1\% durch.
+Um den Grad der Kollisionen zu verändern haben wir eine Variable, die die obere Grenze für die zufällige Generierung einer Zahl, darstellt.
+Anschließend fragen wir alle Zeilen mit dem Wert \texttt{Kunde\_1} für die Spalte \texttt{NAME} ab und führen die Tests mit den Kollisionswahrscheinlichkeiten von 25\%, 10\%, 5\% und 1\% durch.
 
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Index/Hash/selectivity-change/Reads}
-        \caption{Unterschiede von Readsabfragen}
-        \label{hash-collision-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Index/Hash/selectivity-change/Writes}
-        \caption{Unterschiede von Schreibbefehlen}
-        \label{hash-collision-writes}
     \end{subfigure}
+    \vspace{-8pt}
     \caption[Hash-Indexing: Auswirkungen von Hashkollisionen]{Vergleich der Auswirkungen von Hashkollisionen}
     \label{fig:hash-collision-comparison}
 \end{figure}
-\vspace{-15pt}
+\vspace{-17pt}
 
 An den Ergebnissen in Abbildung~\ref{fig:hash-collision-comparison} können wir sehen, dass je geringer die Wahrscheinlichkeit für eine Kollision ist, desto schneller ist die Select-Abfrage.
 Es fällt auch auf, dass die Unterschiede zwischen den verschiedenen Kollisionswahrscheinlichkeiten sehr groß sind.
-Hingegen die Einfüge-Performance ist überraschenderweise bei allen 4 Varianten auf einem ähnlichen Niveau.
+Hingegen die Einfüge-Performance ist bei allen 4 Varianten auf einem ähnlichen Niveau.
 
-Als zweiten Test wollen wir wieder überprüfen, ob der Index bei bestimmten Select-Queries benutzt wird oder nicht.
-Wie erwartbar benutzen wir wieder unsere Kundentabelle und erstellen den gleichen Index wie in Beispiel~\ref{lst:indexing-create-single}.
-Anschließend fügen wir wieder die Testdaten ein und verwenden wieder die Select-Befehle aus~\ref{lst:indexing-b-tree-selects}.
-Dieses Mal benutzen wir aber nicht alle Select-Befehle, sondern nur die folgenden:
+Als zweiten Test wollen wir überprüfen, ob der Index bei bestimmten Select-Queries benutzt wird oder nicht.
+Wir verwenden erneut die Kundentabelle, erstellen den gleichen Index wie in Beispiel~\ref{lst:indexing-create-combined}, fügen die Testdaten ein und nutzen die Select-Befehle aus~\ref{lst:indexing-b-tree-selects}.
+Dieses Mal benutzen wir aber nicht alle Select-Befehle, sondern nur die aus folgender Tabelle:
 
+\vspace{-4pt}
 \begin{table}[H]
     \centering
     \scriptsize
-    \begin{tabular}{|l|l|l|}
+    \begin{tabular}{|l|l|l|l|}
         \hline
-        \textbf{Select-Query} & \textbf{Anzahl an Zeilen} & \textbf{Index benutzt?} \\
+        \textbf{Select-Query} & \textbf{Anzahl an Zeilen} & \textbf{Faktor} & \textbf{Index benutzt?} \\
         \hline
-        full\_match & 0 & ja \\
-        combined\_match\_with\_range & 4 & nein \\
-        exact\_with\_prefix & 41 & nein \\
-        leftmost\_prefix & 201 & nein \\
+        full\_match & 0 & 2.67 & ja \\
+        combined\_match\_with\_range & 6 & 0.97 & nein \\
+        exact\_with\_prefix & 45 & 1.01 & nein \\
+        leftmost\_prefix & 206 & 1.00 & nein \\
         \hline
     \end{tabular}
     \vspace{3pt}
     \caption{Ergebnisse der COUNT(*)-Abfragen für Hash-Index}
     \label{tab:indexing_hash_count_results}
 \end{table}
-\vspace{-25pt}
+\vspace{-27pt}
 
-Wie schon aus der Tabelle~\ref{tab:indexing_hash_count_results} ersichtlich wird, wir nur bei \texttt{full\_match} der Index verwendet.
-Diese Erkenntnis können wir auch aus dem Result des Benchmarks (siehe~\ref{fig:indexing-hash-query-readsh}) erkennen.
-Denn die Query ist um ein Erhebliches schneller als alle anderen (etwa um Faktor 15).
-Alle anderes Queries sind sehr ähnlich, was unter anderem auch der Skalierung geschuldet ist.
-Obwohl \texttt{combined\_match\_with\_range} nur 4 Zeilen zurückgibt und \texttt{leftmost\_prefix} hingegen 201 Datensätze, sind die Unterschiede nur sehr klein.
+Anhand der Spalten \texttt{Faktor} und \texttt{Index benutzt?} können wir erkennen, dass der Index nur bei der \texttt{full\_match}-Abfrage benutzt wird.
+Das stimmt auch mit den Ergebnissen aus der Abbildung~\ref{fig:indexing-hash-query-reads} überein, da ohne Index alle Abfragen auch einem ähnlichen Niveau liegen, aber mit Index sticht eine deutlich hervor.
+Interessant ist, dass die Query mit 206 zurückgegebenen Zeilen nur unwesentlich langsamer ist als die anderen.
+Die Reihenfolge ist wieder bei beiden identisch und hängt von der Anzahl der zurückgegebenen Zeilen ab.
 
-\vspace{-15pt}
+\vspace{-4pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Index/Hash/hash-query-differences/Reads}
-        \caption{Mit Index}
-        \label{indexing-hash-query-reads-index}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Index/Hash/hash-query-differences-no-index/Reads}
-        \caption{Ohne Index}
-        \label{indexing-hash-query-reads-no-index}
     \end{subfigure}
-    \caption[Hash-Indexing: Unterschiedliche Abfragen mit Index und Ohne]{Grafik visualisiert unterschiedlichen Select-Queries mit und ohne Index}
+    \vspace{-8pt}
+    \caption[Hash-Indexing: Unterschiedliche Abfragen mit Index und Ohne]{Grafik visualisiert Select-Queries mit (links) und ohne (rechts) Index}
     \label{fig:indexing-hash-query-reads}
 \end{figure}
