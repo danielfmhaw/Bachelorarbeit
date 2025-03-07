@@ -231,6 +231,14 @@ Innerhalb des Workflowjobs muss nichts anpasst werden, da dort der Wert von \tex
 Wichtig ist noch zu erwähnen, dass beim Master-Replica logischerweise die Insert-Befehle nur auf dem Master also Port 3307 ausgeführt werden.
 Die Select-Befehle werden sowohl auf dem Master als auch auf den Replicas ausgeführt.
 
+Wenn wir die Ergebnisse aus Abbildung~\ref{fig:replication-vs-no} betrachten, dann fällt auf, dass die Version ohne Replikation am schnellsten ist.
+Danach folgen die Readabfragen auf dem Master auf Port 3307.
+Der Unterschied der beiden liegt bei etwa 15\%.
+Nah an dem Ergebnis vom Master ist die erste Replica (3308).
+Überraschenderweise folgen danach die anderen beiden Replicas auf den Ports 3309 und 3310.
+Die Schreibgeschwindigkeit ist in beim Fall ohne und mit Replikation auf einem ähnlichen Niveau, wobei die Version mit Master-Replica etwa 10\% langsamer ist.
+In diesem Benchmark wurde der Threads-Wert konstant auf 1 gesetzt, sodass die Leistung eines einzelnen Threads ersichtlich wird.
+
 \vspace{-8pt}
 \begin{figure}[H]
   \centering
@@ -243,21 +251,13 @@ Die Select-Befehle werden sowohl auf dem Master als auch auf den Replicas ausgef
     \centering
     \includegraphics[width=\textwidth]{PNGs/Script/Replication/replication-vs-no/Writes}
   \end{subfigure}
-  \vspace{-20pt}
-  \caption[Replikation: Master-Replica-Ansatz vs Single-Server]{Vergleich zwischen dem Master mit 3 Replicas und einem normalen MySQL-Server }
+  \vspace{-8pt}
+  \caption[Replikation: Master-Replica-Ansatz vs Single-Server]{Vergleich zwischen Master mit 3 Replicas und einem normalen MySQL-Server }
   \label{fig:replication-vs-no}
 \end{figure}
 \vspace{-20pt}
 
-Wenn wir die Ergebnisse aus Abbildung~\ref{fig:replication-vs-no} betrachten, dann fällt auf, dass die Version ohne Replikation am schnellsten ist.
-Danach folgen die Readabfragen auf dem Master auf Port 3307.
-Der Unterschied der beiden liegt bei etwa 15\%.
-Nah an dem Ergebnis vom Master ist die erste Replica (3308).
-Überraschenderweise folgen danach die anderen beiden Replicas auf den Ports 3309 und 3310.
-Die Writegeschwindigkeit ist in beim Fall ohne und mit Replikation auf einem ähnlichen Niveau, wobei die Version mit Master-Replica etwa 10\% langsamer ist.
-In diesem Benchmark wurde der Threads-Wert konstant auf 1 gesetzt, sodass die Leistung eines einzelnen Threads ersichtlich wird.
-Nun betrachten wir ein praxisnahes Szenario:
-
+Als Nächstes betrachten wir ein praxisnahes Szenario:
 Wenn 8 Nutzer gleichzeitig und unabhängig voneinander Daten abfragen, ohne Änderungen vorzunehmen, ergibt sich eine Last von 8 parallelen Threads.
 Dies kann entweder von einem einzelnen MySQL-Server mit 8 Threads verarbeitet werden oder mit dem Master-Replica-Ansatz.
 In diesem Fall teilen sich der Master und drei Replicas die Last, sodass jeder von ihnen 2 Threads verarbeitet.
@@ -299,7 +299,7 @@ Und auch die Schreibgeschwindigkeiten verhalten sich bei beiden Varianten sehr �
   \begin{subfigure}[t]{0.48\textwidth}
     \includegraphics[width=\textwidth]{PNGs/Script/Replication/replication-format-change/Writes}
   \end{subfigure}
-  \vspace{-20pt}
+  \vspace{-8pt}
   \caption[Replikation: Unterschiedlichen Binlog-Typen]{Vergleich zwischen dem unterschiedlichen Binlog-Typen }
   \label{fig:replication-format-change}
 \end{figure}

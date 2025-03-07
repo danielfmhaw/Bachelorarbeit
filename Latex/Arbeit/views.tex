@@ -285,15 +285,15 @@ Zum anderen führen wir auch eine Analyse des MySQL-Ansatzes im Vergleich zum gl
 \newpage
 \section{Analyse der Ergebnisse}\label{sec:analyse-der-ergebnisse}
 
-Nach der Durchführung der Benchmarks betrachten wir vor allem die Ergebnisse der \texttt{READS} und \texttt{WRITES} - Kennzahlen.
-Zunächst fällt, wie zu erwarten war, auf, dass die Unterschiede zwischen der virtuellen Sicht und den direkten SQL-Befehlen (\texttt{without\_view}) nur minimal sind.
-Dies gilt sowohl für die Lese- als auch für die Schreibwerte.
+Nach der Durchführung der Benchmarks betrachten wir vor allem die Ergebnisse der \texttt{READS} und \texttt{WRITES}-Kennzahlen.
+Zunächst fällt, wie zu erwarten war, auf, dass die Unterschiede zwischen der virtuellen Sicht und den direkten SQL-Befehlen (\texttt{without\_view}) nur minimal sind, aber \texttt{with\_view} hat dennoch eine geringfügig schlechtere Performance.
+Dies gilt sowohl für die Lese- als auch für die Schreibwerte in den beiden Graphen (\ref{fig:view-comparison-comp-metric}).
+Außerdem kann man einen klaren Performancevorteil beim Ansatz mit den Triggern erkennen, da die Lesewerte um den Faktor 3 höher sind.
+Das liegt daran, dass direkt die Tabelle mit den aggregierten Werten abgefragt wird und nicht die Basistabellen, wie bei der virtuellen Sicht oder der Variante ohne Sicht.
+Anders hingegen sieht es bei der Schreibperformance aus, da die Trigger ausgelöst werden und zusätzliche Aktualisierungen an der Tabelle \texttt{KUNDEN\_MAT\_OVERVIEW} durchführt werden müssen.
+Dadurch sehen wie einen deutlichen Unterschied zu den anderen beiden Ansätzen, da die Werte bei den Schreibvorgängen etwa 15--20\% langsamer sind.
 
-Man kann auch einen klaren Performancevorteil beim Ansatz mit den Triggern erkennen, da die Lesewerte dort deutlich höher sind.
-Anders hingegen sieht es bei der Schreibperformance aus, da dort die Trigger greifen und zusätzliche Aktualisierungen durchführen, weshalb sich dort etwas geringe Werte ergeben.
-Der Unterschied bei Writes ist aber nicht wirklich signifikant in unserem Beispiel, kommt aber daher, da gar keine Daten physisch gespeichert werden.
-Dies liegt aber auch daran, dass wir relativ wenige Datensätze in den Testtabellen haben.
-
+\vspace{-5pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
@@ -303,21 +303,22 @@ Dies liegt aber auch daran, dass wir relativ wenige Datensätze in den Testtabel
     \begin{subfigure}[t]{0.48\textwidth}
         \includegraphics[width=\textwidth]{PNGs/Script/Views/view-comparison/Writes}
     \end{subfigure}
-    \vspace{-20pt}
-    \caption[Views: Keine View, virtuelle View und Ansatz mit Triggern]{Vergleich zwischen keiner View, der virtuellen View und dem Ansatz mit Triggern in MySQL}
+    \vspace{-5pt}
+    \caption[Views: Keine View, virtuelle View und Ansatz mit Triggern]{Vergleich zwischen keiner View, der virtuellen und Triggeransatz in MySQL}
     \label{fig:view-comparison-comp-metric}
 \end{figure}
-\vspace{-12pt}
+\vspace{-15pt}
 
-Bei dem zweiten Vergleich sehen wir zuallererst einen sehr deutlichen Performanceunterschied beim Ansatz mit den Triggern zwischen Postgres und MySQL\@.
-Begründet werden kann dieser Unterschied mit den verschiedenen Vorteilen des jeweiligen Datenbankmanagementsystems und dessen Umgebung.
+Bei dem zweiten Vergleich (\ref{fig:mat-view-comparison-comp-metric}) sehen wir zuallererst einen sehr deutlichen Performanceunterschied beim Ansatz mit den Triggern zwischen Postgres und MySQL\@.
+Begründet werden kann dieser Unterschied mit den verschiedenen Vorteilen des jeweiligen DBMS und dessen Umgebung.
 Wir haben beide Systeme mit dem gleichen Ansatz gebenchmarkt, damit wir die Implementierung der nativen materialisierten Sicht, die nur in Postgres möglich ist, besser vergleichen zu können.
 Denn die Ergebnisse der nativen Implementierung sind in Bezug auf die Abfragegeschwindigkeit tatsächlich am performantesten und die Anzahl an Aktualisierungen (\ref{lst:refresh-materialized-view}) hat dabei keinen Einfluss.
 Anders hingegen sieht es bei der Einfüge-Geschwindigkeit aus, da dort die Implementierung, die nach jedem Insert-Befehl aktualisiert nicht am schnellsten, sondern am langsamsten ist.
-Der Vergleich zwischen den DBMS fällt wieder schwer, da die Unterschiede zwischen \texttt{with\_trigger} und \texttt{with\_trigger\_postgres} sehr groß sind (etwa um Faktor 2--3).
+Der Vergleich zwischen den Datenbankmanagementsystemen fällt wieder schwer, da die Unterschiede zwischen \texttt{with\_trigger} und \texttt{with\_trigger\_postgres} sehr groß sind (etwa um Faktor 2--3).
 Damit wird noch einmal deutlich wie stark die Einfügedauer bei den materialisierten Sichten von der Anzahl an Refreshs abhängig ist, da \texttt{mat\_view\_refresh\_every} unterhalb der Performance von \texttt{with\_trigger} liegt.
 In unserem Beispiel ist die einmalige Aktualisierung der Sicht besser als das Verwenden der Trigger in Postgres.
 
+\vspace{-5pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
@@ -327,13 +328,13 @@ In unserem Beispiel ist die einmalige Aktualisierung der Sicht besser als das Ve
     \begin{subfigure}[t]{0.48\textwidth}
         \includegraphics[width=\textwidth]{PNGs/Script/Views/mat-view-comparison/Writes}
     \end{subfigure}
-    \vspace{-20pt}
+    \vspace{-5pt}
     \caption[Views: Beide Triggeransätze sowie materialisierte Sicht]{Vergleich zwischen Triggeransatz in MySQL und Postgres, sowie zwei nativen Implementierungen in Postgres }
     \label{fig:mat-view-comparison-comp-metric}
 \end{figure}
-\vspace{-12pt}
+\vspace{-15pt}
 
-Es lässt sich also zusammenfassen, dass virtuelle Sichten keine Auswirkungen auf die Performance haben.
+Es lässt sich also zusammenfassen, dass virtuelle Sichten wenig Auswirkungen auf die Performance haben.
 Dies ist im eigentlichen Sinne aber auch nicht der Absicht der virtuellen Sicht, denn sie ist besser geeignet, um beispielsweise die Organisation der Rechte für unterschiedliche Nutzer der Datenbank zu gewährleisten.
 Wenn man hingegen beispielweise in OLTP-Systemen die Notwendigkeit hat, dass man aggregierte Daten häufig zu der Analyse von bestimmten Daten benötigt, dann sind materialisierte Sichten nützlich.
 Man sollte allerdings vor allem die Performanceauswirkungen von diesen Sichten nicht unterschätzen und sich gut überlegen, wie häufig und zu welcher Zeit die Daten aktualisiert werden müssen.

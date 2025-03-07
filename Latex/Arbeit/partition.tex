@@ -214,7 +214,7 @@ Außerdem vergleichen die Ergebnisse mit jeweils einer Referenz, bei der es kein
 Bei der Range-Partitionierung fällt auf, dass die Benutzung von \texttt{RANGE} oder \texttt{RANGE COLUMNS} keinerlei Einfluss auf die Performance hat.
 Damit stellt sich bei der Verwendung nicht die Frage nach der Performance, sondern nur welche Art der Definition der Nutzer bevorzugt.
 Es wird auch klar, dass das Pruning nur in dem Fall funktioniert, bei dem wir die Geburtstage zwischen dem ersten und letzten Tage des Jahres abfragen (Abbildung~\ref{fig:range-partition}).
-Wenn wir die Funktion \texttt{YEAR()} benutzen, dann sind die Werte schlechter als in dem Fall komplett ohne Replikation.
+Wenn wir die Funktion \texttt{YEAR()} benutzen, dann sind die Werte schlechter als in dem Fall komplett ohne Partition.
 Es lässt sich als feststellen, dass Pruning mithilfe von \texttt{YEAR()} offensichtlich nicht funktioniert.
 Bei dem Fall ohne Partitionierung spielt die Verarbeitung durch \texttt{YEAR()} keinen Einfluss, denn es ist genauso schnell wie der direkte Aufruf über den 01.\ Januar des Jahres.
 Wenn wir die Query mit dem Primärschlüssel zwischen der Version mit Range-Partitionierung und ohne Partitionen vergleichen, dann gibt es keinen großen Unterschied, aber dennoch hat die Version ohne Partitionen einen leichten Vorteil.
@@ -231,11 +231,11 @@ Bei den Insert-Befehlen sieht es leicht anders aus, aber dort ist der Fall ohne 
 	\begin{subfigure}[t]{0.48\textwidth}
 		\includegraphics[width=\textwidth]{PNGs/Script/Partition/range-partition/Writes}
 	\end{subfigure}
-	\vspace{-20pt}
+	\vspace{-8pt}
 	\caption[Range-Partitionierung: Unterschiedliche Selects mit und ohne Partition]{Vergleich zwischen der Range-Partitionierung und ohne Partition}
 	\label{fig:range-partition}
 \end{figure}
-\vspace{-12pt}
+\vspace{-19pt}
 
 Bei der List-Partitionierung~\ref{fig:list-partition} können wir auch einige interessante Beobachtungen machen.
 Beim ersten Fall ist nur ein Land in der WHERE-Bedingung vorhanden.
@@ -257,15 +257,14 @@ Die Performance beim Einfügen der Daten ist bei der Partitionierung und dem Ref
 	\begin{subfigure}[t]{0.48\textwidth}
 		\includegraphics[width=\textwidth]{PNGs/Script/Partition/list-partition/Writes}
 	\end{subfigure}
-	\vspace{-20pt}
+	\vspace{-8pt}
 	\caption[List-Partitionierung: Unterschiedliche Abfragen mit und ohne Partition]{Vergleich zwischen der List-Partitionierung und ohne Partition}
 	\label{fig:list-partition}
 \end{figure}
-\vspace{-12pt}
+\vspace{-19pt}
 
 Bei der Key-Partitionierung fällt auf, dass es keinen signifikanten Performance-Unterschied zur Hash-Partitionierung gibt, wenn derselbe Datensatz und dieselbe Anzahl von Partitionen verwendet wird.
 Generell ist die Key-Partitionierung häufig stabiler und optimierter ist, insbesondere wenn es um Primärschlüssel geht.
-
 Bei der Hash-Partitionierung~\ref{fig:hash-partition} nehmen sich beide Select-Fälle kaum etwas.
 Auch hier fällt auf, dass die Werte der Abfragen sehr konstant sind.
 Nur bei der Variante mit 500 Partitionen gibt es deutlich sichtbare Schwankungen.
@@ -274,9 +273,9 @@ Die Hash-Partitionierung berechnet aus dem Wert einer bestimmten Spalte mithilfe
 Da der Hash-Wert bei 500 Partitionen mit modulo 500 gebildet wird, landet jeder 500-ste Wert in der gleichen Partition.
 Damit ist klargestellt, dass immer alle Partitionen benutzt werden, was die folgenden Ergebnisse zeigen.
 Zunächst zeigt sich, dass die Abfrage ohne Partitionierung am schnellsten ist.
-Danach kann man der Regel folgen, dass je mehr Partitionen es gibt, desto langsamer wird die Query.
+Danach lässt sich die Regel ableiten, dass eine höhere Anzahl an Partitionen zu einer langsameren Abfrage führt.
+Dies liegt daran, dass mehr Partitionen die Suche innerhalb der Struktur komplexer machen und dadurch die Performance beeinträchtigen.
 Der Unterschied zwischen ohne Partitionen und 5 Partitionen ist noch überschaubar, aber bei 500 Partitionen sieht man einen sehr deutlichen Unterschied.
-Das bestätigt die wichtig von unserem Leitsatz, dass je mehr Partitionen benötigt werden, desto aufwendiger wird die Suche innerhalb der Partitionsstruktur, was die Performance verringert.
 
 \vspace{-8pt}
 \begin{figure}[H]
@@ -288,7 +287,7 @@ Das bestätigt die wichtig von unserem Leitsatz, dass je mehr Partitionen benöt
 	\begin{subfigure}[t]{0.48\textwidth}
 		\includegraphics[width=\textwidth]{PNGs/Script/Partition/hash-partition/Writes}
 	\end{subfigure}
-	\vspace{-20pt}
+	\vspace{-8pt}
 	\caption[Hash-Partitionierung: Variationen der Partitionsanzahl]{Vergleich zwischen der Hash-Partitionierung und ohne Partition}
 	\label{fig:hash-partition}
 \end{figure}
