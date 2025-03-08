@@ -16,6 +16,26 @@ function utils.randomString(length)
     return result
 end
 
+function utils.get_cpu_usage()
+   local handle = io.popen("uname")
+   local os_type = handle:read("*a"):gsub("\n", "")
+   handle:close()
+   local cpu_usage
+   -- Abhängig vom Betriebssystem
+   if os_type == "Darwin" then
+       handle = io.popen("top -l 1 | grep 'CPU usage' | awk '{print $3 + $5}'")
+       cpu_usage = handle:read("*a")
+       handle:close()
+   elseif os_type == "Linux" then
+       handle = io.popen("top -bn1 | grep 'Cpu(s)' | sed 's/.*, *\\([0-9.]*\\)%* id.*/\\1/' | awk '{print 100 - $1}'")
+       cpu_usage = handle:read("*a")
+       handle:close()
+   else
+       return
+   end
+   io.stderr:write("CPU-Usage:" .. cpu_usage:gsub("\n", "") .. "%\n")
+end
+
 function utils.print_results(con, query, custom)
     local result = con:query(query)
     local query_line = "Executed Query: " .. query:gsub("%s+", " ")
