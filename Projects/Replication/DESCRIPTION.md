@@ -63,6 +63,20 @@ cd Tools/Shell-Scripts
   }'
 ```
 
+### Code für keine Replikation mit unterschiedlicher Threadanzahl:
+```bash
+cd ../..
+cd Tools/Shell-Scripts
+./sysbench_script.sh \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output" \
+  -var '{"sel_thr":[8,16,32]}' \
+  -scripts '{
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Scripts/replication": {
+      "vars": "sel_thr"
+    }
+  }'
+```
+
 ```bash
 cd ../..
 cd Tools/Shell-Scripts

@@ -3,8 +3,10 @@ package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):mat
 local utils = require("utils")
 
 local counts_executed = false
+local counter = 0
 
 function select_query()
+    counter = counter + 1
     local join_query = [[
         SELECT k.STADT, SUM(b.UMSATZ) AS Total_Umsatz
         FROM KUNDEN k
@@ -16,6 +18,10 @@ function select_query()
         utils.print_results(con, "SELECT COUNT(*) FROM KUNDEN", "KUNDEN")
         utils.print_results(con, "SELECT COUNT(*) FROM BESTELLUNG", "BESTELLUNG")
         counts_executed = true
+    end
+
+    if counter % 200 == 0 then
+        utils.get_cpu_usage()
     end
 
     con:query(join_query)

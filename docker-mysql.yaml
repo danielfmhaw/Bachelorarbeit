@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: sbtest
+    ports:
+      - "3306:3306"
+    networks:
+      - mysql_network
+
+networks:
+  mysql_network:
+    driver: bridge
