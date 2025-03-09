@@ -208,14 +208,18 @@ Es kann aber kleinere Unterschiede geben, da wir jeweils zufällige generierte D
 Bei signifikanten Abweichungen sind die Performancemessungen jedoch schwerer miteinander vergleichbar.
 
 Im ersten Benchmark mit der Range-Partitionierung fällt auf, dass die Benutzung von \texttt{RANGE} oder \texttt{RANGE COLUMNS} keinerlei Einfluss auf die Performance hat.
-Damit stellt sich bei der Verwendung nicht die Frage nach der Performance, sondern nur welche Art der Definition der Nutzer bevorzugt.
-Es wird auch klar, dass das Pruning nur in dem Fall funktioniert, bei dem wir die Geburtstage zwischen dem ersten und letzten Tage des Jahres abfragen (Abbildung~\ref{fig:range-partition}).
-Wenn wir die Funktion \texttt{YEAR()} benutzen, dann sind die Werte schlechter als in dem Fall komplett ohne Partition.
-Es lässt sich als feststellen, dass Pruning mithilfe von \texttt{YEAR()} offensichtlich nicht funktioniert.
-Bei dem Fall ohne Partitionierung spielt die Verarbeitung durch \texttt{YEAR()} keinen Einfluss, denn es ist genauso schnell wie der direkte Aufruf über den 01.\ Januar des Jahres.
-Wenn wir die Query mit dem Primärschlüssel zwischen der Version mit Range-Partitionierung und ohne Partitionen vergleichen, dann gibt es keinen großen Unterschied, aber dennoch hat die Version ohne Partitionen einen leichten Vorteil.
-Der größte Unterschied ist aber definitiv, wenn Pruning erfolgreich ist, da die Query mit deutlichem Abstand schneller als bei allen anderen Select-Queries.
-Bei den Insert-Befehlen sieht es leicht anders aus, aber dort ist der Fall ohne Partitionierung nur minimal schneller als mit.
+Daher stellt sich bei der Verwendung nicht die Frage nach der Performance, sondern nur welche Art der Definition der Nutzer bevorzugt.
+Wenn wir die Abbildung~\ref{fig:range-partition} analysieren, dann wird klar, dass die \texttt{with\_pruning}-Query mit deutlichem Abstand schneller ist als die anderen.
+Damit funktioniert das Pruning besonders gut, wenn die Geburtstage zwischen dem ersten und letzten Tage des Jahres abfragen.
+Als Nächstes kommen die Skripte ohne Partitionierung, die aber etwa 50\% ineffizienter sind, als das Skript zuvor.
+Da beide auf einem sehr ähnlichen Niveau liegen, kann davon ausgehen, dass die Verarbeitung durch \texttt{YEAR()} hier keine Rolle spielt.
+Etwas langsamer bei der Range-Partitionierung ist \texttt{with\_primary\_key}, bei der wir nur die Kunden erhalten, die am 1.\ Januar 1985 geboren wurden.
+Wenn wir die Ergebnisse von \texttt{EXPLAIN} betrachten, dann sehen wir, dass bei der Abfrage nur eine Partition benutzt wurde.
+Als Letztes kommen die beiden Select-Queries, die alle Partitionen durchsuchen.
+Bei der einen haben wir keine \texttt{WHERE}-Bedingung angegeben und bei der anderen haben wir die Funktion \texttt{YEAR()} benutzt.
+Es lässt sich also feststellen, dass Pruning mithilfe von \texttt{YEAR()} offensichtlich nicht funktioniert.
+Dies bestätigt auch der Ausführungsplan für die Query.
+Bei den Insert-Befehlen ist der Fall ohne Partitionierung nur geringfügig schneller als mit Partitionierung.
 
 \vspace{-6pt}
 \begin{figure}[H]
