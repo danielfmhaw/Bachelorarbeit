@@ -210,7 +210,7 @@ Im ersten Vergleich wollen wir die Performanceunterschiede zwischen dem Master-R
 Beim Master-Replikat-Ansatz verwenden wir mit \texttt{ROW} immer den Default-Wert des Binlog-Formats.
 Damit keine Fehler auftreten, müssen wir die beiden Ansätze miteinander kompatibel machen.
 Das Problem dabei ist, dass der Standardport von MySQL (3306) nicht gleichzeitig verwendet werden darf.
-Daher starten wir den Master auf Port 3307, und jedes Replikat erhöht diesen Wert um 1.
+Daher starten wir den Master auf Port 3307 und jedes Replikat erhöht diesen Wert um 1.
 Somit nutzt das dritte Replikat den Port 3310.
 Die Anzahl an Replikate können wir in der \texttt{envs.json}-Datei mithilfe der Variablen \texttt{REPLICAS\_COUNT} festlegen.
 Die Voraussetzung dafür ist, dass es lokal mindestens diese Anzahl an gestarteten und konfigurierten Replikate gibt.
