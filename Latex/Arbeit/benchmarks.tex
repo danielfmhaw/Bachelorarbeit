@@ -29,7 +29,7 @@ Ein weiterer Vorteil besteht darin, dass nur ein Teil des gesamten Systems getes
 Da sich diese Bachelorarbeit ausschließlich mit den verschiedenen Objekten in Datenbanken beschäftigt, habe ich mich für einen Single-Component-Benchmark entschieden.
 
 Das Gefährliche bei der Verwendung von Benchmarks ist, dass schlechte Designentscheidungen zu falschen Interpretationen des Systems führen.
-Ein möglicher Grund dafür kann sein, dass die Ergebnisse nicht die Realität widerspiegeln.
+Ein möglicher Grund dafür kann sein, dass die Ergebnisse nicht die Realität wiederspiegeln.
 Deshalb ist es wichtig, dass die Größe des Datensatzes und des Workloads realistisch sind.
 Idealerweise verwendet man einen Snapshot des tatsächlichen produktiven Datensatzes.\footnote{Snapshots bestehen größtenteils aus Metadaten, die den Zustand Ihrer Daten definieren und sind keine vollständige Duplikation der Daten auf Ihrer Festplatte. Snapshots werden häufig für Test- und Entwicklungsaufgaben verwendet (\cite{snapshot}).}
 Weil in dieser Arbeit keine echten Produktionsdaten zur Verfügung stehen, müssen die Daten und der Workload nicht durch Snapshots, sondern zufällig generiert werden.
@@ -49,10 +49,10 @@ Zu guter Letzt empfiehlt es die Ergebnisse eines Benchmarks in einem Diagramm da
 
 \section{Kennzahlen}\label{sec:einleitung-kennzahlen}
 
-Bevor wir ein geeignetes Benchmark-Tool auswählen, sollten wir zunächst klären, welche Kennzahlen im Datenbankkontext relevant sind und welche davon für unsere Zwecke von besonderem Interesse sind.
-Das Benchmark-Tool, für das wir uns entscheiden, muss in der Lage sein, diese Kennzahlen zu erfassen und uns zugänglich zu machen.
+Bevor wir ein geeignetes Benchmark-Tool auswählen, sollte zunächst geklärt werden, welche Kennzahlen im Datenbankkontext relevant sind und welche davon für die eigenen Zwecke von besonderem Interesse sind.
+Das Benchmark-Tool, für das man sich entscheidet, muss in der Lage sein, diese Kennzahlen zu erfassen und zugänglich zu machen.
 
-Die erste Kennzahl, die wir betrachten, ist der Durchsatz (engl.\ throughput).
+Die erste Kennzahl, die betrachtet wird, ist der Durchsatz (engl.\ throughput).
 Der Durchsatz gibt an, wie viele Transaktionen pro Zeiteinheit durchgeführt werden, wobei ein höherer Wert eine bessere Performance zur Folge hat.
 Üblicherweise wird als Einheit Transaktionen pro Sekunde verwendet, gelegentlich auch Transaktionen pro Minute.
 Man kann Transaktionen auch in verschiedene Kategorien unterteilen, wie beispielsweise Lese- und Schreibtransaktionen.
@@ -61,7 +61,7 @@ Diese Unterscheidung ist wichtig, da bestimmte Implementierungen schnellere Lese
 Die nächste Metrik ist die Antwortzeit (engl.\ latency), die die gesamte Zeit misst, die für eine Abfrage benötigt wird.
 Abhängig von der Applikation kann sie in Mikrosekunden (µs), Millisekunden (ms), Sekunden oder sogar Minuten angegeben werden.
 Oft wird die Latenz in einer aggregierten Form angegeben, wie beispielsweise dem Durchschnitt, Maximum, Minimum oder Perzentilen.
-Bei der Betrachtung von Latenzzeiten macht es aber wenig Sinn Maximal- oder Minimalwerte zu betrachten, da diese oft Ausreißer sind und die allgemeine Performance nicht repräsentieren.
+Bei der Betrachtung von Latenzzeiten macht es aber wenig Sinn, Maximal- oder Minimalwerte zu betrachten, da diese oft Ausreißer sind und die allgemeine Performance nicht repräsentieren.
 Daher nutzt man eher Perzentile bei den Antwortzeiten.
 Perzentile bezeichnen den Wert, unter dem ein bestimmter Prozentsatz der gemessenen Latenzzeiten liegt.
 Wenn beispielsweise das 95.\ Perzentil der Antwortzeit bei 5 ms liegt, bedeutet dies, dass 95\% der Abfragen in weniger als 5 ms abgeschlossen sind (\cite{perzentil_erklaerung}).
@@ -78,7 +78,7 @@ Es gibt noch zahlreiche weitere Messgrößen, wie beispielsweise die Verfügbark
 Auf Letztere werden wir im Kapitel~\ref{ch:replikation} näher eingehen.
 Für das Benchmark-Tool sind die Metriken Durchsatz und Antwortzeit unverzichtbar und sollten daher unbedingt berücksichtigt werden.
 Das Tool sollte auch dazu in der Lage sein, zwischen Lese- und Schreibtransaktionen zu unterscheiden.
-Die anderen Metriken sind vor allem im Zusammenhang mit Mehrbenutzer-Systemen wichtig und nehmne daher in den meisten Kapiteln dieser Arbeit eine untergeordnete Rolle ein.
+Die anderen Metriken sind vor allem im Zusammenhang mit Mehrbenutzer-Systemen wichtig und nehmen daher in den meisten Kapiteln dieser Arbeit eine untergeordnete Rolle ein.
 
 \section{Auswahl der Tools}\label{sec:auswahl-der-tools}
 
@@ -94,7 +94,7 @@ Nach eingehender Überlegung habe ich mich für Sysbench (\cite{sysbench_repo}) 
 Sysbench ist ein Open-Source-Tool, das ein skriptfähiges und multi-threaded Benchmark-Tool ist und auf LuaJIT basiert (\cite[pp. 50--66]{schwartz2012high}).
 Es wird hauptsächlich für Datenbankbenchmarks verwendet, kann jedoch auch dazu eingesetzt werden, um beliebig komplexe Arbeitslasten zu erstellen, die keinen Datenbankserver erfordern.
 Das Tool erfasst verschiedene Metriken, die im vorherigen Kapitel vorgestellt wurden, wie etwa Transaktionen pro Sekunde und Latenz.
-Außerdem kann genauer spezifizieren werden, wie oft diese Metriken geloggt werden sollen.
+Außerdem kann genauer spezifiziert werden, wie oft diese Metriken geloggt werden sollen.
 Ein weiterer Vorteil von Sysbench ist, dass es nicht auf ein einzelnes Datenbanksystem beschränkt ist, sondern die Auswahl aus mehreren DBMS ermöglicht, darunter auch PostgreSQL\@.
 
 Bei der Auswahl des Benchmark-Tools habe ich auch andere Optionen wie Benchbase (\cite{DifallahPCC13}) und Mybench (\cite{mybench_repo}) in Erwägung gezogen.
