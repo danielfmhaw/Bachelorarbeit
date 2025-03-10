@@ -448,3 +448,48 @@ Die Reihenfolge ist wieder bei beiden identisch und hängt von der Anzahl der zu
     \caption[Hash-Indexing: Unterschiedliche Abfragen mit Index und Ohne]{Grafik visualisiert Select-Queries mit (links) und ohne (rechts) Index}
     \label{fig:indexing-hash-query-reads}
 \end{figure}
+
+\section{Vergleich von B-Tree- und Hash-Index}\label{sec:indexing-comp-b-tree-hash-index}
+
+In den vorherigen Kapiteln haben wir den B-Tree-Index und den Hash-Index jeweils getrennt voneinander betrachtet.
+Dabei haben wir auch analysiert, bei welchen Select-Queries die Indizes Vorteile bringen und bei welchen nicht.
+Damit fehlt uns noch der Vergleich zwischen dem B-Tree-Index und dem Hash-Index.
+
+Um die Unterschiede zwischen beiden Indexstrukturen genauer zu analysieren, führen wir einen neuen Benchmark durch, der die Skripte aus Kapitel~\ref{sec:indexing-b-baum-index} und~\ref{sec:indexing-hash-index} wiederverwendet.
+Da der Hash-Tree aber nur 4 unterschiedliche Select-Queries aufruft, wollen wir auch nur diese mit dem B-Tree-Index aufrufen.
+Dazu fügen wir einfach den Parameter \texttt{selects} beim Aufruf des Orchestrator-Skripts hinzu und führen es anschließend aus.
+
+\vspace{-4pt}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/hash-vs-b-tree-comparison/Reads}
+        \caption{Anzahl der Lesezugriffe}
+        \label{indexing-hash-vs-b-tree-comparison-reads}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{PNGs/Script/Index/B_Tree/hash-vs-b-tree-comparison/Writes}
+        \caption{Anzahl der Schreibzugriffe}
+        \label{indexing-hash-vs-b-tree-comparison-writes}
+    \end{subfigure}
+    \vspace{-2pt}
+    \caption[Indexing: Vergleich von B-Tree- und Hash-Index]{Vergleich der Select-Query-Performance von B-Tree- und Hash-Index}
+    \label{fig:indexing-hash-b-tree-comp}
+\end{figure}
+\vspace{-12pt}
+
+In der Abbildung~\ref{indexing-hash-vs-b-tree-comparison-reads} sehen die Performance für die unterschiedlichen Select-Befehle.
+Die höchste Transaktionsrate erzielt der Hash-Index, sofern der vollständige Schlüssel angegeben wird (\texttt{full\_match}).
+Dicht darauf folgt der B-Tree-Index mit derselben Abfrage, allerdings mit etwa 10\% weniger Zugriffen.
+Bei den übrigen Abfragen schneidet hingegen der B-Tree-Index deutlich besser ab, in einigen Fällen sogar bis zu dreimal schneller als der Hash-Index.
+Den Grund dafür kennen wir schon aus den anderen Kapiteln.
+Da der Hash-Index nur bei exakter Schlüsselabgleichung zum Einsatz kommt, wird er bei den anderen Abfragen nicht verwendet.
+Mithilfe des \texttt{EXPLAIN}-Operators haben wir festgestellt, dass stattdessen der B-Tree-Index genutzt wird, was die starken Unterschiede erklärt.
+
+Betrachtet man die Schreibperformance (Abbildung~\ref{indexing-hash-vs-b-tree-comparison-writes}), zeigt sich, dass der Hash-Index etwa 30--40\% schneller ist als der B-Tree-Index.
+Wenn eine Anwendung also eine hohe Schreiblast hat, könnte der Hash-Index eine bessere Wahl sein, da er weniger Mehraufwand verursacht.
+Zusammenfassend lässt sich festhalten, dass der Hash-Index einen leichten Vorteil hat, wenn beide Indexe greifen.
+Andernfalls überwiegen die Stärken des B-Tree-Indexes.
