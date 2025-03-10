@@ -18,20 +18,21 @@ Dies führt zu einer erhöhten Komplexität der \texttt{CREATE TABLE}- und \text
 In der Partitionsklausel selbst können nicht nur Ausdrücke und Berechnungen zur Bestimmung der Partitionierung eingesetzt werden, sondern auch Funktionen.
 Die Funktionen müssen dazu jedoch eine nicht-konstante und deterministische Ganzzahl zurückgeben, wie z.B. \texttt{YEAR()}.
 Wir werden gleich sehen, wie man erkennen kann, welche Komponenten-Tabellen intern verwendet werden.
-
+% TODO(Daniel): dieser part hier gefällt mir nicht.
 Bevor wir zu den Vorteilen der Partitionierung und deren Funktionsweise kommen, klären wir noch die Einschränkungen.
 Zum einen müssen alle Spalten, nach denen die Partitionierung erfolgt, im Primärschlüssel oder Unique-Index enthalten sein.
 Andernfalls ist es nicht möglich, die Partitionen korrekt zu erstellen oder zu verwalten.
 Als logische Schlussfolgerung ergibt sich ein zusätzlicher Aufwand für die Pflege der neuen Indizes.
-Außerdem können alle Fremdschlüssel-Bedingungen (engl.\ foreign key constraints) nicht verwendet werden.
+Außerdem können keine Fremdschlüssel-Bedingungen (engl.\ foreign key constraints) verwendet werden.
 Darüber hinaus gibt es ein Limit für die Anzahl der Partitionen pro Tabelle.
-Bei älteren MySQL-Versionen liegt dieses Limit bei 1024 und seit MySQL-Version 8.0 bei 8192 Partitionen (\ref{mysql_nof_partitions}).
+Bei älteren MySQL-Versionen liegt dieses Limit bei 1024 und seit MySQL-Version 8.0 bei 8192 Partitionen (\cite{mysql_nof_partitions}).
 Wie wir später noch feststellen werden, sollte aus verschiedenen Gründen die Anzahl der Partitionen so gering wie möglich gehalten werden.
 Aus diesem Grund ist diese Einschränkung nicht sehr relevant, sollte aber im Hinterkopf behalten werden.
 
 Da wir die Bedingungen nun geklärt haben, kommen wir als Nächstes zu der Funktionsweise.
 Wie bereits erwähnt, bestehen partitionierte Tabellen aus mehreren zugrunde liegenden Tabellen, die durch Handler-Objekte verwaltet werden.
-Ein Handler-Objekt stellt die Schnittstelle für den Zugriff auf die Daten einer Partition dar und ermöglicht MySQL den Zugriff auf die zugrunde liegenden Tabellen, als ob sie eigenständige Tabellen wären.
+% TODO(Daniel): dieser part hier gefällt mir nicht.
+Ein Handler-Objekt dient als Schnittstelle für den Zugriff auf die Daten einer Partition und ermöglicht MySQL, die zugrunde liegenden Tabellen so zu nutzen, als wären sie eigenständige Tabellen.
 Aus Sicht der Storage Engine sind Partitionen einfach Tabellen, unabhängig davon, ob sie eigenständig oder Teil einer partitionierten Tabelle sind.
 Jede Partition wird von der Storage Engine auf übliche Weise verwaltet, jedoch können die einzelnen Partitionen nicht immer direkt angesprochen werden.
 Das hängt jedoch auch vom jeweiligen Datenbankmanagementsystem ab.
@@ -63,29 +64,31 @@ Die meisten dieser Operationen unterstützen Pruning, einige, wie z.B.\ INSERT-A
 In der Funktionsweise des Pruning kann man auch den Hauptzweck der Partitionierung erkennen, denn wie bei der Indexierung und der Datenclusterung einer Tabelle, trägt es dazu bei, große Teile der Tabelle vom Zugriff auszuschließen und zusammengehörige Zeilen nahe beieinander zu speichern.
 Statt Indexe zu verwenden, bietet es sich an Tabellen ohne Indexe zu erstellen und ausschließlich die Partitionierung zu nutzen, um gezielt auf die gewünschten Zeilen zuzugreifen.
 Wenn man sich in der Nähe der gewünschten Daten befindet, kann man von dort aus entweder das relevante Datengebiet sequentiell scannen oder es in den Speicher laden und indexieren.
-Zudem hat die Partitionierung hat einen geringen Mehraufwand, weil es keine Datenstruktur gibt, die auf einzelne Zeilen zeigt und ständig aktualisiert werden muss.
+Zudem hat die Partitionierung einen geringen Mehraufwand, weil es keine Datenstruktur gibt, die auf einzelne Zeilen zeigt und ständig aktualisiert werden muss.
 Sie lassen sich auch physisch verteilen, sodass der Server mehrere Festplatten effizienter nutzen kann.
 Darüber hinaus erfolgt die Identifikation der Daten nicht auf Zeilenebene und es wird keine separate Datenstruktur verwendet.
 Stattdessen gibt es eine mathematische Formel, die bestimmt, welche Partitionen welche Kategorien von Zeilen enthalten können.
-Wenn wir Partitionen anstelle von Indexen verwenden, steigt die Effizienz, je mehr Partitionen durch die WHERE-Klausel in der Abfrage ausgeschlossen werden.
+Wenn wir Partitionen anstelle von Indizes verwenden, steigt die Effizienz, je mehr Partitionen durch die WHERE-Klausel in der Abfrage ausgeschlossen werden.
 Besonders vorteilhaft können Partitionen sein, wenn die Tabellen sehr groß sind und nicht mehr vollständig in den Speicher passen.
 Außerdem sind partitionierte Daten einfacher zu verwalten, da gesamte Partitionen gelöscht oder auch wiederhergestellt werden können.
 
 Die Effizienz von Partitionierung basiert auf zwei wichtigen Annahmen.
 Zum einen muss man die Suche durch das Pruning von Partitionen beim Abfragen eingrenzen können und zum anderen muss die Partitionierung selbst nicht sehr kostspielig sein.
 Diese Annahmen sind aber nicht immer gültig.
-Im Folgenden betrachten wir 3 unterschiedliche Leitsätze, um mögliche Fehler, die beim Umgang mit Partitionen auftreten können, zu vermeiden.
+Im Folgenden betrachten wir 3 unterschiedliche Anwendungsfälle, bei denen mögliche Fehler im Umgang mit Partitionen beschrieben werden.
 
-Zuallererst kann das Ergebnis der Partitionsfunktion \texttt{NULL} sein und das kann auch passieren, wenn das Datum als \texttt{NOT NULL} deklariert wird, da man Werte speichern kann, die kein gültiges Datum sind.
-Jede Zeile, deren Datum entweder NULL oder kein gültiges Datum ist, wird in der ersten definierten Partition gespeichert.
-Wenn man eine Abfrage hat, die alle Jahre außer 2020 herausfiltert, dann muss man zwei Partitionen statt nur einer durchsuchen, um die Zeilen zu finden.
-Diese Effekte verstärken sich mit der Größe der ersten Partition, weshalb man entweder eine dedizierten Partition für diese Sonderfälle einführen sollte oder Funktionen, wie \texttt{RANGE COLUMNS} verwenden sollte.
+Zuallererst kann das Ergebnis der Partitionsfunktion \texttt{NULL} sein.
+Selbst wenn man die zeitbasierte Spalten als \texttt{NOT NULL} deklariert, können Werte gespeichert werden, die kein gültiges Datum sind.
+Alle Zeilen, deren Datum entweder NULL oder nicht gültig ist, werden in MySQL in der ersten definierten Partition gespeichert.
+Deshalb muss man bei einer Abfrage, die alle Jahre außer 2020 herausfiltert, anstelle einer Partition zwei Partitionen durchsuchen.
+Die damit verbundenen Leistungsprobleme nehmen mit der Größe der ersten Partition zu.
+Daher sollte man entweder eine dedizierte Partition für diese Sonderfälle einführen oder Funktionen wie \texttt{RANGE COLUMNS} verwenden.
 
-Wenn man einen Index definiert, der nicht mit der Partitionsklausel übereinstimmt, kann es dazu führen, dass Partitionen nicht ausgeschlossen werden können, obwohl man eigentlich davon ausgehen würde.
-Man sollte daher versuchen, auf nicht partitionierten Spalten keine Indexe zu erstellen, es sei denn, die Abfragen enthalten auch einen Ausdruck, der beim Pruning der Partitionen hilft.
+Wenn man einen Index definiert, der nicht mit der Partitionsklausel übereinstimmt, können unerwartet mehr Partitionen durchsucht werden.
+Man sollte daher versuchen, auf nicht partitionierten Spalten keine Indexe zu erstellen, es sei denn, die Abfragen enthalten einen Ausdruck, der beim Pruning der Partitionen hilft.
 Manchmal lässt sich dieses Problem nicht auf den ersten Blick erkennen.
 Angenommen eine partitionierte Tabelle ist die zweite Tabelle in einem Join und der Index, der für den Join verwendet wird, ist nicht Teil der Partitionsklausel, dann wird jede Zeile im Join jede Partition in der zweiten Tabelle durchsuchen.
-
+% TODO(Daniel): dieser part hier gefällt mir nicht.
 Bei der Range-Partitionierung kann die Bestimmung der korrekten Partition teuer sein, weil der Server die Liste der Partitionsdefinitionen durchsucht, um die Richtige zu finden.
 Diese lineare Suche ist nicht sehr effizient und es steigen die Kosten, je mehr Partitionen es gibt.
 Das Öffnen und Sperren von Partitionen, wenn eine Abfrage auf eine partitionierte Tabelle zugreift, ist eine andere Art von Overhead pro Partition.
@@ -122,8 +125,8 @@ Alle fünf Jahre soll es eine neue Partition geben.
 \vspace{-5pt}
 
 Damit es zu keinen Fehlern kommt, muss hier der Geburtstag auch Teil des Primärschlüssels der Kundentabelle sein.
-Außerdem muss der Attribut \texttt{GEBURTSTAG} bei der Bestelltabelle als Attribute hinzugefügt werden, damit das Joinen der Tabellen über den Primärschlüssel effizienter ist.
-Seit MySQL 5.5 kann für Datumsspalten auch der Partitionierungstyp \texttt{RANGE COLUMNS} verwendet werden, der keine zusätzliche Funktion erfordert.
+Außerdem muss die Spalte \texttt{GEBURTSTAG} bei der Bestelltabelle hinzugefügt werden, damit das Joinen der Tabellen über den Primärschlüssel effizienter ist.
+Seit MySQL 5.5 kann für Datumsspalten auch der Partitionierungstyp \texttt{RANGE COLUMNS} verwendet werden, wodurch bei der Partitionsklausel die Funktion \texttt{YEAR()} nicht erforderlich ist.
 
 Um die Performance der beiden Ansätze zu vergleichen, verwenden wir beide Varianten bei der Tabellenerstellung.
 Bei der Range-Partitionierung testen wir mehrere Select-Befehle, da je nach Art der Abfrage des Datums das Pruning besser oder schlechter funktioniert (siehe Abschnitt~\ref{sec:partition-grundlagen}).
@@ -140,7 +143,7 @@ WHERE k.GEBURTSTAG = '1985-01-01';		            -- with_primary_key.sql
 \vspace{-5pt}
 
 Bevor wir die Performance dieser Abfragen analysieren, wollen wir überprüfen, ob der Optimierer die Partitionen pruned oder nicht.
-Dazu kann man SQL-Befehl \texttt{EXPLAIN} vor demn \texttt{SELECT}-Befehl in~\ref{lst:different_where_conditions} nutzen.
+Dazu kann man SQL-Befehl \texttt{EXPLAIN} vor dem \texttt{SELECT}-Befehl in~\ref{lst:different_where_conditions} nutzen.
 Als Rückgabe erhält man eine Übersicht, wie MySQL die Abfrage ausführt und welche Partitionen verwendet wurden.
 Zunächst führen wir Query aus, bei der wir keine \texttt{WHERE}-Klausel angeben.
 Im Ergebnis von \texttt{EXPLAIN} sehen wir, dass der Abfragemechanismus alle Partitionen durchsuchen muss, was bei großen Tabellen die Performance stark beeinträchtigen kann.
@@ -166,7 +169,7 @@ Damit müssen wir bei der Erstellung der Tabelle auch 20 Partitionen sowie eine 
 ]{Scripts/Partition/02_Create_Kunden_Partition_List.sql}
 \vspace{-5pt}
 
-Auch bei der List-Partitionierung überprüfen wird die Performance von unterschiedlichen Select-Befehlen.
+Auch bei der List-Partitionierung wird die Performance von unterschiedlichen Select-Befehlen überprüft.
 Zunächst joinen wir, wie zuvor, die Kundentabelle mit der Bestelltabelle und in der WHERE-Bedingung filtern wir so, dass alle Kunden aus Deutschland kommen.
 Genau die gleiche Query verwenden wir beim Vergleich mit der Referenz ohne Partition.
 Zusätzlich wollen wir die Performance untersuchen, wenn aus der Liste an Ländern zufällig fünf ausgewählt werden und alle Kunden nur aus einem dieser fünf Ländern kommen.
