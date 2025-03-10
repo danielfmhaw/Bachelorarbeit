@@ -486,7 +486,7 @@ Die höchste Transaktionsrate erzielt der Hash-Index, sofern der vollständige S
 Dicht darauf folgt der B-Tree-Index mit derselben Abfrage, allerdings mit etwa 10\% weniger Zugriffen.
 Bei den übrigen Abfragen schneidet hingegen der B-Tree-Index deutlich besser ab, in einigen Fällen sogar bis zu dreimal schneller als der Hash-Index.
 Den Grund dafür kennen wir schon aus den anderen Kapiteln.
-Da der Hash-Index nur bei exakter Schlüsselabgleichung zum Einsatz kommt, wird er bei den anderen Abfragen nicht verwendet.
+Da der Hash-Index nur bei exaktem Schlüsselabgleich zum Einsatz kommt, wird er bei den anderen Abfragen nicht verwendet.
 Mithilfe des \texttt{EXPLAIN}-Operators haben wir festgestellt, dass stattdessen der B-Tree-Index genutzt wird, was die starken Unterschiede erklärt.
 
 Betrachtet man die Schreibperformance (Abbildung~\ref{indexing-hash-vs-b-tree-comparison-writes}), zeigt sich, dass der Hash-Index etwa 30--40\% schneller ist als der B-Tree-Index.
