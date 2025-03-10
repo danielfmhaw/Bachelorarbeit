@@ -2,39 +2,39 @@
 %! Date = 13.02.25
 
 \chapter{Replikation}\label{ch:replikation}
-In diesem Segment befassen wir uns mit dem Thema Replikation.
+In diesem Segment wird das Thema Replikation behandelt.
 Replikation kann die Grundlage für den Aufbau großer, leistungsstarker Anwendungen auf der Basis von MySQL sein.
 Es verfolgt dabei die sogenannte~\glqq Scale-Out\grqq-Architektur, bei der mehrere Storage-Knoten parallelisiert arbeiten (\cite{scale_out_eigenschaften}).
 Nach außen hin wirkt es trotzdem wie ein einziges Gesamtsystem.
 Bei dieser Architektur ist die Skalierbarkeit nahezu unbegrenzt, da man durch einfaches Hinzufügen weiterer Speicherknoten die Performance verbessern kann.
 Im Gegensatz dazu ist Scale-Up durch die Systemgrenzen eines einzelnen Geräts limitiert.
-Mit Scale-Out sind allerdings auch Nachteile verbunden, zu denen wir später in diesem Abschnitt kommen.
-Wie schon in den vorherigen Kapiteln gehen wir zuerst auf die Grundlagen ein, dann betrachten wir die Konfiguration, die die Basis für die Benchmarks bilden und abschließend analysieren wir die Ergebnisse.
+Mit Scale-Out sind allerdings auch Nachteile verbunden, die später in diesem Abschnitt behandelt werden.
+Wie schon in den vorherigen Kapiteln werden zunächst die Grundlagen behandelt, gefolgt von der Betrachtung der Konfiguration, die die Basis für die Benchmarks bildet und abschließend erfolgt eine Analyse der Ergebnisse.
 
 \section{Grundlagen}\label{sec:replication-grundlagen}
 Replikation ermöglicht die Konfiguration eines oder mehrere Server als Replikate eines anderen Servers, auch Master genannt (\cite[pp. 447--477]{schwartz2012high}).
 Sowohl die Begrifflichkeit Master-Replikat als auch die Varianten Primary-Secondary und Primary-Replica sind gebräuchlich.
 Das grundlegende Problem, das die Replikation löst, besteht darin, die Daten eines Servers mit denen eines anderen synchron zu halten.
-Es können sich mehrere Replikate mit einem einzigen Master verbinden und mit diesem synchron bleiben.
-Außerdem können Master und Replikate in vielen verschiedenen Konfigurationen angeordnet werden.
+Es können sich mehrere Replikate mit einem einzigen Master verbinden und dessen aktuellen Zustand widerspiegeln.
+Sie sind aber nicht dazu geeignet, richtige Backups zu ersetzten.
+Master und Replikate lassen sich auch in anderen Konfigurationen anordnen.
 Neben der klassischen Master-Replikat-Variante können Replikate selbst als Master für weitere Replikate dienen.
-Zudem ist auch eine Master-Master-Kombination denkbar.
+Zudem ist eine Master-Master-Kombination denkbar.
 Die Vorteile der Replikation liegen nicht nur in einer höheren Effizienz, sondern auch in einer erhöhten Verfügbarkeit und besseren Skalierbarkeit.
-Besonders gut ist es auch für Datenanalysen im Data Warehousing geeignet, aber Replikate sollte keine richtigen Backups ersetzten.
 Die Effizienzvorteile gibt es insbesondere durch die Lastverteilung, bei der Leseanfragen auf mehrere Server verteilt werden.
 Daher ist Replikation besonders für leselastige Anwendungen vorteilhaft ist.
 
-Im folgenden Abschnitt erklären wir die Funktionsweise der Replikation und betrachten dabei den Fall mit einem Master und einem oder mehreren Replikaten.
-Unmittelbar bevor jede Transaktion, die Daten aktualisiert, auf dem Master abgeschlossen wird, zeichnet der Master die Änderungen in seinem Binärlog (engl.\ binary log) auf.
+Im folgenden Abschnitt wird die Funktionsweise der Replikation erklärt, wobei der Fall mit einem Master und einem oder mehreren Replikaten betrachtet wird.
+Unmittelbar bevor eine Transaktion, die Daten aktualisiert, auf dem Master abgeschlossen wird, zeichnet der Master die Änderungen in seinem Binärlog (engl.\ binary log) auf.
 MySQL schreibt die Transaktionen seriell ins Binary-Log und informiert die Storage Engines nach dem Schreiben der Ereignisse darüber, die Transaktionen zu committen.
 Zu diesen Änderungen können beispielsweise neu deklarierte Tabellen oder Trigger sowie Einfügeoperationen in bestehende Tabellen gehören.
 Im nächsten Schritt muss das Replikat die Veränderungen auf dem Master mitbekommen.
 Dazu wird ein Worker-Thread gestartet, der als I/O-Replikations-Thread (engl.\ I/O-Slave-Thread) bezeichnet wird und eine Client-Verbindung zum Master öffnet (siehe Abbildung~\ref{fig:master-replica}).
 Daraufhin wird ein spezieller Prozess gestartet, der die Ereignisse aus dem Binary-Log des Masters liest (engl.\ binlog dump process).
 Nach dem Verarbeiten schreibt der Thread die Werte auf seine eigene Festplatte in das sogenannte Relay-Log.
-Wenn er alle Ereignisse auf dem Log verarbeitet hat, geht er in einen passiven Zustand und wartet auf Aktualisierungen.
+Wenn er alle Ereignisse auf diesem Log verarbeitet hat, geht er in einen passiven Zustand und wartet auf Aktualisierungen.
 Den letzten Teil des Prozesses übernimmt der SQL-Slave-Thread.
-Dieser liest und spielt Ereignisse aus dem Relay-Log ab und aktualisiert so die Daten der Replikate, sodass sie mit denen des Masters übereinstimmen.
+Dieser liest und spielt Ereignisse aus dem Relay-Log ab und aktualisiert die Daten der Replikate, sodass sie mit denen des Masters übereinstimmen.
 Wenn beide Threads eine etwa gleich schnelle Verarbeitung haben, dann bleibt das Relay-Log normalerweise im Cache des Betriebssystems und es gibt nur sehr geringe Mehrkosten (engl.\ Overhead).
 Die Ereignisse, die der SQL-Thread ausführt, können optional zusätzlich in das eigene Binary-Log der Replikate geschrieben werden.
 
@@ -47,26 +47,26 @@ Die Ereignisse, die der SQL-Thread ausführt, können optional zusätzlich in da
 \end{figure}
 \vspace{-18pt}
 
-Die Abbildung~\ref{fig:master-replica} zeigt nur die beiden Replikation-Threads, die auf dem Replikat laufen.
+Die Abbildung~\ref{fig:master-replica} zeigt die beiden Replikation-Threads, die auf dem Replikat laufen.
 Zusätzlich gibt es jedoch einen weiteren Thread auf dem Master, der die vom Replikat zum Master geöffnete Verbindung auf dem Master startet.
 
 Die Replikationsarchitektur entkoppelt die Prozesse des Abrufens und Schreiben von Ereignissen auf dem Replikat.
 Dadurch können die beiden Threads asynchron arbeiten, sodass der I/O-Thread unabhängig vom SQL-Thread agieren kann.
-Dies hat jedoch zur Folge, dass Änderungen, die auf dem Master parallel in verschiedenen Threads ausgeführt werden könnten, auf dem Replikat nicht parallelisiert werden können.
+Dies hat jedoch zur Folge, dass Änderungen, die auf dem Master parallel in verschiedenen Threads ausgeführt werden, auf dem Replikat nicht parallelisiert werden können.
 Das liegt daran, dass die Veränderungen auf dem Replikat in einem einzigen Thread abgearbeitet werden.
-Generell gibt es keine Garantie für die Latenz auf des Replikats und große Abfragen können dazu führen, dass das Replikat Sekunden, Minuten oder sogar Stunden hinter dem Master zurückbleibt.
+Generell gibt es auch keine Garantie für die Latenz des Replikats und große Abfragen können dazu führen, dass das Replikat Sekunden, Minuten oder sogar Stunden hinter dem Master zurückbleibt.
 Der Flaschenhals (engl.\ bottleneck) des gesamten Systems stellt die Anzahl der Schreibvorgänge dar, die der langsamste Thread ausführen kann.
 
-Die Replikation verursacht nur einen geringen Mehraufwand für den Master.
+Wie aus der Funktionsweise der Replikation hervorgeht, verursacht der Master nur einen geringen Mehraufwand.
 Wenn das binäre Logging für Backups und Point-in-Time-Recovery genutzt wird, kann es jedoch deutlich mehr Ressourcen beanspruchen.
 Jedes angeschlossene Replikat verursacht nur eine geringe zusätzliche Last (hauptsächlich Netzwerk-I/O) auf dem Master.
 Trotzdem sollten die Auswirkungen vieler Replikate nicht unterschätzt werden, da sie im Wesentlichen zu unnötiger Daten-Duplikation führen.
 
-Als Nächstes betrachten wir die zwei verschiedenen Arten der Replikation, die von MySQL unterstützt werden: die anweisungsbasierte (engl.\ statement-based) und die zeilenbasierte (engl.\ row-based) Replikation.
+Als Nächstes werden die zwei verschiedenen Arten der Replikation betrachtet, die von MySQL unterstützt werden: die anweisungsbasierte (engl.\ statement-based) und die zeilenbasierte (engl.\ row-based) Replikation.
 Die anweisungsbasierte Replikation wird seit MySQL 5.0 und älter unterstützt und funktioniert, indem die Abfrage, die die Daten auf dem Master geändert hat, protokolliert wird.
 Wenn ein Replikat das Ereignis aus dem Relay-Log liest und ausführt, wird die tatsächliche SQL-Abfrage erneut ausgeführt, die der Master ausgeführt hat.
 Der offensichtlichste Vorteil davon ist, dass sie relativ einfach zu implementieren ist und das Protokollieren sowie Wiederholen der Anweisungen das Replikat logischerweise mit dem Master synchron halten sollte.
-Außerdem sind die Binary-Log-Ereignisse in der Regel recht kompakt sind und verbrauchen nicht viel Bandbreite.
+Außerdem sind die Binary-Log-Ereignisse in der Regel recht kompakt und verbrauchen nicht viel Bandbreite.
 In der Praxis gibt es jedoch Änderungen auf dem Master, die von Faktoren abhängen, die über den reinen Abfragetext hinausgehen.
 Beispielsweise werden Anweisungen zu leicht oder sogar deutlich unterschiedlichen Zeiten auf dem Master und dem Replikat ausgeführt.
 Deshalb muss das Binary Log nicht nur den Abfragetext, sondern auch Metadaten wie den aktuellen Zeitstempel enthalten.
@@ -93,7 +93,7 @@ Damit kommen wir zu weiteren Vor- und Nachteilen der unterschiedlichen Arten.
 Die anweisungsbasierte Replikation eignet sich besser, wenn das Schema auf Master und Replikat unterschiedlich ist und unterstützt Szenarien mit unterschiedlichen, aber kompatiblen Datentypen oder Spaltenreihenfolgen.
 Zudem erleichtert sie Schemaänderungen auf Replikaten, die später als Master dienen sollen, wodurch Ausfallzeiten reduziert werden können.
 Im Gegensatz dazu kann die zeilenbasierte Replikation bei Schemaänderungen auf einem Replikat bestimmte Operationen nicht ausführen, bietet jedoch eine zuverlässige Funktionalität mit allen SQL-Konstrukten.
-Sie stopp auch bei Fehlern, z.B.\ wenn eine erwartete Zeile auf dem Replikat fehlt und weist damit auf Inkonsistenzen hin, während der andere Typ keine Hinweise auf fehlende Einträge gibt.
+Sie stoppt auch bei Fehlern, z.B.\ wenn eine erwartete Zeile auf dem Replikat fehlt und weist damit auf Inkonsistenzen hin, während der andere Typ keine Hinweise auf fehlende Einträge gibt.
 Die Fehlersuche und das Verständnis von Problemen sind bei der anweisungsbasierten Replikation einfacher, da die Änderungen über verständliche SQL-Anweisungen erfolgen.
 Bei der zeilenbasierten Replikation ist die Nachvollziehbarkeit der Änderungen dagegen schwieriger, jedoch gibt es dafür weniger Locking-Probleme.
 Die zeilenbasierte Replikation erleichtert die Datenwiederherstellung durch das Speichern alter Daten, wobei eine Wiederherstellung zu einem bestimmten Zeitpunkt mit einem Binary-Log im zeilenbasierten Format zwar schwieriger, aber möglich ist.
@@ -105,14 +105,15 @@ Alternativ kann das Format auch durch Setzen der Variable \texttt{binlog\_format
 
 \section{Konfiguration des Master-Replikat-Ansatzes}\label{sec:replication-konfiguration}
 
-Damit wir Benchmarks ausführen können, müssen den Master-Replika-Ansatz in MySQL konfigurieren.
-Zunächst müssen wir festlegen, welches Szenario der Replikation wir umsetzen wollen.
-In diesem Kapitel betrachten wir das Modell mit einem Master und einer beliebigen Anzahl an Replikaten.
+Um Benchmarks ausführen zu können, muss der Master-Replika-Ansatz in MySQL konfiguriert werden.
+Zunächst gilt es, das Szenario der Replikation festzulegen, das umgesetzt werden soll.
+In diesem Kapitel wird das Modell mit einem Master und einer beliebigen Anzahl an Replikaten betrachtet.
 Die erforderlichen Schritte umfassen das Erstellen der Master- und Replikationsknoten und der anschließenden Anweisung an das Replikat, sich mit dem Master zu verbinden.
 Abschließend muss die Replikation gestartet werden.
-Nach dem Erstellen der Knoten müssen wir uns mit einigen speziellen MySQL-Privilegien befassen, die erforderlich sind, damit die Replikationsprozesse ordnungsgemäß ausgeführt werden können.
+
+Nach dem Starten der Knoten müssen einige spezielle MySQL-Privilegien berücksichtigt werden, die erforderlich sind, damit die Replikationsprozesse ordnungsgemäß ausgeführt werden können.
 Dazu muss ein Benutzer auf dem Master erstellt werden und diesem die richtigen Privilegien zugewiesen werden, damit der I/O-Thread sich als dieser Benutzer verbinden und das Binary-Log des Masters lesen kann.
-Außerdem dürfen wir nicht vergessen, die Datenbank zu erstellen, auf der die Benchmarks ausgeführt werden (wie in~\ref{lst:tools-create-db}).
+Außerdem darf nicht vergessen werden, die Datenbank zu erstellen, auf der die Benchmarks ausgeführt werden (wie in~\ref{lst:tools-create-db}).
 
 \vspace{-7pt}
 \begin{lstlisting}[language=SQL,caption=Datenbank- und Nutzererstellung sowie Rechtevergabe,label={lst:replication-privileges}]
@@ -122,7 +123,7 @@ GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';
 \end{lstlisting}
 \vspace{-5pt}
 
-Den Nutzer müssen wir nur auf dem Master erstellen, aber wir benötigen ihn auch bei der Verbindung der Replikate mit dem Master.
+Diesen Nutzer muss nur auf dem Master erstellt werden, ist jedoch auch für die Verbindung der Replikate mit dem Master erforderlich.
 Im nächsten Schritt müssen einige Einstellungen auf dem Master und den Replikaten vorgenommen werden.
 Zum einen muss die Binärprotokollierung aktiviert und zum anderen eine einzigartige ID mit dem Parameter \texttt{server\_id} angegeben werden.
 Wenn die Binärprotokollierung in der Konfigurations-Datei nicht bereits angegeben wurde, muss MySQL neu gestartet werden.
@@ -136,14 +137,14 @@ SHOW MASTER STATUS; --MySQL <8.0.23
 \end{lstlisting}
 \vspace{-5pt}
 
-Die wichtigste Einstellung für das Binär-Logging auf dem Master ist \texttt{sync\_binlog}, wobei der Wert \texttt{1} gesetzt werden muss.
+Die wichtigste Einstellung für das Binär-Logging auf dem Master ist \texttt{sync\_binlog}, wobei der Wert auf \texttt{1} gesetzt werden muss.
 Diese Option sorgt dafür, dass MySQL den Inhalt des Binary-Logs, bei jedem Transaktions-Commit auf die Festplatte synchronisiert.
 Ist die Option deaktiviert, verringert sich der Arbeitsaufwand des Servers, jedoch könnten Binary-Log-Einträge bei einem Absturz verloren gehen.
 Auf einem Replikat, das nicht als Master dient, erzeugt diese Option unnötigen Mehraufwand.
-Außerdem wird empfohlen, einen Basisnamen für das Binary-Log explizit anzugeben, um einheitliche Namen auf allen Servern zu gewährleisten und Änderungen bei einem Hostnamenwechsel zu vermeiden.
+Es wird außerdem empfohlen, einen Basisnamen für das Binary-Log explizit anzugeben, um einheitliche Namen auf allen Servern zu gewährleisten und Änderungen bei einem Hostnamenwechsel zu vermeiden.
 Dazu muss ein Argument für die \texttt{log\_bin}-Option angegeben werden.
 
-Es gibt noch weitere optionale Konfigurationsparameter, die wir hinzufügen können.
+Es gibt noch weitere optionale Konfigurationsparameter, die hinzugefügt werden können.
 Einer davon ist der Parameter \texttt{relay\_log}, der den Speicherort und den Namen des Relay-Logs festlegt.
 Ein weiterer wichtiger Parameter ist \texttt{log\_slave\_updates}, der es dem Replikat ermöglicht, replizierte Ereignisse in sein eigenes Binary-Log zu schreiben.
 Die Option \texttt{skip\_slave\_start} sorgt dafür, dass das Replikat nach einem Absturz automatisch startet, was die Möglichkeit offenlässt, den Server im Falle eines Problems zu reparieren.
@@ -168,7 +169,7 @@ CHANGE MASTER TO
 \vspace{-5pt}
 
 Die Spalten \texttt{MASTER\_LOG\_FILE} und \texttt{MASTER\_LOG\_POS} müssen mit dem Ergebnis von dem Befehl aus~\ref{lst:replication-master-config} übereinstimmen.
-Um sicherzustellen, dass die Datenbank \texttt{sbtest} und der Benutzer mit den entsprechenden Privilegien tatsächlich existieren, müssen wir den Befehl aus~\ref{lst:replication-master-config} bereits vor der Ausführung des Befehls in~\ref{lst:replication-privileges} durchführen.
+Um sicherzustellen, dass die Datenbank \texttt{sbtest} und der Benutzer mit den entsprechenden Privilegien tatsächlich existieren, muss der Befehl aus~\ref{lst:replication-master-config} bereits vor der Ausführung des Befehls in~\ref{lst:replication-privileges} ausgeführt werden.
 Um die eigentliche Replikation zu starten, muss man den folgenden Befehl auf den Replikaten ausführen:
 
 \vspace{-8pt}
@@ -188,9 +189,9 @@ SHOW PROCESSLIST\G;
 Die Spalten \texttt{Slave\_IO\_State}, \texttt{Slave\_IO\_Running} und \texttt{Slave\_SQL\_Running} zeigen an, ob die Replikationsprozesse laufen oder nicht.
 Wenn \texttt{Seconds\_Behind\_Master} nicht mehr NULL ist, bedeutet das, dass der I/O-Thread bereits alle Binary-Logs abgerufen hat und nun auf ein Ereignis vom Master wartet.
 Man sollte auch beobachten können, dass die verschiedenen Datei- und Positionswerte auf dem Replikat inkrementiert werden, wenn man Änderungen an dem Master vornimmt.
-Außerdem sollten zwei Threads auf dem Replikat aktiv sein, die unter dem Benutzer~\glqq system user\grqq laufen.
+Außerdem sollten zwei Threads auf dem Replikat aktiv sein, die unter dem Benutzer~\glqq system user\grqq~laufen.
 
-Bei den bisherigen Setup-Anweisungen sind wir von einer frischen Installation ausgegangen.
+Bei den bisherigen Setup-Anweisungen wurde von einer frischen Installation ausgegangen.
 Es gibt aber auch andere Möglichkeiten, um ein Replikat von einem anderen Server zu initialisieren.
 Zum einen kann man bereits existierende Daten von einem Master kopieren, ein Replikat von einem anderen Replikat klonen oder ein Replikat aus einem aktuellen Backup starten.
 Um ein Replikat mit einem Master zu synchronisieren, sind drei Elemente erforderlich: eine Momentaufnahme der Master-Daten zu einem bestimmten Zeitpunkt, die Log-Datei des Masters mit dem entsprechenden Byte-Offset (ermittelbar durch den Befehl~\ref{lst:replication-master-config}) sowie die Binary-Logs des Masters ab diesem Zeitpunkt.
@@ -200,30 +201,30 @@ Bei einer warmen Kopie können die Dateien übertragen werden, während der Serv
 \section{Analyse}\label{sec:replication-analyse}
 
 Im vorherigen Abschnitt wurde erklärt, wie man den Master und vor allem die Replikate korrekt konfiguriert und den Prozess der Replikation startet.
-Für die Durchführung der Benchmarks benötigen wir wieder die Kundentabelle und die Bestelltabelle aus Kapitel~\ref{sec:projektaufbau-mit-beispiel}.
+Für die Durchführung der Benchmarks werden erneut die Kundentabelle und die Bestelltabelle aus Kapitel~\ref{sec:projektaufbau-mit-beispiel} benötigt.
 Die einzigen erforderlichen Anpassungen betreffen das Festlegen des Binlog-Formats, das über die Variable \texttt{binlog\_format} definiert wird und die Werte \texttt{STATEMENT}, \texttt{ROW} oder \texttt{MIXED} annehmen kann.
 Diese Einstellung kann entweder global für den gesamten Server oder lokal für die aktuelle Sitzung mithilfe des Befehls \texttt{SET SESSION} geändert werden.
-Damit können wir die Performanceunterschiede zwischen den einzelnen Arten, insbesondere für die Einfügeoperationen, vergleichen.
+Damit lassen sich die Performanceunterschiede zwischen den einzelnen Arten, insbesondere bei den Einfügeoperationen, vergleichen.
 Der eigentliche Aufwand bei diesen Benchmarks besteht in der Einrichtung der Replikation auf dem lokalen Rechner und im Workflow, während die Veränderungen an den Lua-Skripten minimal sind.
 
-Im ersten Vergleich wollen wir die Performanceunterschiede zwischen dem Master-Replikat-Ansatz und dem Ansatz mit einem MySQL-Server feststellen.
-Beim Master-Replikat-Ansatz verwenden wir mit \texttt{ROW} immer den Default-Wert des Binlog-Formats.
-Damit keine Fehler auftreten, müssen wir die beiden Ansätze miteinander kompatibel machen.
+Im ersten Vergleich sollen die Performanceunterschiede zwischen dem Master-Replikat-Ansatz und dem Ansatz mit einem einzelnen MySQL-Server festgestellt werden.
+Beim Master-Replikat-Ansatz wird mit \texttt{ROW} immer der Standardwert des Binlog-Formats verwendet.
+Damit keine Fehler auftreten, müssen die beiden Ansätze miteinander kompatibel gemacht werden.
 Das Problem dabei ist, dass der Standardport von MySQL (3306) nicht gleichzeitig verwendet werden darf.
-Daher starten wir den Master auf Port 3307 und jedes Replikat erhöht diesen Wert um 1.
+Daher wird der Master auf Port 3307 gestartet und jedes Replikat erhält einen um 1 erhöhten Wert.
 Somit nutzt das dritte Replikat den Port 3310.
-Die Anzahl an Replikate können wir in der \texttt{envs.json}-Datei mithilfe der Variablen \texttt{REPLICAS\_COUNT} festlegen.
+Die Anzahl der Replikate lässt sich in der \texttt{envs.json}-Datei über die Variable \texttt{REPLICAS\_COUNT} festlegen.
 Die Voraussetzung dafür ist, dass es lokal mindestens diese Anzahl an gestarteten und konfigurierten Replikate gibt.
 Innerhalb des Workflowjobs muss nichts anpasst werden, da dort \texttt{REPLICAS\_COUNT} dazu genutzt wird, die exakte Anzahl an Replikate zu starten.
 Wichtig ist noch zu erwähnen, dass die Insert-Befehle nur auf dem Master, also Port 3307, ausgeführt werden.
 Die Select-Befehle werden sowohl auf dem Master als auch auf die Replikate ausgeführt.
 
-Wenn wir die Ergebnisse aus Abbildung~\ref{fig:replication-vs-no} betrachten, dann fällt auf, dass die Version ohne Replikation am schnellsten ist.
+Beim Betrachten der Ergebnisse aus Abbildung~\ref{fig:replication-vs-no} fällt auf, dass die Version ohne Replikation am schnellsten ist.
 Danach folgen die Readabfragen auf dem Master auf Port 3307.
 Der Unterschied der beiden liegt bei etwa 15\%.
 Nah an dem Ergebnis vom Master ist das erste Replikat (3308).
 Überraschenderweise folgen mit etwas mehr Abstand erst die anderen beiden Replikate auf den Ports 3309 und 3310.
-Die Schreibgeschwindigkeit ist sehen wir einen deutlichen Unterschied zwischen den beiden Varianten, da durch den Prozess der Replikation die Schreibgeschwindigkeit ungefähr 60\% langsamer ist.
+Bei der Schreibgeschwindigkeit gibt es einen deutlichen Unterschied zwischen den beiden Varianten, da durch den Prozess der Replikation die Schreibgeschwindigkeit ungefähr 60\% langsamer ist.
 
 \vspace{-8pt}
 \begin{figure}[H]
@@ -244,15 +245,15 @@ Die Schreibgeschwindigkeit ist sehen wir einen deutlichen Unterschied zwischen d
 \vspace{-20pt}
 
 Bei dem ersten Vergleich betrug der Threads-Wert bei Einfügungen und Abfragen \texttt{1}, sodass die Leistung eines einzelnen Threads ersichtlich wurde.
-Aus den Ergebnissen können wir schlussfolgern, dass der Single-Server am effizientesten ist, solange er nicht stark ausgelastet ist.
-In dem Fall bringt der Master-Replikat-Ansatz demnach keine Vorteile.
-Anders sieht das aus, wenn wir die Last auf den Server erhöhen, indem wir die Anzahl der Threads erhöhen.
+Aus den Ergebnissen lässt sich schlussfolgern, dass der Single-Server am effizientesten ist, solange er nicht stark ausgelastet wird.
+In diesem Fall bringt der Master-Replikat-Ansatz demnach keine Vorteile.
+Anders verhält es sich, wenn die Last auf den Server erhöht wird, indem die Anzahl der Threads gesteigert wird.
 Die Threadanzahl kann beim Aufführen des Sysbench-Befehls mit dem Parameter \texttt{--threads} festgelegt werden.
 Die Prozesse sollen die Last durch Nutzer in der Datenbank simulieren.
-Um den Vergleich zwischen dem Single-Server und dem Master-Replikat-Ansatz zu verdeutlichen, führen wir den Benchmark mit 8 und 16 Threads durch.
+Um den Vergleich zwischen dem Single-Server und dem Master-Replikat-Ansatz zu verdeutlichen, wird der Benchmark mit 8 und 16 Threads durchgeführt.
 Beim Single-Server werden alle Threads auf einem Server ausgeführt, während sie beim Master-Replikat-Ansatz auf den Master und die drei Replikate gleichmäßig aufgeteilt werden.
-Bei 8 Threads wird die Last so aufgeteilt, dass der Master und jedes Replikat 2 Threads verarbeitet ($4 * 2 = 8$).
-Nach diesem Prinzip lassen wir den Benchmark auch mit 16 Threads durchführen (siehe Abbildung~\ref{replication-multiple-select-threads-reads}).
+Bei 8 Threads wird die Last so aufgeteilt, dass der Master und alle Replikat je 2 Threads verarbeiten ($8 / 4 = 2$).
+Nach diesem Prinzip wird der Benchmark auch mit 16 Threads durchgeführt (siehe Abbildung~\ref{replication-multiple-select-threads-reads}).
 
 \vspace{-8pt}
 \begin{figure}[H]
@@ -274,10 +275,10 @@ Nach diesem Prinzip lassen wir den Benchmark auch mit 16 Threads durchführen (s
 \end{figure}
 \vspace{-20pt}
 
-Zunächst erkennen in der linken Grafik, dass beide Kurven des Single-Server-Ansatzes sehr ähnlich verlaufen.
+Zunächst ist in der linken Grafik zu erkennen, dass beide Kurven des Single-Server-Ansatzes sehr ähnlich verlaufen.
 Auf den ersten Blick könnte das überraschen, da man erwarten würde, dass eine Verdopplung der Threadanzahl auch zu einer Verdopplung der Leseabfragen führt.
-Deshalb haben wir noch einen weiteren Vergleich durchgeführt, bei dem wir die Threadanzahlen der 2-er Potenzreihe bis einschließlich $2^5$ nur für den Single-Server-Ansatz getestet haben.
-Zusätzlich haben wir bei diesem Vergleich die CPU-Auslastung mit dem folgenden Befehl gemessen:
+Deshalb wurde noch ein weiterer Vergleich durchgeführt, bei dem die Threadanzahlen der 2er-Potenzreihe bis einschließlich $2^5$ nur für den Single-Server-Ansatz getestet wurden.
+Zusätzlich wurde bei diesem Vergleich die CPU-Auslastung mit dem folgenden Befehl gemessen:
 
 \vspace{-5pt}
 \begin{lstlisting}[language=bash,caption=Messen der CPU-Auslastung,label={lst:replication-cpu-usage},style=custom_daniel,basicstyle=\ttfamily\scriptsize]
@@ -291,7 +292,7 @@ Die Abbildung~\ref{replication-no-multiple-select-threads-reads} zeigt, dass sic
 Zwischen 2 und 4 Threads fällt der Unterschied schon geringer aus, liegt aber dennoch bei etwa 40\%.
 Die restlichen Threadanzahlen weichen nur geringfügig voneinander ab.
 Begründen lässt sich das durch die CPU-Auslastung.
-Bei geringeren Anzahlen an Threads ist die CPU-Auslastung sehr gering, weshalb wir diese starken Anstiege sehen.
+Bei einer geringeren Anzahl an Threads ist die CPU-Auslastung sehr niedrig, was die starken Anstiege erklärt.
 Irgendwann ist die CPU jedoch voll ausgelastet, sodass die Performance nicht mehr weiter steigt.
 Dies ist bei 8 Threads der Fall, da dort die CPU-Auslastung bei 89.34\% liegt.
 
@@ -317,20 +318,20 @@ Dies ist bei 8 Threads der Fall, da dort die CPU-Auslastung bei 89.34\% liegt.
 \end{table}
 \vspace{-25pt}
 
-Wenn wir jetzt wieder das Ergebnis aus~\ref{fig:replication-multiple-select-threads} betrachten, fallen die Vorteile der Replikation deutlich auf.
+Wenn nun wieder das Ergebnis aus~\ref{replication-multiple-select-threads-reads} betrachtet wird, werden die Vorteile der Replikation deutlich sichtbar.
 In beiden Fällen liegen die Werte mit Replikation stets deutlich über denen des Single-Server-Ansatzes.
 Die Performance des Single-Servers bleibt unabhängig von der Threadanzahl nahezu konstant.
 Bei der Replikation zeigt sich, dass ein Anstieg an Threads auch zu einer Steigerung der Leseabfragen führt.
 So ist die Kombination von 16 Threads, verteilt auf den Master und 3 Replikate, am effizientesten.
 Danach folgt mit etwas Abstand die Version mit 8 Prozessen, die etwa 25\% langsamer ist.
-Dennoch sind selbst diese deutlich schneller als alle Varianten des Single-Server-Ansatzes, weshalb wir sagen können, dass die Replikation bei höherer Last deutliche Vorteile bringt.
+Aber selbst diese ist deutlich schneller als alle Varianten des Single-Server-Ansatzes, sodass festgestellt werden kann, dass die Replikation bei höherer Last klare Vorteile bietet.
 
-Im letzten Vergleich verwenden wir ausschließlich den Master-Replikat-Ansatz und vergleichen die unterschiedlichen Binlog-Formate, die wir aus~\ref{lst:replication-change-format} kennen.
-Um Variationen zu begrenzen, betrachten wir nur ein Replikat pro Master.
+Im letzten Vergleich wird ausschließlich der Master-Replikat-Ansatz verwendet, um die unterschiedlichen Binlog-Formate zu vergleichen.
+Zur Begrenzung der Variationen wird nur ein Replikat pro Master betrachtet.
 Daraus ergeben sich sechs unterschiedliche Leseergebnisse, da für jedes der drei Formate sowohl der Master- als auch der Replikat-Port abgefragt wird.
-In der Grafik~\ref{fig:replication-format-change} können wir sehen, dass es bei den verschiedenen Binlog-Formaten und Ports kaum Unterschiede zu erkennen gibt.
+In der Grafik~\ref{fig:replication-format-change} ist zu erkennen, dass es bei den verschiedenen Binlog-Formaten und Ports kaum Unterschiede gibt.
 Und auch die Schreibgeschwindigkeiten verhalten sich bei beiden Varianten sehr ähnlich.
-Das können wir auch mit dem Hexagon-Chart bestätigen, da dort alle Werte sehr nah beieinander liegen.
+Das lässt sich auch mit dem Hexagon-Chart bestätigen, da dort alle Werte sehr nahe beieinander liegen.
 
 \begin{figure}[H]
   \centering
@@ -347,9 +348,9 @@ Das können wir auch mit dem Hexagon-Chart bestätigen, da dort alle Werte sehr 
 \end{figure}
 \vspace{-20pt}
 
-Die Schlussfolgerungen, die wir aus den Messungen gewinnen können, sehen dabei wie folgt aus.
-Wir sehen, dass durch Replikation, anders als beispielsweise mit Indexen oder Partitionen, bei einem einzelnen Thread keine deutlichen Performancevorteile gewonnen werden können.
+Die Schlussfolgerungen aus den Messungen sehen dabei wie folgt aus.
+Es zeigt sich, dass durch Replikation, anders als beispielsweise mit Indexen oder Partitionen, mit einem einzelnen Thread keine deutlichen Performancevorteile gewonnen werden können.
 Wenn aber mehrere Nutzer auf der Datenbank interagieren und ausschließlich Lesezugriffe benötigen, dann können die Abfragen auf die unterschiedlichen Ports aufgeteilt werden.
-In diesen Szenarien mit höherer Parallelität und intensiveren Leseoperationen kann Replikation daher signifikante Vorteile bieten.
+In diesen Szenarien mit höherer Parallelität und intensiveren Leseoperationen kann Replikation signifikante Vorteile bieten.
 Die Auswahl des Binlog-Formats hat bei unserem Benchmark zu keinen Performanzgewinnen geführt.
 Möglicherweise könnte sich jedoch ein anderer Einfluss zeigen, wenn Schreiboperationen ins Spiel kommen oder die Konsistenzanforderungen geändert werden.
