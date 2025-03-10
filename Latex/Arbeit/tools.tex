@@ -12,7 +12,7 @@ Zu guter Letzt zeigen wir, wie GitHub Actions funktionieren, uns bei den Benchma
 
 Zuallererst muss der MySQL–Server gestartet sein.
 Dabei ist es egal, ob dies lokal auf dem Rechner oder über einen Docker in eines GitHub CI/CD-Workflows erfolgt.
-Das Wichtigste dabei ist es, dass man sich die Zugangsdaten, bestehend aus Benutzer- und Passwortdaten, speichert, da diese gebraucht werden, um den Benchmark-Test mit Sysbench zu starten.
+Das Wichtigste dabei ist, dass man sich die Zugangsdaten, bestehend aus Benutzer- und Passwortdaten, speichert, da diese gebraucht werden, um den Benchmark-Test mit Sysbench zu starten.
 Nachdem das RDBMS gestartet worden ist, muss zunächst eine Datenbank erstellt werden.
 Das könnte beispielsweise folgendermaßen aussehen:
 
@@ -25,7 +25,7 @@ Das könnte beispielsweise folgendermaßen aussehen:
 \vspace{-9pt}
 
 Zusätzlich zu erfolgreichen Erstellung der Datenbank muss das Tool Sysbench installiert werden.
-Auf einem linux-basierten System kann Sysbench wie folgt installiert werden.
+Auf einem Linux-basierten System kann Sysbench wie folgt installiert werden.
 Wenn man das Betriebssystem macOS verwendet, muss \texttt{sudo apt} durch \texttt{brew} ersetzt werden.
 
 \vspace{-5pt}
@@ -34,7 +34,7 @@ sudo apt install sysbench
 \end{lstlisting}
 \vspace{-9pt}
 
-Damit wir auch unsere Grafiken erstellen können, müssen wir die Tools \texttt{gnuplot} und \texttt{pandas} in Kombination mit \texttt{matplotlib} installieren.
+Damit wir auch unsere Grafiken erstellen können, müssen wir die Tools \texttt{Gnuplot} und \texttt{Pandas} in Kombination mit \texttt{matplotlib} installieren.
 Auch hier können wir \texttt{sudo apt} durch \texttt{brew} ersetzen, wenn wir macOS verwenden.
 Es kann sein, dass wir \texttt{pip3} anstelle von \texttt{pip} benutzen müssen.
 
@@ -85,7 +85,7 @@ Als letztes müssen wir die unterschiedlichen Methoden auflisten, um sie mit den
     \item \textbf{cleanup}: Diese Methode stellt die Datenbank in ihren ursprünglichen Zustand zurück und stellt sicher, dass keine Testdaten zurückbleiben.
 \end{itemize}
 
-Für unser Demo-Beispiel wählen wir den Testtyp \textbf{oltp\_read\_write} aus und kombinieren ihn mit allen Methoden.
+Für unser Demo-Beispiel wählen wir den Testtyp \textbf{oltp\_read\_write} aus und kombinieren diesen mit allen Methoden.
 Für die Methode \texttt{RUN} würde unsere Query so aussehen, wobei \texttt{YOUR\_USER} und \texttt{YOUR\_PASSWORD} durch die tatsächlichen Benutzerdaten der verwendeten Datenbank ersetzt werden müssten:
 
 \vspace{-5pt}
@@ -140,7 +140,7 @@ Dies geht mit dem Shell-Kommando \texttt{grep}:
 Der letzte Schritt ist die Erstellung der Graphen mithilfe der Tools Gnuplot oder der Python-Library Pandas.
 %TODO (Daniel): remove line underneath
 Die kompletten Scripts \texttt{plot\_sysbench.gp} und \texttt{generatePlot.py} befinden sich am Ende dieser Bachelorarbeit.
-Das Python-Script, das zuständig ist für die Visualisierung, muss als Argument zum einen die CSV-Datei übermittelt bekommen und zum anderen kann es nur eine bestimmte Auswahl an Messwerten übergeben, damit nur für diese die Graphen erzeugt werden.
+Das Python-Script, das zuständig für die Visualisierung ist, muss als Argument zum einen die CSV-Datei übermittelt bekommen und zum anderen kann es nur eine bestimmte Auswahl an Messwerten übergeben, damit nur für diese die Graphen erzeugt werden.
 In der Abbildung~\ref{fig:demo-graph-generation} können wir die Ergebnisse der Grapherstellung sehen.
 
 \vspace{-5pt}
