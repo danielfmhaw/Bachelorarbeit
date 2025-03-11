@@ -1,6 +1,7 @@
 local con = sysbench.sql.driver():connect()
 package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):match("(.*/)") .. "../../../../Tools/Lua/?.lua"
 local utils = require("utils")
+local dbms = tostring(os.getenv("CUSTOM_DB_NAME")) or ""
 
 local counts_executed = false
 local counter = 0
@@ -20,7 +21,7 @@ function select_query()
         counts_executed = true
     end
 
-    if counter % 200 == 0 then
+    if dbms == "mysql" and counter % 200 == 0 then
         utils.get_cpu_usage()
     end
 

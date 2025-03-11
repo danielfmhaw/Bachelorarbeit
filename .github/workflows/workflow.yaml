@@ -8,6 +8,7 @@ on:
       - '.github/pattern.json'
       - 'Tools/Python/**'
       - 'Tools/Shell-Scripts/sysbench_script.sh'
+      - 'Tools/Shell-Scripts/helper_functions.sh'
       - 'Tools/Lua/utils.lua'
       - 'envs.json'
   workflow_dispatch:
@@ -19,7 +20,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       configurations: ${{ steps.prepare-config.outputs.configurations }}
     env:
-      GENERAL_PATHS: "./.github/workflows ./.github/pattern.json ./Tools/Python ./Tools/Shell-Scripts/sysbench_script.sh ./envs.json ./Tools/Lua/utils.lua"
+      GENERAL_PATHS: "./.github/workflows/workflow.yaml ./.github/pattern.json ./Tools/Python ./Tools/Shell-Scripts/sysbench_script.sh ./Tools/Shell-Scripts/helper_functions.sh ./Tools/Lua/utils.lua ./envs.json"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
