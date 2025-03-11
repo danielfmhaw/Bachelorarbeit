@@ -27,7 +27,7 @@ cd Tools/Shell-Scripts
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output" \
   -scripts '{
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Scripts/replication": {
-      "db": ["mysql_master_slave","mysql"]
+      "db": ["mysql_master_slave","mysql,mysql_single_server_no"]
     }
   }'
 ```
@@ -42,7 +42,7 @@ cd Tools/Shell-Scripts
   -scripts '{
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Scripts/replication": {
       "vars": "sel_thr",
-      "db": ["mysql_master_slave","mysql"],
+      "db": ["mysql_master_slave","mysql,mysql_single_server"],
       "prefixes": "replication_db_mysql_master_slave_comb_sel_thr_8_select,replication_db_mysql_master_slave_comb_sel_thr_16_select,replication_db_mysql_master_slave_comb_sel_thr_32_select"
     }
   }'
@@ -69,7 +69,7 @@ cd ../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output" \
-  -var '{"sel_thr":[8,16,32]}' \
+  -var '{"sel_thr":[1,2,4,8,16,32]}' \
   -scripts '{
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Scripts/replication": {
       "vars": "sel_thr"

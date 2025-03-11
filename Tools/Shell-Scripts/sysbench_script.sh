@@ -53,7 +53,7 @@ run_benchmark() {
     echo "Running $(basename "$SCRIPT_PATH") for $TIME seconds ..."
   fi
   if [[ "$MODE" == "prepare" ]]; then
-    echo "Preparing database for $(basename "$SCRIPT_PATH")${COMBINATION:+ with $COMBINATION}"
+    echo "Preparing database for $(basename "$SCRIPT_PATH")${COMBINATION:+ with $COMBINATION}${DB_INFO:+ and database $DB}"
   fi
   [[ "$MODE" == "cleanup" ]] && echo -e "Cleaning up database for $(basename "$SCRIPT_PATH")\n"
 
@@ -85,7 +85,7 @@ for SCRIPT_PATH in $SCRIPT_DIRS; do
   SELECT_QUERIES=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].selects')
   for DB in $(echo "$DBMS" | jq -r '.[]'); do
     prepare_variables "$SCRIPT_PATH" "$DB"
-    DB_INFO="$( [ "$DBMS_COUNT" -ne 1 ] && echo "${DB}" )"
+    DB_INFO="$( [ "$DBMS_COUNT" -ne 1 ] && echo "${CUSTOM_DB_NAME}" )"
     if [[ -n "$EXPORTED_VARS" ]]; then
       IFS=',' read -r -a KEYS <<< "$EXPORTED_VARS"
 

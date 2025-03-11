@@ -81,8 +81,14 @@ initialize_variables() {
 # Helper function to prepare the variables (for each db)
 prepare_variables(){
   local SCRIPT_PATH="$1" ENV="$2"
+
+  CUSTOM_DB_NAME="${ENV#*,}"
+  ENV="${ENV%%,*}"
+  CUSTOM_DB_NAME=${CUSTOM_DB_NAME:-$ENV}
   # shellcheck disable=SC2046
   eval $(jq -r --arg env "$ENV" '.[$env] | to_entries | .[] | "export " + .key + "=" + (.value | @sh)' "$ABS_PATH/envs.json")
+  export CUSTOM_DB_NAME DB="$ENV"
+
   [ -n "$REPLICAS_COUNT" ] && DB_PORTS=$(seq -s' ' $DB_PORT $((DB_PORT + REPLICAS_COUNT))) || unset DB_PORTS
 
   EXPORTED_VARS=$(echo "$SCRIPTS" | jq -r --arg key "$SCRIPT_PATH" '.[$key].vars // ""')
