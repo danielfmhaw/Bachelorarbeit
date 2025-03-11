@@ -1,6 +1,6 @@
 #!/bin/bash
 
-filename="VorlageBA"
+filename="Bachelorarbeit_Daniel_Freire_Mendes"
 
 rm "$filename".{aux,log,bcf,lof,lot,out,toc,pdf}
 rm *.aux
