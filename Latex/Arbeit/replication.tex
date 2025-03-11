@@ -12,19 +12,31 @@ Mit Scale-Out sind allerdings auch Nachteile verbunden, die später in diesem Ab
 Wie schon in den vorherigen Kapiteln werden zunächst die Grundlagen behandelt, gefolgt von der Betrachtung der Konfiguration, die die Basis für die Benchmarks bildet und abschließend erfolgt eine Analyse der Ergebnisse.
 
 \section{Grundlagen}\label{sec:replication-grundlagen}
-Replikation ermöglicht die Konfiguration eines oder mehrere Server als Replikate eines anderen Servers, auch Master genannt (\cite[pp. 447--477]{schwartz2012high}).
+Replikation ermöglicht die Konfiguration eines oder mehrere Server als Replikate eines anderen Servers, auch Master genannt.
 Sowohl die Begrifflichkeit Master-Replikat als auch die Varianten Primary-Secondary und Primary-Replica sind gebräuchlich.
+
+\begin{quote}
+  \enquote{Replication means keeping a copy of the same data on multiple machines that are connected via a network.} (\cite[S. 151]{kleppmann2017designing})
+\end{quote}
+
 Das grundlegende Problem, das die Replikation löst, besteht darin, die Daten eines Servers mit denen eines anderen synchron zu halten.
 Es können sich mehrere Replikate mit einem einzigen Master verbinden und dessen aktuellen Zustand widerspiegeln.
 Sie sind aber nicht dazu geeignet, richtige Backups zu ersetzten.
 Master und Replikate lassen sich auch in anderen Konfigurationen anordnen.
 Neben der klassischen Master-Replikat-Variante können Replikate selbst als Master für weitere Replikate dienen.
 Zudem ist eine Master-Master-Kombination denkbar.
-Die Vorteile der Replikation liegen nicht nur in einer höheren Effizienz, sondern auch in einer erhöhten Verfügbarkeit und besseren Skalierbarkeit.
-Die Effizienzvorteile gibt es insbesondere durch die Lastverteilung, bei der Leseanfragen auf mehrere Server verteilt werden.
+Die Datenreplikation kann aus verschiedenen Gründen vorteilhaft sein:
+
+\begin{quote}
+  \enquote{Replicas are very useful in a master failure scenario because they contain all of the most recent data and can be promoted to master.} (\cite[S. 148]{da2015redis})
+\end{quote}
+
+Zusätzlich sorgt sie dafür, dass die Daten näher an den Nutzern liegen, wodurch die Latenz verringert wird (vgl.\ \cite[S. 151]{kleppmann2017designing}).
+Außerdem verbessert sie die Verfügbarkeit und ermöglicht eine bessere Skalierbarkeit.
+Effizienzvorteile gibt es insbesondere durch die Lastverteilung, bei der Leseanfragen auf mehrere Server verteilt werden.
 Daher ist Replikation besonders für leselastige Anwendungen vorteilhaft ist.
 
-Im folgenden Abschnitt wird die Funktionsweise der Replikation erklärt, wobei der Fall mit einem Master und einem oder mehreren Replikaten betrachtet wird.
+Im folgenden Abschnitt wird die Funktionsweise der Replikation erklärt, wobei der Fall mit einem Master und einem oder mehreren Replikaten betrachtet wird (\cite[S. 447--477]{schwartz2012high}).
 Unmittelbar bevor eine Transaktion, die Daten aktualisiert, auf dem Master abgeschlossen wird, zeichnet der Master die Änderungen in seinem Binärlog (engl.\ binary log) auf.
 MySQL schreibt die Transaktionen seriell ins Binary-Log und informiert die Storage Engines nach dem Schreiben der Ereignisse darüber, die Transaktionen zu committen.
 Zu diesen Änderungen können beispielsweise neu deklarierte Tabellen oder Trigger sowie Einfügeoperationen in bestehende Tabellen gehören.
@@ -88,7 +100,7 @@ UPDATE master_table SET col1 = 0;
 
 Die Verwendung der zeilenbasierten Replikation für diese Abfrage wäre sehr teuer, da jede Zeile geändert und somit ins Binary-Log geschrieben wird.
 Dadurch würde das Binary-Log-Ereignis extrem groß werden, was sowohl beim Protokollieren als auch bei der Replikation zu einer höheren Last auf dem Master führen würde.
-Damit kommen wir zu weiteren Vor- und Nachteilen der unterschiedlichen Arten.
+Damit werden nun weitere Vor- und Nachteile der unterschiedlichen Arten betrachtet.
 
 Die anweisungsbasierte Replikation eignet sich besser, wenn das Schema auf Master und Replikat unterschiedlich ist und unterstützt Szenarien mit unterschiedlichen, aber kompatiblen Datentypen oder Spaltenreihenfolgen.
 Zudem erleichtert sie Schemaänderungen auf Replikaten, die später als Master dienen sollen, wodurch Ausfallzeiten reduziert werden können.
@@ -150,7 +162,7 @@ Ein weiterer wichtiger Parameter ist \texttt{log\_slave\_updates}, der es dem Re
 Die Option \texttt{skip\_slave\_start} sorgt dafür, dass das Replikat nach einem Absturz automatisch startet, was die Möglichkeit offenlässt, den Server im Falle eines Problems zu reparieren.
 Zudem sorgt die Option \texttt{read\_only} dafür, dass die meisten Benutzer keine nicht-temporären Tabellen ändern können.
 Die einzigen Ausnahmen bilden der Replikation-SQL-Thread und Threads mit dem \texttt{SUPER}-Privileg, weshalb dieses Privileg normalen Benutzern nicht zugewiesen werden sollte.
-In unserem Anwendungsfall haben die Replikate die Option \texttt{read\_only} aktiviert.
+In dem Anwendungsfall haben die Replikate die Option \texttt{read\_only} aktiviert.
 Wenn das Replikat stark im Rückstand ist, kann der I/O-Thread den Festplattenspeicher füllen.
 Mit der Option \texttt{relay\_log\_purge} kann verhindert werden, dass der Replikation-SQL-Thread diese entfernt diese, sobald er mit deren Verarbeitung fertig ist.
 
@@ -352,5 +364,5 @@ Die Schlussfolgerungen aus den Messungen sehen dabei wie folgt aus.
 Es zeigt sich, dass durch Replikation, anders als beispielsweise mit Indexen oder Partitionen, mit einem einzelnen Thread keine deutlichen Performancevorteile gewonnen werden können.
 Wenn aber mehrere Nutzer auf der Datenbank interagieren und ausschließlich Lesezugriffe benötigen, dann können die Abfragen auf die unterschiedlichen Ports aufgeteilt werden.
 In diesen Szenarien mit höherer Parallelität und intensiveren Leseoperationen kann Replikation signifikante Vorteile bieten.
-Die Auswahl des Binlog-Formats hat bei unserem Benchmark zu keinen Performanzgewinnen geführt.
+Die Auswahl des Binlog-Formats hat beim Benchmark zu keinen Performanzgewinnen geführt.
 Möglicherweise könnte sich jedoch ein anderer Einfluss zeigen, wenn Schreiboperationen ins Spiel kommen oder die Konsistenzanforderungen geändert werden.

@@ -8,9 +8,9 @@ Beim Datenbankentwurf muss man die ermittelten Anforderungen aus den Interviews 
 Danach wird aus dem konzeptionellen Entwurf ein Logischer in Form eines Relationenschemas.
 Dieses Kapitel dient dazu, eine allgemeine Zusammenfassung der wesentlichen Erkenntnisse zu bieten.
 
-Zuallererst betrachten wir den logischen Entwurf, zu dem neben der Normalisierung der Tabellen auch die Wahl der korrekten Datentypen gehört.
-Das erste Kapitel~\ref{ch:data-types} behandelte dieses Thema im Detail.
-Mithilfe der Benchmarks haben wir zum einen festgestellt, dass der kleinstmögliche Datentyp für eine Spalte deklariert werden sollte.
+Zuallererst wird der logische Entwurf betrachtet, bei dem neben der Normalisierung der Tabellen auch die Auswahl der korrekten Datentypen eine Rolle spielt.
+Das erste Kapitel behandelte dieses Thema im Detail.
+Mithilfe der Benchmarks wurde festgestellt, dass der kleinstmögliche Datentyp für eine Spalte deklariert werden sollte.
 Dazu muss zunächst festgelegt werden, welcher Bereich an Werten abgebildet werden soll, um darauf basierend den geeigneten Typ auszuwählen.
 Dabei ist durchaus von Vorteil, dass der Typ bei einer falschen Einschätzung des Wertebereichs ohne viel Aufwand verändert werden kann.
 Beim Betrachten der numerischen Datentypen fiel auf, dass je größer der Wertebereich und damit der Speicherbedarf ist, desto schlechter wird die Leistung.
@@ -18,13 +18,13 @@ Deshalb zählen \texttt{DECIMAL} und \texttt{BIGINT} zu den ineffizientesten.
 Bei den zeichenkettenbasierten Typen ist die Wahl einfach zu treffen, da in den meisten Fällen der Typ \texttt{VARCHAR} am schnellsten ist.
 Nur wenn eine Spalte häufiger aktualisiert als abgefragt wird, kann es sinnvoll sein, den Typ \texttt{CHAR} in Erwägung zu ziehen.
 Einer der anderen Leitsätze bei der Wahl der Datenformate ist, dass man die simplere Datenstruktur wählen sollte.
-So war in unserem Vergleich \texttt{INT} in etwa ~50\% schneller ist als \texttt{CHAR}.
+Im Vergleich zeigte sich, dass \texttt{INT} etwa 50\% schneller ist als \texttt{CHAR}.
 Zu guter Letzt sollte berücksichtigt werden, dass die Spalten nicht nur aus Performancegründen, sondern auch zur Wahrung der Datenintegrität und -konsistenz an möglichst vielen Stellen als \texttt{NOT NULL} definiert werden sollten.
 
 Nach dem logischen Entwurf einer Datenbank kommt als nächster Schritt die physische Implementierung.
-Bei diesem Schritt spielen auch die anderen Aspekte, die wir betrachtet haben, wie Indexierung, Sichten, Partitionen oder Replikation, eine Rolle.
+Bei diesem Schritt spielen auch die anderen Aspekte, die betrachtet wurden, wie Indexierung, Sichten, Partitionen oder Replikation, eine Rolle.
 
-Bei der Indexierung haben wir gezeigt, wie effektiv sie sein kann, indem wir den Aufbau und die Funktionsweise der B-Tree- und Hash-Indexe erläutert und getrennt voneinander untersucht haben.
+Bei der Indexierung wurde gezeigt, wie effektiv sie sein kann, indem der Aufbau und die Funktionsweise der B-Tree- und Hash-Indexe erläutert und getrennt voneinander untersucht wurden.
 Der Vergleich beider Varianten hat ergeben, dass der Hash-Index in bestimmten Fällen effektiver ist als der B-Baum-Index.
 Auf der anderen Seite kann der B-Baum-Index bei deutlichen mehr Abfragen eingesetzt werden, insbesondere auch bei Bereichsabfragen oder Filtern von Teilen des Indexes.
 Im Gegensatz dazu funktioniert der Hash-Index nur bei einem exakten Schlüsselabgleich.
@@ -35,7 +35,7 @@ Bei der Analyse kann man möglicherweise eine sinnvolle Nutzung von Indizes iden
 Nach einigen Tagen oder Wochen bietet es sich an, eine Kontrolle durchzuführen und abhängig vom Ergebnis können einige Indizes entfernt und andere neue hinzugefügt werden.
 Ein ähnliches Vorgehen ist auch beim Einsatz von Views nützlich.
 
-Wie die Benchmarks im Kapitel~\ref{ch:views} gezeigt haben, wirken sich virtuelle Views nicht auf die Performance aus.
+Wie die Benchmarks für die Sichten gezeigt haben, wirken sich virtuelle Views nicht auf die Performance aus.
 Dafür eignen sich virtuelle Sichten hervorragend für Gewährleistung von Rechtemanagement in einer Organisation, denn sie haben den Vorteil, dass die Daten nicht physisch gespeichert werden und somit keine Redundanzen entstehen.
 Materialisierte Sichten hingegen werden auf der Festplatte gesichert und bieten dafür ein erhebliches Performancepotenzial.
 Besonders geeignet sind sie in Szenarien, in denen häufig auf aggregierte oder komplexe Abfragen zugegriffen wird, wie zum Beispiel in OLTP-Systemen.
@@ -63,15 +63,23 @@ Für die List-Partitionierung hat sich gezeigt, dass der Operator \texttt{IN} am
 Bei der Hash-Partitionierung wurde festgestellt, dass mit zunehmender Anzahl der Partitionen die Suche innerhalb der Partitionierungsstruktur aufwendiger wird und die Performance entsprechend schlechter ausfällt.
 Diese Erkenntnis gilt auch für die anderen Partitionierungstypen.
 
-Zum Schluss haben wir den Einfluss der Replikation im Rahmen des Master-Replikat-Ansatzes analysiert.
+Zum Schluss wurde der Einfluss der Replikation im Rahmen des Master-Replikat-Ansatzes analysiert.
 Anders als bei der Partitionierung werden bei der Replikation vollständige Kopien der gesamten Datenbank auf mehreren Servern erstellt.
 Wenn Änderungen am Master vorgenommen werden, werden diese durch verschiedene Threads an die Replikate übertragen.
 Dadurch wird die Verfügbarkeit und Ausfallsicherheit erhöht, weshalb Replikation häufig in Verbindung mit Backups eingesetzt wird.
-Um die Performance zu testen, haben wir die Leistung eines Single-Servers mit der eines Systems aus Master- und Replikaten verglichen.
-Dabei haben wir festgestellt, dass der Single-Server bei Verwendung eines einzelnen Threads einen Leistungsvorteil hat.
+Um die Performance zu testen, wurde die Leistung eines Single-Servers mit der eines Systems aus Master- und Replikaten verglichen.
+Dabei wurde festgestellt, dass der Single-Server bei Verwendung eines einzelnen Threads einen Leistungsvorteil hat.
 Sobald jedoch mehrere Threads die CPU-Auslastung auf dem Single-Server erhöhen und gleichzeitig die Last auf die Master- und Replikatknoten verteilt wird, zeigt sich der Vorteil der Replikationsverteilung.
 Allerdings treten auch Nachteile beim Einfügen von Daten mit Replikation auf, da das erneute Kopieren der Daten auf die Replikate die Performance negativ beeinflusst.
 Die Auswahl des Binlog-Formats hat bei keinem Benchmark zu Vor- oder Nachteilen geführt.
 Aus der Betrachtung der Ergebnisse ergibt sicht, dass Replikation kein geeigneter Lösungsansatz ist, wenn nur ein Nutzer auf die Datenbank zugreift.
 Sie wird jedoch besonders vorteilhaft, wenn die Last auf mehrere Server verteilt werden muss.
 In Bezug auf die Verteilung ähnelt die Replikation den zentralen Konzepten von NoSQL-Datenbanken, die horizontal skalieren, um Daten auf mehrere Knoten zu verteilen.
+
+Zusammenfassend lässt sich festhalten, dass es keine allgemeingültige Lösung für optimale Performance gibt, sondern verschiedene Konzepte, deren Effizienz vom jeweiligen Anwendungsfall abhängt.
+Oft führt eine gezielte Kombination mehrerer Techniken zu den besten Ergebnissen.
+Ein bewährter Ansatz ist die Verbindung von Partitionierung und Replikation.
+Hierbei wird jede Partition auf mehreren Knoten repliziert, wodurch die Datensätze weiterhin einer bestimmten Partition zugeordnet bleiben, gleichzeitig aber redundant gespeichert werden.
+Darüber hinaus wirkt sich die Verwendung kleinerer Datentypen positiv auf die Index-Performance aus.
+Indizes können effektiv mit Partitionierung oder materialisierten Views kombiniert werden und optimieren in replizierten Systemen die Lesezugriffe auf die Replikate.
+Letztlich zeigt sich, dass das Zusammenspiel der verschiedenen Strategien eine nachhaltige Antwort bietet.
