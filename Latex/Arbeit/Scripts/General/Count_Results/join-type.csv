@@ -1,4 +1,5 @@
 LogFile,CountValue
-int_queries_select,2100
-varchar_queries_comb_length_1_select,2100
-varchar_queries_comb_length_64_select,2100
+int_queries_comb_length_16_select,2100
+int_queries_comb_length_4_select,2100
+varchar_queries_comb_length_16_select,2100
+varchar_queries_comb_length_4_select,2100
