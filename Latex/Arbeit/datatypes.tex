@@ -3,15 +3,15 @@
 
 \chapter{Optimierungen von Datentypen}\label{ch:data-types}
 
-Das erste Thema, das wir in Bezug auf die Performance-Optimierung von Datenbanken betrachten, sind die unterschiedlichen Datentypen und deren Auswirkungen auf die Performance.
+Das erste Thema in Bezug auf die Performance-Optimierung von Datenbanken sind die unterschiedlichen Datentypen und deren Auswirkungen auf die Performance.
 Bei der Auswahl des korrekten Datentyps gibt es unterschiedliche Faktoren, die vom jeweiligen Typen abhängen.
-Besonders werden wir die unterschiedlichen Implementierungen von numerischen und zeichenkettenbasierten Datentypen betrachten.
+Besonders werden die unterschiedlichen Implementierungen von numerischen und zeichenkettenbasierten Datentypen betrachtet.
 Es gibt aber auch allgemeinere Prinzipien, die auf fast alle angewendet werden können.
 
 \section{Allgemeine Faktoren}\label{sec:data-types-allgemeine-faktoren}
 
-In diesem Abschnitt werden wir uns mit den geltenden Grundsätzen beschäftigen, die allgemein bei der Wahl der Datentypen angewendet werden können.
-Bei der Erstellung von Tabellen sollte man folgende Schritte für die Auswahl von Datentypen befolgen (\cite[pp. 115--145]{schwartz2012high}).
+In diesem Abschnitt werden die geltenden Grundsätze behandelt, die allgemein bei der Wahl der Datentypen angewendet werden können.
+Bei der Erstellung von Tabellen sollte man folgende Schritte für die Auswahl von Datentypen befolgen (\cite[S. 115--145]{schwartz2012high}).
 Zunächst muss die übergeordnete Kategorie des Datentyps, wie beispielsweise numerisch, textbasiert oder zeitbezogen, festgelegt werden.
 Anschließend sollte der spezifische Typ ausgewählt werden.
 Für numerische Daten kommen beispielsweise Ganzzahlen wie \texttt{INT} oder Fließkommazahlen wie \texttt{FLOAT} und \texttt{DOUBLE} infrage.
@@ -30,23 +30,26 @@ Daher sollte man stets einen Integer wählen, wenn er die Daten korrekt abbilden
 Begründen kann es damit, dass für einfachere Datentypen weniger CPU-Zyklen benötigt werden, um Operationen auszuführen.
 Im Fall von Integer und Character liegt der Unterschied in den Character Sets und Sortierregeln, die den Vergleich von Character erschweren.
 
-Die letzte allgemeine Regel, die zu Performancegewinnen führen kann, ist die Vermeidung von \texttt{NULL}.
-Viele Tabellen enthalten \texttt{NULLABLE} Spalten, obwohl die Anwendung keinen \texttt{NULL}-Wert, also das Fehlen eines Wertes, speichern muss.
-Dies liegt daran, dass \texttt{NULL} die Standardeinstellung ist.
-Daher ist es am besten solche Spalten bei der Tabellenerstellung mit dem Identifier \texttt{NOT NULL} zu definieren.
-Wenn jedoch \texttt{NULL}-Werte gespeichert werden sollen, darf der Identifier selbstverständlich nicht verwendet werden.
-Mit \texttt{NULL} ist es für MySQL schwieriger Abfragen zu optimieren, da die Indizes und Wertevergleiche mehr Speicherplatz benötigen und komplizierter werden.
-Dies liegt daran, dass indizierte nullable Spalten ein zusätzliches Byte pro Eintrag benötigen, wodurch ein Index mit fester Größe in einen variablen Index umgewandelt werden kann.
-Der Leistungsunterschied zwischen \texttt{NULL} und \texttt{NOT NULL} ist zwar nicht so stark wie bei den anderen Prinzipien, dennoch kann er einen Effekt haben, insbesondere in Verbindung mit Indizes.
+Die letzte Regel zur Performanceverbesserung ist die Vermeidung von \texttt{NULL}.
+Viele Tabellen enthalten \texttt{NULLABLE}-Spalten, obwohl keine \texttt{NULL}-Werte gespeichert werden müssen, da \texttt{NULL} die Standardeinstellung ist.
+Daher sollten solche Spalten bei der Tabellenerstellung mit dem Identifier \texttt{NOT NULL} definiert werden, es sei denn, \texttt{NULL}-Werte sind erforderlich.
+
+\begin{quote}
+    \enquote{A missing NOT NULL constraint can prevent index usage in an Oracle database-especially for count(*) queries.} (\cite[S. 57]{winand2011sql})
+\end{quote}
+
+Mit \texttt{NULL} wird es auch für MySQL schwieriger, Abfragen zu optimieren, da Indizes und Wertevergleiche mehr Speicherplatz benötigen.
+Dies liegt daran, dass indizierte nullable Spalten ein zusätzliches Byte pro Eintrag erfordern, wodurch ein Index mit fester Größe in einen variablen umgewandelt wird.
+Der Leistungsunterschied zwischen \texttt{NULL} und \texttt{NOT NULL} ist zwar gering, kann jedoch, besonders in Verbindung mit Indizes, spürbar sein.
 
 Es muss erwähnt werden, dass MySQL viele Aliase für Datentypen unterstützt, wie zum Beispiel \texttt{INTEGER}, \texttt{BOOL} und \texttt{NUMERIC}.
 Diese Aliase können verwirrend sein, aber sie beeinflussen nicht die Performance.
-Im Wesentlichen funktioniert es so, dass wenn wir eine Tabelle mit einem aliasierten Datentyp erstellen, wandelt MySQL diesen intern in den Basistyp um.
-Mit dem Befehl \texttt{SHOW CREATE TABLE} können das bestätigen, da statt des aliasierten Datentyps der Basistyp angezeigt wird.
+Im Wesentlichen funktioniert es so, dass ein aliasierter Datentyp beim Erstellen einer Tabelle intern in den Basistyp umgewandelt wird.
+Dies lässt sich mit dem Befehl \texttt{SHOW CREATE TABLE} bestätigen, da dort der Basistyp angezeigt wird.
 
 \section{Verhaltensweise einzelner Datentypen}\label{sec:data-types-verhaltensweise-einzelner-datentypen}
 
-Der erste Datentyp, bei dem wir die Verhaltensweise genauer betrachten, ist der numerische Datentyp.
+Der erste Datentyp, bei dem das Verhalten genauer betrachtet wird, ist der numerische Datentyp.
 Bei diesem kann zwischen Ganzzahlen und Fließkommazahlen gewählt werden.
 Die spezifischen Typen unterscheiden sich nur in der Anzahl der Bits, die sie speichern können.
 \texttt{SMALLINT} kann 16 Bits speichern, während \texttt{INT} 32 und \texttt{BIGINT} 64 Bits speichern kann (\cite{mysql_data_types_numeric}).
@@ -55,7 +58,7 @@ Mit den optionalen \texttt{UNSIGNED}-Attributen können keine negativen Werte ge
 Dafür verdoppelt sich die obere Grenze der positiven Werte, während der Speicherplatz und die Leistung unverändert bleiben.
 Die Berechnung des Wertebereichs für \texttt{SIGNED} und \texttt{UNSIGNED} erfolgt nach den folgenden Formeln:
 
-\vspace{-30pt}
+\vspace{-27pt}
 \begin{gather}
     \text{Signed: } -2^{(N-1)} \text{ bis } 2^{(N-1)} - 1\label{eq:equation-signed} \\
     \text{Unsigned: } 0 \text{ bis } 2^N - 1\label{eq:equation-unsigned}
@@ -64,12 +67,12 @@ Die Berechnung des Wertebereichs für \texttt{SIGNED} und \texttt{UNSIGNED} erfo
 \vspace{-10pt}
 \textbf{Hinweis:} $N$ entspricht der Anzahl der Bits.
 
-Wenn wir die Wertebereiche für den Datentyp \texttt{TINYINT} in MySQL berechnen möchten, müssen wir für $N$ den Wert 8 einsetzen.
-Ale Ergebnis bekommen wir für \texttt{SIGNED} die Werte -128 bis 127 und für \texttt{UNSIGNED} die Werte 0 bis 255.
-Bei einem Beispiel mit 150 Werten können wir anstelle von \texttt{SMALLINT} also einfach \texttt{UNSIGNED} verwenden, um Speicherplatz zu sparen.
+Wenn die Wertebereiche für den Datentyp \texttt{TINYINT} in MySQL berechnet werden sollen, muss für $N$ der Wert 8 eingesetzt werden.
+Als Ergebnis ergeben sich für \texttt{SIGNED} die Werte von -128 bis 127 und für \texttt{UNSIGNED} die Werte von 0 bis 255.
+Bei einem Beispiel mit 150 Werten kann anstelle von \texttt{SMALLINT} also einfach \texttt{UNSIGNED} verwendet werden, um Speicherplatz zu sparen.
 
 Eine Breitenangabe wie \texttt{INT(11)} beeinflusst nur die Anzeige und nicht den Wertebereich oder die Speicheranforderungen.
-Um dies zu beweisen, erstellen wir die folgende Table:
+Um dies zu beweisen, wird die folgende Tabelle erstellt:
 
 \lstinputlisting[
     language=sql,
@@ -77,7 +80,7 @@ Um dies zu beweisen, erstellen wir die folgende Table:
 ]{Scripts/Data_Types/01_testint_create.sql}
 \vspace{-7pt}
 
-Wir haben für beide Spalten den Typen \texttt{INT} gewählt und da wir überprüfen wollen, ob die Breitenangabe einen Einfluss auf die Speicheranforderungen hat, versuchen die Grenzen von \texttt{INT} einzufügen.
+Es wurde für beide Spalten der Datentyp \texttt{INT} gewählt und da überprüft werden soll, ob die Breitenangabe einen Einfluss auf die Speicheranforderungen hat, wird versucht, die Grenzen von \texttt{INT} einzufügen.
 Da \texttt{INT} 32 Bits benötigt, ergeben sich folgende Grenzen: $2^{(32-1)} - 1 = 2147483647$ und $-2^{(32-1)} = -2147483648$.
 
 \vspace{-7pt}
@@ -101,8 +104,8 @@ Da \texttt{INT} 32 Bits benötigt, ergeben sich folgende Grenzen: $2^{(32-1)} - 
 \end{table}
 \vspace{-9pt}
 
-Bei der Ausführung der Insert-Befehle erhalten wir keine Fehlermeldung, weshalb \texttt{INT(5)} und \texttt{INT(11)} beide die Grenzwerte speichern können.
-Damit haben wir gezeigt, dass die Breitenangabe keinen Einfluss auf die Speicheranforderungen hat, sondern nur die Anzeige beeinflusst.
+Bei der Ausführung der Insert-Befehle wird keine Fehlermeldung angezeigt, weshalb \texttt{INT(5)} und \texttt{INT(11)} beide die Grenzwerte speichern können.
+Damit wurde gezeigt, dass die Breitenangabe keinen Einfluss auf die Speicheranforderungen hat, sondern lediglich die Anzeige beeinflusst.
 
 Neben dem Typ für Ganzzahlen gibt es auch den Typ für Festkommazahlen, der in MySQL als \texttt{DECIMAL} bezeichnet wird.
 Eine Festkommazahl ist eine Zahl mit einem festen Dezimalpunkt, bei der sowohl die Anzahl der Dezimalstellen als auch die maximale Anzahl der Ziffern vor und nach dem Dezimalpunkt definiert sind.
@@ -116,7 +119,7 @@ Fließkommazahlen verwenden die Gleitkomma-Arithmetik und sind für ungefähre B
 Die Gleitkomma-Arithmetik ist aufgrund der nativen Verarbeitung durch die CPU deutlich schneller als die präzise Berechnung mit \texttt{DECIMAL}, bringt jedoch einen gewissen Präzisionsverlust mit sich.
 Alternativ kann man auch \texttt{BIGINT} nutzen, um sowohl die Ungenauigkeit von Gleitkomma-Speicherungen als auch die höheren Kosten der \texttt{DECIMAL}-Arithmetik zu vermeiden.
 
-Als Nächstes betrachten wir die zeichenkettenbasierten Datentypen.
+Als Nächstes werden die zeichenkettenbasierten Datentypen betrachtet.
 Die beiden Haupttypen sind \texttt{VARCHAR} und \texttt{CHAR}.
 \texttt{VARCHAR} speichert die Zeichenfolgen mit variabler Länge und benötigt daher weniger Speicherplatz als Typen mit fester Länge, da nur so viel Platz verwendet wird, wie tatsächlich benötigt wird.
 Zusätzlich werden ein oder zwei Bytes für die Speicherung der Länge der Zeichenfolge verwendet (1 Byte für < 255 Bytes Zeichenfolge).
@@ -130,7 +133,7 @@ Daher ist \texttt{CHAR} ideal für sehr kurze Strings oder Werte, die alle nahez
 Außerdem bleibt die Speicherstruktur bei Aktualisierungen von \texttt{CHAR} unverändert, weshalb er besser geeignet ist, wenn die Daten häufig geändert werden.
 Dafür ist \texttt{CHAR} nicht dafür geeignet, wenn die maximale Spaltenlänge deutlich größer ist als die durchschnittliche Wertelänge.
 
-Als Letztes kommen wir noch zu den zeitbezogenen Datentypen \texttt{DATE}, \texttt{TIME}, \texttt{TIMESTAMP} und \texttt{DATETIME}.
+Als Letztes werden die zeitbezogenen Datentypen \texttt{DATE}, \texttt{TIME}, \texttt{TIMESTAMP} und \texttt{DATETIME} behandelt.
 Der Datentyp \texttt{DATE} speichert nur das Datum ohne Uhrzeit und ist besonders speichereffizient, während \texttt{TIME} ausschließlich eine Uhrzeit oder Zeitspanne, auch über 24 Stunden hinaus, erfasst.
 Die anderen beiden speichern das Datum mit Uhrzeit und haben eine Genauigkeit von einer Sekunde.
 \texttt{TIMESTAMP} benötigt nur halb so viel Speicherplatz wie \texttt{DATETIME} und ist zeitzonenbewusst, hat aber dafür einen deutlich kleineren Wertebereich.
@@ -138,10 +141,10 @@ Abhängig von der Information, die gespeichert werden soll, wählt man den passe
 
 \section{Analyse der Benchmarks}\label{sec:data-types-analyse-der-benchmarks}
 
-Der erste Leitsatz, den wir untersuchen, besagt, dass Spalten nach Möglichkeit als \texttt{NOT NULL} deklariert werden sollten.
-Für den Nachweis benutzen wir die Kundentabelle aus \ref{lst:tools-create-table-kunde}, bei der einmal alle Spalten als \texttt{NOT NULL} deklariert werden und einmal der Default genutzt wird.
+Der erste Leitsatz, der untersucht wird, besagt, dass Spalten nach Möglichkeit als \texttt{NOT NULL} deklariert werden sollten.
+Zum Nachweis wird die Kundentabelle aus~\ref{lst:tools-create-table-kunde} verwendet, bei der einmal alle Spalten als \texttt{NOT NULL} deklariert sind und einmal der Standardwert genutzt wird.
 Wenn das Attribut nicht deklariert wird, können \texttt{NULL}-Werte in die Tabelle eingefügt werden.
-Um bei den Select-Abfragen mit \texttt{WHERE}-Klauseln sowie \texttt{COUNT}- und \texttt{GROUP BY}-Befehlen für beide Tabellen gleich viele Zeilen zurückzubekommen, verzichten wir auf \texttt{NULL}-Werte.
+Um bei Select-Abfragen mit \texttt{WHERE}-Klauseln sowie \texttt{COUNT}- und \texttt{GROUP BY}-Befehlen die gleiche Anzahl an Zeilen zu erhalten, werden \texttt{NULL}-Werte ausgeschlossen.
 
 In der Grafik~\ref{data-types-null-reads} sind die Ergebnisse der Select-Befehle zu sehen, wobei die Werte für \texttt{NOT NULL} im Durchschnitt höher sind als für \texttt{WITH NULL}.
 Höhere Werte bedeuten mehr Abfragen pro Sekunde und deuten auf bessere Performance hin, weshalb man sagen kann, dass \texttt{NOT NULL} besser performt als \texttt{WITH NULL}.
@@ -154,14 +157,14 @@ Daher sollte die Entscheidung, eine Spalte als \texttt{NOT NULL} zu deklarieren,
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Data_Types/Null/null-check/Reads}
-        \caption[Vergleich von \texttt{NULL} und \texttt{NOT NULL}]{Vergleich von \texttt{NULL} und \texttt{NOT NULL}}
+        \caption{Vergleich von NULL und NOT NULL}
         \label{data-types-null-reads}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{PNGs/Script/Data_Types/Simpler/int-char/Reads}
-        \caption{Vergleich von \texttt{INT} und \texttt{CHAR}}
+        \caption{Vergleich von INT und CHAR}
         \label{data-types-int-char-reads}
     \end{subfigure}
     \vspace{-6pt}
@@ -169,25 +172,25 @@ Daher sollte die Entscheidung, eine Spalte als \texttt{NOT NULL} zu deklarieren,
 \end{figure}
 \vspace{-20pt}
 
-Um zu zeigen, dass man bei der Wahl zwischen unterschiedlichen Datentypen, den simpleren wählen sollte, nutzen wir erneut die Kundentabelle.
-Für diesen Benchmark ändern wir jeweils den Datentyp des Schlüsselattributs der Tabelle.
-Zuerst erstellen wir eine Kundentabelle mit einem \texttt{INT}-Primärschlüssel, danach eine mit \texttt{CHAR}.
+Um zu zeigen, dass bei der Wahl zwischen unterschiedlichen Datentypen der einfachere bevorzugt werden sollte, wird erneut die Kundentabelle verwendet.
+Für diesen Benchmark wird jeweils der Datentyp des Schlüsselattributs der Tabelle geändert.
+Zunächst wird eine Kundentabelle mit einem \texttt{INT}-Primärschlüssel erstellt, gefolgt von einer weiteren mit \texttt{CHAR}.
 Die Performance der Schreibbefehle ist in beiden Fällen etwa gleich.
 Bei den Lesebefehlen sieht das anders aus (siehe~\ref{data-types-int-char-reads}).
 Wenn man einen Wertebereich abfragt, dann ist \texttt{INT} deutlich schneller (etwa 50\%) als \texttt{CHAR}.
 Bei der Sortierung hat \texttt{INT} ebenfalls einen Vorteil, jedoch fallen die Abstände deutlich geringer aus.
 
-Als letztes wollten wir unterschiedliche Datentypen vergleichen.
-Dazu verwenden wir die gleiche Tabelle wie beim Vergleich von \texttt{INT} und \texttt{CHAR}, setzen diesmal jedoch unterschiedliche numerische oder zeichenkettenbasierte Typen als Primärschlüssel ein.
+Als letztes soll der Vergleich unterschiedlicher Datentypen erfolgen.
+Hierfür wird die gleiche Tabelle wie beim Vergleich von \texttt{INT} und \texttt{CHAR} verwendet, jedoch werden diesmal verschiedene numerische oder zeichenkettenbasierte Typen als Primärschlüssel eingesetzt.
 Beim Vergleich der numerischen Typen zeigt sich, dass \texttt{DECIMAL} mit deutlichem Abstand am langsamsten ist (Abbildung~\ref{data-types-smaller-number-type-reads}).
 Danach folgt, wie vermutet, der nächstgrößere Datentyp \texttt{BIGINT}.
 Das lässt sich sowohl an der Grafik als auch an der Legende erkennen, die die Typen nach Performance absteigend sortiert.
 Die Legende hilft dabei, da auffällig ist, dass die unterschiedlichen Werte auch aufgrund der Skalierung der y-Achse sehr stark schwanken.
 Daraufhin kommen \texttt{INT}, \texttt{MEDIUMINT} und \texttt{SMALLINT}, wobei die Unterschiede kleiner sind als erwartet.
-Dies wird vermutlich aber daran liegen, dass wir die Abfragen nur auf eine Tabelle mit wenigen tausend Datensätzen ausgeführt haben.
-In der Praxis mit Hunderttausenden oder Millionen von Datensätzen ist anzunehmen, dass die Unterschiede zwischen den Typen größer wären als in unserem Vergleich.
+Dies wird vermutlich darauf zurückzuführen sein, dass die Abfragen nur auf einer Tabelle mit wenigen tausend Datensätzen ausgeführt wurden.
+In der Praxis mit Millionen von Datensätzen dürften die Unterschiede zwischen den Typen größer sein als in diesem Vergleich.
 
-\vspace{-24pt}
+\vspace{-12pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
@@ -204,12 +207,12 @@ Beim Vergleich zwischen den beiden Zeichenketten-Typen \texttt{CHAR} und \texttt
 Im ersten Vergleich wurde jeweils eine Länge von 4 Stellen verwendet und beim zweiten Vergleich eine Länge von 64 Stellen.
 Bei beiden untersuchten Längen ist \texttt{VARCHAR} schneller als \texttt{CHAR}.
 
-Als letzten Vergleich haben beide Zeichenketten-Typen mit der Länge von 255 Stellen definiert, aber dafür mit unterschiedlich vielen Stellen befüllt.
-Anschließend haben wir bei beiden Tabellen die Werte aktualisiert und wenige Stellen bei der Namen-Spalte zufällig hinzugefügt.
-Bei den Ergebnissen fällt auf, dass \texttt{CHAR} schneller ist als \texttt{VARCHAR} (\ref{fig:data-types-smaller-string-type-length-writes}).
-Damit haben wir die Vermutungen aus Abschnitt~\ref{sec:data-types-verhaltensweise-einzelner-datentypen} bestätigt, da die Vorteile von \texttt{CHAR} vor allem bei der Aktualisierung von Werten zum Tragen kommen, während \texttt{VARCHAR} bei der Selektion von Werten besser abschneidet.
+Als letzten Vergleich wurden beide Zeichenketten-Typen mit der Länge von 255 Stellen definiert, aber mit unterschiedlich vielen Stellen befüllt.
+Anschließend wurden bei beiden Tabellen die Werte aktualisiert, wobei in der Namen-Spalte zufällig wenige Stellen hinzugefügt wurden.
+Dabei war \texttt{CHAR} schneller als \texttt{VARCHAR} (\ref{fig:data-types-smaller-string-type-length-writes}).
+Dies bestätigt die Vermutungen aus Abschnitt~\ref{sec:data-types-verhaltensweise-einzelner-datentypen}, da die Vorteile von \texttt{CHAR} insbesondere bei der Aktualisierung von Werten zum Tragen kommen, während \texttt{VARCHAR} bei der Selektion von Werten besser abschneidet.
 
-\vspace{-8pt}
+\vspace{-10pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}

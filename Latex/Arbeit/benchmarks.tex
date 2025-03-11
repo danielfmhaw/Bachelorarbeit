@@ -4,7 +4,7 @@
 
 Diese Bachelorarbeit untersucht verschiedene Datenbankobjekte in relationalen Datenbanken.
 Dabei werden zunächst die einzelnen Konzepte detailliert erläutert, bevor ihre praktische Umsetzung in einem Datenbankmanagementsystem erfolgt.
-Um die Effizienz der verschiedenen Implementierungen bewerten zu können, benötigen wir eine geeignete Messmethode.
+Um die Effizienz der verschiedenen Implementierungen bewerten zu können, wird eine geeignete Messmethode benötigt.
 Dafür sind Benchmarks das optimale Werkzeug.
 Anhand der Benchmark-Ergebnisse lassen sich Rückschlüsse auf die Leistungsfähigkeit der untersuchten Ansätze ziehen.
 Dieses Kapitel behandelt die Grundlagen und Typen von Benchmarks, die relevanten Kennzahlen sowie die Auswahl geeigneter Tools für eine korrekte Durchführung.
@@ -15,7 +15,7 @@ Benchmarks dienen dazu, das Verhalten eines Systems unter Last praktisch und eff
 Die wichtigste Erkenntnis, die aus Benchmarks gewonnen werden kann, ist die Identifikation von Problemen und Fehlern, die systematisch dokumentiert und nach Priorität bearbeitet werden sollten.
 Das Ziel von Benchmarks ist die Reduzierung und Bewertung von unerwünschtem Verhalten sowie die Analyse, wie sich das System derzeit und unter simulierten, zukünftigen und anspruchsvolleren Bedingungen verhalten könnte.
 
-Es gibt zwei verschiedene Techniken für Benchmarks (\cite[pp. 35--49]{schwartz2012high}).
+Es gibt zwei verschiedene Techniken für Benchmarks (\cite[S. 35--49]{schwartz2012high}).
 Die erste zielt darauf ab, die Applikation als Ganzes zu testen (engl.\ full-stack).
 Dabei wird nicht nur die Datenbank getestet, sondern die gesamte Applikation, einschließlich des Webservers, des Netzwerks und des Applikationscodes.
 Der Grundgedanke dahinter ist, dass der Nutzer genauso lange auf eine Antwort warten muss, wie das gesamte System für die Verarbeitung der Anfrage benötigt.
@@ -35,7 +35,7 @@ Idealerweise verwendet man einen Snapshot des tatsächlichen produktiven Datensa
 Weil in dieser Arbeit keine echten Produktionsdaten zur Verfügung stehen, müssen die Daten und der Workload nicht durch Snapshots, sondern zufällig generiert werden.
 Ein Problem bei der Verwendung zufällig erzeugter Werte ist die unrealistisch gleichmäßige Verteilung der Datensätze.
 Im Gegensatz dazu können in der Realität Hotspots auftreten, die die Verteilung erheblich beeinflussen.
-In den folgenden Kapiteln werden die Ansätze möglichst allgemein erläutert, weshalb wir diesen Kompromiss in Kauf nehmen können.
+In den folgenden Kapiteln werden die Ansätze möglichst allgemein erläutert, weshalb dieser Kompromiss in Kauf genommen werden kann.
 Für die Analyse eines speziellen Systems sollten jedoch Snapshots aus der Produktivumgebung verwendet werden, um fehlerhafte Schlüsse zu vermeiden.
 
 Ein weiterer Fehler, der noch bei Benchmarks auftreten kann, ist das falsche Nachstellen des tatsächlichen Benutzerverhaltens.
@@ -49,7 +49,7 @@ Zu guter Letzt empfiehlt es die Ergebnisse eines Benchmarks in einem Diagramm da
 
 \section{Kennzahlen}\label{sec:einleitung-kennzahlen}
 
-Bevor wir ein geeignetes Benchmark-Tool auswählen, sollte zunächst geklärt werden, welche Kennzahlen im Datenbankkontext relevant sind und welche davon für die eigenen Zwecke von besonderem Interesse sind.
+Bevor ein geeignetes Benchmark-Tool ausgewählt wird, sollte zunächst geklärt werden, welche Kennzahlen im Datenbankkontext relevant sind und welche davon für die jeweiligen Zwecke von besonderem Interesse sind.
 Das Benchmark-Tool, für das man sich entscheidet, muss in der Lage sein, diese Kennzahlen zu erfassen und zugänglich zu machen.
 
 Die erste Kennzahl, die betrachtet wird, ist der Durchsatz (engl.\ throughput).
@@ -75,7 +75,7 @@ Sie gibt an, wie sich das Verhalten des Systems verändert, wenn die Anzahl der 
 In einem idealen System würden doppelt so viele Abfragen bearbeitet werden, wenn doppelt so viele „Arbeiter“ versuchen, die Aufgaben zu erledigen.
 
 Es gibt noch zahlreiche weitere Messgrößen, wie beispielsweise die Verfügbarkeit oder die CPU-Auslastung.
-Auf Letztere werden wir im Kapitel~\ref{ch:replikation} näher eingehen.
+Auf Letztere wird im Kapitel~\ref{ch:replikation} näher eingegangen.
 Für das Benchmark-Tool sind die Metriken Durchsatz und Antwortzeit unverzichtbar und sollten daher unbedingt berücksichtigt werden.
 Das Tool sollte auch dazu in der Lage sein, zwischen Lese- und Schreibtransaktionen zu unterscheiden.
 Die anderen Metriken sind vor allem im Zusammenhang mit Mehrbenutzer-Systemen wichtig und nehmen daher in den meisten Kapiteln dieser Arbeit eine untergeordnete Rolle ein.
@@ -91,7 +91,7 @@ Das ist aber die einzige Ausnahme, denn der Schwerpunkt im weiteren Verlauf der 
 
 Die Grundlage dieser Bachelorarbeit bildet die Untersuchung des Verhaltens der MySQL-Datenbank (\cite{sysbench_mysql}) im Hinblick auf verschiedene Konzepte mithilfe eines zentralen Benchmark-Tools.
 Nach eingehender Überlegung habe ich mich für Sysbench (\cite{sysbench_repo}) entschieden.
-Sysbench ist ein Open-Source-Tool, das ein skriptfähiges und multi-threaded Benchmark-Tool ist und auf LuaJIT basiert (\cite[pp. 50--66]{schwartz2012high}).
+Sysbench ist ein Open-Source-Tool, das ein skriptfähiges und multi-threaded Benchmark-Tool ist und auf LuaJIT basiert (\cite[S. 50--66]{schwartz2012high}).
 Es wird hauptsächlich für Datenbankbenchmarks verwendet, kann jedoch auch dazu eingesetzt werden, um beliebig komplexe Arbeitslasten zu erstellen, die keinen Datenbankserver erfordern.
 Das Tool erfasst verschiedene Metriken, die im vorherigen Kapitel vorgestellt wurden, wie etwa Transaktionen pro Sekunde und Latenz.
 Außerdem kann genauer spezifiziert werden, wie oft diese Metriken geloggt werden sollen.
