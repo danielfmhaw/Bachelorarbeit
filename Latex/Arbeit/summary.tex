@@ -17,10 +17,8 @@ Beim Betrachten der numerischen Datentypen fiel auf, dass je größer der Werteb
 Deshalb zählen \texttt{DECIMAL} und \texttt{BIGINT} zu den ineffizientesten.
 Bei den zeichenkettenbasierten Typen ist die Wahl einfach zu treffen, da in den meisten Fällen der Typ \texttt{VARCHAR} am schnellsten ist.
 Nur wenn eine Spalte häufiger aktualisiert als abgefragt wird, kann es sinnvoll sein, den Typ \texttt{CHAR} in Erwägung zu ziehen.
-Einer der anderen Leitsätze bei der Wahl der Datenformate ist, dass man die simplere Datenstruktur wählen sollte.
-Im Vergleich zeigte sich, dass \texttt{INT} etwa 50\% schneller ist als \texttt{CHAR}.
+Ein weiterer Leitsatz bei der Wahl der Datenformate ist, eine simplere Datenstruktur zu bevorzugen, was sich im Vergleich zeigte, da \texttt{INT} schneller als \texttt{CHAR} ist.
 Zu guter Letzt sollte berücksichtigt werden, dass die Spalten nicht nur aus Performancegründen, sondern auch zur Wahrung der Datenintegrität und -konsistenz an möglichst vielen Stellen als \texttt{NOT NULL} definiert werden sollten.
-
 Nach dem logischen Entwurf einer Datenbank kommt als nächster Schritt die physische Implementierung.
 Bei diesem Schritt spielen auch die anderen Aspekte, die betrachtet wurden, wie Indexierung, Sichten, Partitionen oder Replikation, eine Rolle.
 
@@ -35,7 +33,7 @@ Bei der Analyse kann man möglicherweise eine sinnvolle Nutzung von Indizes iden
 Nach einigen Tagen oder Wochen bietet es sich an, eine Kontrolle durchzuführen und abhängig vom Ergebnis können einige Indizes entfernt und andere neue hinzugefügt werden.
 Ein ähnliches Vorgehen ist auch beim Einsatz von Views nützlich.
 
-Wie die Benchmarks für die Sichten gezeigt haben, wirken sich virtuelle Views nicht auf die Performance aus.
+Wie bei den Benchmarks für die Sichten festgestellt wurde, wirken sich virtuelle Views nicht auf die Performance aus.
 Dafür eignen sich virtuelle Sichten hervorragend für Gewährleistung von Rechtemanagement in einer Organisation, denn sie haben den Vorteil, dass die Daten nicht physisch gespeichert werden und somit keine Redundanzen entstehen.
 Materialisierte Sichten hingegen werden auf der Festplatte gesichert und bieten dafür ein erhebliches Performancepotenzial.
 Besonders geeignet sind sie in Szenarien, in denen häufig auf aggregierte oder komplexe Abfragen zugegriffen wird, wie zum Beispiel in OLTP-Systemen.
@@ -44,24 +42,23 @@ Wie genau die Implementierung von materialisierten Sichten umgesetzt werden kann
 Einige DBMS unterstützen materialisierte Sichten, während andere sogar eine inkrementelle Auffrischung ermöglichen.
 In MySQL hingegen müssen materialisierte Sichten durch dedizierte Tabellen in Kombination mit Triggern nachgebildet werden.
 Bei den Tests ist jedoch deutlich geworden, dass die native Implementierung, z.B.\ in Postgres, einen klaren Performancevorteil gegenüber der Implementierung mit Triggern bietet.
-Daher ist es ratsam, diesen Aspekt bei der Auswahl des DBMS zu berücksichtigen.
+Daher sollte dieser Aspekt bei der Auswahl des DBMS berücksichtigt werden.
 In Bezug auf die Schreibperformance muss ebenfalls erwähnt werden, dass die Pflege von materialisierten Sichten die Effizienz negativ beeinflusst.
 
 Bei Partitionen fällt der Mehraufwand geringer aus als bei Indizes oder Sichten, da keine zusätzlichen Datenbankobjekte verwaltet werden müssen.
 Stattdessen werden die Datensätze auf mehrere Partitionen verteilt und nicht in einer einzelnen Tabelle gespeichert.
 Wenn eine Datenbankoperation ausgeführt wird, muss zunächst die Partition oder die entsprechenden Partitionen ermittelt werden, die die angeforderten Daten enthalten.
-Es ist auch möglich, dass eine Datenbankumgebung nicht für die Partitionierung geeignet ist.
-Normalerweise ist ein Merkmal, das für die Partitionierung spricht, ein natürliches Trennkriterium wie beispielsweise ein Zeitstempel oder geografische Regionen, da dadurch eine logische Aufteilung der Daten ermöglicht wird.
-Abhängig vom Trennkriterium muss man sich für einen der Partitionstypen entscheiden: Range, List, Hash oder Key.
-Der Performancevorteil der Partitionierung liegt darin, dass nur die relevanten Partitionen durchsucht werden müssen, anstatt die gesamte Tabelle zu scannen.
+Normalerweise ist ein Merkmal, das für die Partitionierung spricht, ein natürliches Trennkriterium wie ein Zeitstempel oder geografische Regionen, da dadurch eine logische Aufteilung der Daten ermöglicht wird.
+Abhängig vom Trennkriterium muss man sich für einen der Partitionierungstypen entscheiden: Range, List, Hash oder Key.
+Der Vorteil der Partitionierung liegt darin, dass nur die relevanten Partitionen durchsucht werden müssen, anstatt die gesamte Tabelle zu scannen.
 Dieser Vorgang wird als Pruning bezeichnet und führt zu einer erheblichen Steigerung der Abfragegeschwindigkeit.
-Allerdings gibt es einige Einschränkungen beim Pruning, da es nicht mit allen Operatoren kompatibel ist.
-Bei der Range-Partitionierung mit einem Zeitstempel als Partitionsschlüssel können bei einigen Operatoren unerwartete Probleme auftreten.
-Obwohl eine Abfrage, die beispielsweise den \texttt{YEAR()}-Operator verwendet, dasselbe Ergebnis wie eine Bereichsabfrage nach dem ersten und letzten Tag eines Jahres liefert, kann die Query mit \texttt{YEAR()} nicht für das Partition-Pruning genutzt werden.
+Allerdings gibt es einige Einschränkungen beim Pruning.
+Bei der Range-Partitionierung mit einem Zeitstempel können bei einigen Operatoren unerwartete Probleme auftreten.
+Ein solches Beispiel stellt der \texttt{YEAR()}-Operator dar, der zwar dasselbe Ergebnis wie eine Bereichsabfrage liefert, jedoch nicht für das Partition-Pruning verwendet werden kann.
 In einem solchen Fall müssen alle Partitionen durchsucht werden, was die Abfrage sogar langsamer macht als ohne Partitionierung.
 Für die List-Partitionierung hat sich gezeigt, dass der Operator \texttt{IN} am effizientesten ist, gefolgt von \texttt{OR}, während \texttt{UNION} deutlich weniger effizient ist, weshalb von seiner Verwendung abgeraten werden sollte.
-Bei der Hash-Partitionierung wurde festgestellt, dass mit zunehmender Anzahl der Partitionen die Suche innerhalb der Partitionierungsstruktur aufwendiger wird und die Performance entsprechend schlechter ausfällt.
-Diese Erkenntnis gilt auch für die anderen Partitionierungstypen.
+Die Hash-Partitionierung trägt zu einer gleichmäßigen Verteilung der Daten bei.
+Darüber hinaus wurde festgestellt, dass bei dieser sowie den anderen Typen die Komplexität der Suche innerhalb der Partitionierungsstruktur mit einer steigenden Anzahl von Partitionen zunimmt, was zu einer entsprechenden Verschlechterung der Performance führt.
 
 Zum Schluss wurde der Einfluss der Replikation im Rahmen des Master-Replikat-Ansatzes analysiert.
 Anders als bei der Partitionierung werden bei der Replikation vollständige Kopien der gesamten Datenbank auf mehreren Servern erstellt.
@@ -70,11 +67,8 @@ Dadurch wird die Verfügbarkeit und Ausfallsicherheit erhöht, weshalb Replikati
 Um die Performance zu testen, wurde die Leistung eines Single-Servers mit der eines Systems aus Master- und Replikaten verglichen.
 Dabei wurde festgestellt, dass der Single-Server bei Verwendung eines einzelnen Threads einen Leistungsvorteil hat.
 Sobald jedoch mehrere Threads die CPU-Auslastung auf dem Single-Server erhöhen und gleichzeitig die Last auf die Master- und Replikatknoten verteilt wird, zeigt sich der Vorteil der Replikationsverteilung.
+In Bezug auf die Verteilung zeigt die Replikation Ähnlichkeiten mit den grundlegenden Konzepten von NoSQL-Datenbanken, die ebenfalls horizontale Skalierung einsetzen, um die Effizienz zu optimieren.
 Allerdings treten auch Nachteile beim Einfügen von Daten mit Replikation auf, da das erneute Kopieren der Daten auf die Replikate die Performance negativ beeinflusst.
-Die Auswahl des Binlog-Formats hat bei keinem Benchmark zu Vor- oder Nachteilen geführt.
-Aus der Betrachtung der Ergebnisse ergibt sicht, dass Replikation kein geeigneter Lösungsansatz ist, wenn nur ein Nutzer auf die Datenbank zugreift.
-Sie wird jedoch besonders vorteilhaft, wenn die Last auf mehrere Server verteilt werden muss.
-In Bezug auf die Verteilung ähnelt die Replikation den zentralen Konzepten von NoSQL-Datenbanken, die horizontal skalieren, um Daten auf mehrere Knoten zu verteilen.
 
 Zusammenfassend lässt sich festhalten, dass es keine allgemeingültige Lösung für optimale Performance gibt, sondern verschiedene Konzepte, deren Effizienz vom jeweiligen Anwendungsfall abhängt.
 Oft führt eine gezielte Kombination mehrerer Techniken zu den besten Ergebnissen.

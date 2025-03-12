@@ -9,7 +9,7 @@ Nach außen hin wirkt es trotzdem wie ein einziges Gesamtsystem.
 Bei dieser Architektur ist die Skalierbarkeit nahezu unbegrenzt, da man durch einfaches Hinzufügen weiterer Speicherknoten die Performance verbessern kann.
 Im Gegensatz dazu ist Scale-Up durch die Systemgrenzen eines einzelnen Geräts limitiert.
 Mit Scale-Out sind allerdings auch Nachteile verbunden, die später in diesem Abschnitt behandelt werden.
-Wie schon in den vorherigen Kapiteln werden zunächst die Grundlagen behandelt, gefolgt von der Betrachtung der Konfiguration, die die Basis für die Benchmarks bildet und abschließend erfolgt eine Analyse der Ergebnisse.
+Wie schon in den vorherigen Kapiteln werden zunächst die Grundlagen erläutert, gefolgt von der Betrachtung der Konfiguration, die die Basis für die Benchmarks bildet und abschließend erfolgt eine Analyse der Ergebnisse.
 
 \section{Grundlagen}\label{sec:replication-grundlagen}
 Replikation ermöglicht die Konfiguration eines oder mehrere Server als Replikate eines anderen Servers, auch Master genannt.
@@ -20,10 +20,10 @@ Sowohl die Begrifflichkeit Master-Replikat als auch die Varianten Primary-Second
 \end{quote}
 
 Das grundlegende Problem, das die Replikation löst, besteht darin, die Daten eines Servers mit denen eines anderen synchron zu halten.
-Es können sich mehrere Replikate mit einem einzigen Master verbinden und dessen aktuellen Zustand widerspiegeln.
+Es können sich auch mehrere Replikate mit einem einzigen Master verbinden und dessen aktuellen Zustand widerspiegeln.
 Sie sind aber nicht dazu geeignet, richtige Backups zu ersetzten.
-Master und Replikate lassen sich auch in anderen Konfigurationen anordnen.
-Neben der klassischen Master-Replikat-Variante können Replikate selbst als Master für weitere Replikate dienen.
+Außerdem lassen sich Master und Replikate in anderen Konfigurationen anordnen.
+Neben der klassischen Variante können Replikate selbst als Master für weitere Replikate dienen.
 Zudem ist eine Master-Master-Kombination denkbar.
 Die Datenreplikation kann aus verschiedenen Gründen vorteilhaft sein:
 
@@ -115,7 +115,7 @@ Da kein Format in jeder Situation perfekt ist, kann MySQL dynamisch zwischen sta
 Standardmäßig wird die statement-basierte Replikation verwendet, aber wenn MySQL ein Ereignis erkennt, das nicht korrekt als Statement repliziert werden kann, wechselt es automatisch zur row-basierten Replikation.
 Alternativ kann das Format auch durch Setzen der Variable \texttt{binlog\_format} manuell gesteuert werden.
 
-\section{Konfiguration des Master-Replikat-Ansatzes}\label{sec:replication-konfiguration}
+\section{Konfiguration der Master-Replika-Architektur}\label{sec:replication-konfiguration}
 
 Um Benchmarks ausführen zu können, muss der Master-Replika-Ansatz in MySQL konfiguriert werden.
 Zunächst gilt es, das Szenario der Replikation festzulegen, das umgesetzt werden soll.
@@ -210,7 +210,7 @@ Um ein Replikat mit einem Master zu synchronisieren, sind drei Elemente erforder
 Eine kalte Kopie erfordert das Herunterfahren des Masters, um dessen Dateien zu kopieren, bevor er mit einem neuen Binary-Log neu gestartet wird, was jedoch zu Ausfallzeiten führt.
 Bei einer warmen Kopie können die Dateien übertragen werden, während der Server weiterhin läuft.
 
-\section{Analyse}\label{sec:replication-analyse}
+\section{Untersuchung der Replikation}\label{sec:replication-analyse}
 
 Im vorherigen Abschnitt wurde erklärt, wie man den Master und vor allem die Replikate korrekt konfiguriert und den Prozess der Replikation startet.
 Für die Durchführung der Benchmarks werden erneut die Kundentabelle und die Bestelltabelle aus Kapitel~\ref{sec:projektaufbau-mit-beispiel} benötigt.
@@ -231,12 +231,10 @@ Innerhalb des Workflowjobs muss nichts anpasst werden, da dort \texttt{REPLICAS\
 Wichtig ist noch zu erwähnen, dass die Insert-Befehle nur auf dem Master, also Port 3307, ausgeführt werden.
 Die Select-Befehle werden sowohl auf dem Master als auch auf die Replikate ausgeführt.
 
-Beim Betrachten der Ergebnisse aus Abbildung~\ref{fig:replication-vs-no} fällt auf, dass die Version ohne Replikation am schnellsten ist.
-Danach folgen die Readabfragen auf dem Master auf Port 3307.
-Der Unterschied der beiden liegt bei etwa 15\%.
-Nah an dem Ergebnis vom Master ist das erste Replikat (3308).
-Überraschenderweise folgen mit etwas mehr Abstand erst die anderen beiden Replikate auf den Ports 3309 und 3310.
-Bei der Schreibgeschwindigkeit gibt es einen deutlichen Unterschied zwischen den beiden Varianten, da durch den Prozess der Replikation die Schreibgeschwindigkeit ungefähr 60\% langsamer ist.
+Beim Betrachten der Ergebnisse aus Abbildung~\ref{fig:replication-vs-no} fällt auf, dass die Version ohne Replikation deutlich am schnellsten ist.
+Die übrigen Varianten sind nur halb so schnell, liegen jedoch auf einem ähnlichen Niveau.
+Damit wurde auch festgestellt, dass die Select-Performance auf dem Master genauso effizient ist wie bei den Replikaten.
+Bei der Schreibgeschwindigkeit gibt es allerdings keinen deutlichen Unterschied zwischen den beiden Varianten, da die Replikation nur ungefähr 5\% langsamer ist.
 
 \vspace{-8pt}
 \begin{figure}[H]
@@ -257,8 +255,7 @@ Bei der Schreibgeschwindigkeit gibt es einen deutlichen Unterschied zwischen den
 \vspace{-20pt}
 
 Bei dem ersten Vergleich betrug der Threads-Wert bei Einfügungen und Abfragen \texttt{1}, sodass die Leistung eines einzelnen Threads ersichtlich wurde.
-Aus den Ergebnissen lässt sich schlussfolgern, dass der Single-Server am effizientesten ist, solange er nicht stark ausgelastet wird.
-In diesem Fall bringt der Master-Replikat-Ansatz demnach keine Vorteile.
+Aus den Ergebnissen lässt sich schlussfolgern, dass der Single-Server am effizientesten ist und der Master-Replikat-Ansatz in diesem Fall keine Vorteile bietet.
 Anders verhält es sich, wenn die Last auf den Server erhöht wird, indem die Anzahl der Threads gesteigert wird.
 Die Threadanzahl kann beim Aufführen des Sysbench-Befehls mit dem Parameter \texttt{--threads} festgelegt werden.
 Die Prozesse sollen die Last durch Nutzer in der Datenbank simulieren.
@@ -301,12 +298,12 @@ top -bn1 | grep 'Cpu(s)' | sed 's/.*, *\\([0-9.]*\\)%* id.*/\\1/' | awk '{print 
 
 Die Ergebnisse der CPU-Auslastung und der Anzahl der Leseabfragen sind in Tabelle~\ref{tab:replication-multiple-select-threads} dargestellt, sortiert nach aufsteigender Threadanzahl.
 Die Abbildung~\ref{replication-no-multiple-select-threads-reads} zeigt, dass sich die Leseperformance beim Anstieg von 1 auf 2 Threads nahezu verdoppelt.
-Zwischen 2 und 4 Threads fällt der Unterschied schon geringer aus, liegt aber dennoch bei etwa 40\%.
-Die restlichen Threadanzahlen weichen nur geringfügig voneinander ab.
+Zwischen 2 und 4 Threads fällt der Unterschied schon geringer aus, liegt aber dennoch bei etwa 25\%.
+Die Kurve mit 4 Threads weicht nur geringfügig von den anderen Threadanzahlen ab.
 Begründen lässt sich das durch die CPU-Auslastung.
-Bei einer geringeren Anzahl an Threads ist die CPU-Auslastung sehr niedrig, was die starken Anstiege erklärt.
+Bei einer geringeren Anzahl an Threads ist die CPU-Auslastung niedriger, was die starken Anstiege erklärt.
 Irgendwann ist die CPU jedoch voll ausgelastet, sodass die Performance nicht mehr weiter steigt.
-Dies ist bei 8 Threads der Fall, da dort die CPU-Auslastung bei 89.34\% liegt.
+Dies trifft hier bei 4 bzw. 8 Threads zu, da die CPU-Auslastung dort zwischen 72 und 97\% liegt.
 
 \vspace{-2pt}
 \begin{table}[H]
@@ -332,11 +329,13 @@ Dies ist bei 8 Threads der Fall, da dort die CPU-Auslastung bei 89.34\% liegt.
 
 Wenn nun wieder das Ergebnis aus~\ref{replication-multiple-select-threads-reads} betrachtet wird, werden die Vorteile der Replikation deutlich sichtbar.
 In beiden Fällen liegen die Werte mit Replikation stets deutlich über denen des Single-Server-Ansatzes.
-Die Performance des Single-Servers bleibt unabhängig von der Threadanzahl nahezu konstant.
+Die Performance des Single-Servers bleibt unabhängig von der Threadanzahl gleich.
 Bei der Replikation zeigt sich, dass ein Anstieg an Threads auch zu einer Steigerung der Leseabfragen führt.
-So ist die Kombination von 16 Threads, verteilt auf den Master und 3 Replikate, am effizientesten.
-Danach folgt mit etwas Abstand die Version mit 8 Prozessen, die etwa 25\% langsamer ist.
+So ist die Kombination von 16 Threads, verteilt auf den Master und die 3 Replikate, am effizientesten.
+Danach folgt mit etwas Abstand die Version mit 8 Prozessen, die etwa 10\% langsamer ist.
 Aber selbst diese ist deutlich schneller als alle Varianten des Single-Server-Ansatzes, sodass festgestellt werden kann, dass die Replikation bei höherer Last klare Vorteile bietet.
+Wenn die Threadanzahl beim Replikationsansatz weiter erhöht wird, würde auch hier irgendwann die zuvor erwähnte Grenze des Single-Server-Ansatzes erreicht werden.
+Der Vorteil der Replikation liegt jedoch darin, dass die erhöhte Last auf zusätzliche Replikate verteilt werden kann.
 
 Im letzten Vergleich wird ausschließlich der Master-Replikat-Ansatz verwendet, um die unterschiedlichen Binlog-Formate zu vergleichen.
 Zur Begrenzung der Variationen wird nur ein Replikat pro Master betrachtet.
@@ -345,9 +344,10 @@ In der Grafik~\ref{fig:replication-format-change} ist zu erkennen, dass es bei d
 Und auch die Schreibgeschwindigkeiten verhalten sich bei beiden Varianten sehr ähnlich.
 Das lässt sich auch mit dem Hexagon-Chart bestätigen, da dort alle Werte sehr nahe beieinander liegen.
 
+\vspace{-7pt}
 \begin{figure}[H]
   \centering
-  \begin{subfigure}[t]{0.48\textwidth}
+  \begin{subfigure}[t]{0.42\textwidth}
     \includegraphics[width=\textwidth]{PNGs/Script/Replication/replication-format-change/statistics}
   \end{subfigure}
   \hfill

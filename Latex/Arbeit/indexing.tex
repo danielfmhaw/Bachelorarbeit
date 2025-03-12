@@ -4,26 +4,24 @@
 \chapter{Indizes}\label{ch:indexes}
 
 Das folgende Kapitel befasst sich mit der Indexierung und den damit verbundenen Performance-Optimierungen, die näher erläutert werden.
-Zunächst werden einige Grundlagen der Indexierung betrachtet.
-Anschließend werden die verschiedenen Arten von Indizes näher erläutert und unterschiedliche Benchmarks mit ihnen durchgeführt.
+Zunächst werden einige Grundlagen betrachtet.
+Anschließend werden die verschiedenen Arten von Indizes näher erklärt und unterschiedliche Benchmarks mit ihnen durchgeführt.
 Im letzten Schritt werden die Ergebnisse analysiert, um festzustellen, welche Verwendung der Indizes am besten funktioniert.
 
 \section{Grundlagen}\label{sec:indexing-grundlagen}
 
-Indizes sind Datenstrukturen, die von Speicher-Engines (engl.\ storage engines) verwendet werden, um unter anderem Zeilen schneller zu finden (\cite[S. 147--189]{schwartz2012high}).
+Indizes sind Datenstrukturen, die von Speicher-Engines (engl.\ storage engines) verwendet werden, um Zeilen schneller zu finden.
 Die Storage-Engine ist eine Kernkomponente eines Datenbankmanagementsystems, die für die Speicherung und Verwaltung der Daten verantwortlich ist.
 Verschiedene Storage-Engines unterscheiden sich hinsichtlich ihrer Indexfunktionalität sowie der Unterstützung von Transaktionen und Sperrmechanismen.
 Im weiteren Verlauf werden verschiedene Indextypen vorgestellt, die nicht von allen Engines unterstützt werden.
 
-Die Indizes haben einen großen Einfluss auf die Datenbank-Performance und werden mit zunehmender Größe der Datenbank immer wichtiger, da das Scannen aller Tupel zunehmend aufwendiger wird.
+Mit zunehmender Größe der Datenbank wird das Scannen aller Tupel immer aufwendiger, weshalb Indizes eine zentrale Rolle für die Datenbank-Performance spielen.
 Weniger ausgelastete Datenbanken können ohne ordnungsgemäße Indizes gut funktionieren, aber die Leistung kann rapide sinken, wenn die Datenmenge wächst.
 Wenn ein solches Problem auftritt, ist die Index-Optimierung oft der effektivste Weg, um die Abfrageleistung schnell zu verbessern.
 Um wirklich optimale Indizes zu erstellen, ist es häufig notwendig, Abfragen umzuschreiben.
 Besonders nützlich sind Indizes bei Abfragen, die Joins zwischen mehreren Tabellen enthalten, da sie ermöglichen, die Anzahl der zu prüfenden Tupel erheblich zu reduzieren, wenn eine einschränkende Bedingung vorliegt.
-Wie genau Indizes erstellt werden müssen, wird im Laufe dieses Kapitels geklärt.
 
-
-Um die Funktionsweise eines Indexes anschaulicher zu erklären, wird als Beispiel ein wissenschaftliches Fachbuch betrachtet.
+Um die Funktionsweise eines Indexes anschaulicher zu erklären, wird als Beispiel ein wissenschaftliches Fachbuch betrachtet (vgl.\ \cite[S. 147]{schwartz2012high}).
 Am Ende dieser Bücher gibt es meist ein Stichwortverzeichnis oder Register.
 Dieses Register besteht aus einer alphabetisch geordneten Liste von Begriffen, Themen und Stichworten.
 Möchte man einen Begriff nachschlagen, sucht man ihn im Stichwortverzeichnis und erhält die Seitenzahlen, auf denen er vorkommt.
@@ -35,61 +33,48 @@ Das folgendes Beispiel veranschaulicht dies:
 \begin{lstlisting}[language=SQL]
 SELECT NAME FROM KUNDEN WHERE KUNDEN_ID = 7;
 \end{lstlisting}
+\vspace{-4pt}
 
 Angenommen, es existiert ein Index auf der Spalte \texttt{KUNDEN\_ID}, dann wird MySQL diesen verwenden, um Zeilen zu finden, bei denen die \texttt{KUNDEN\_ID} den Wert 7 hat.
-Mit anderen Worten wird eine Suche innerhalb der Indexwerte durchgeführt und alle entsprechenden Zeilen werden zurückgegeben.
-
-Ein Index kann Werte aus einer oder mehreren Spalten einer Tabelle enthalten.
-Bei mehreren Spalten ist die Reihenfolge der Spalten im Index entscheidend, da MySQL nur effizient auf ein linkes Präfix des Indexes zugreifen kann.
-Gibt man nur das zweite Attribut an, ohne das erste zu referenzieren, kann der Index nicht direkt verwendet werden.
-Außerdem darf man nicht verwechseln, dass ein Index über zwei Spalten nicht gleichbedeutend ist mit zwei separaten einspaltigen Indizes.
-Es gibt verschiedene Typen von Indizes, die jeweils für unterschiedliche Zwecke optimiert sind und in den nächsten Abschnitten behandelt werden.
+Ein Index kann aber nicht nur die Werte einer einzelnen Spalte enthalten, sondern auch mehrere Spalten einer Tabelle umfassen.
+Bei mehrspaltigen Indizes spielt die Reihenfolge der Spalten im Index eine entscheidende Rolle.
+Außerdem ist der Zugriff auf nicht alle Spalten bedingungslos effizient, da MySQL nur auf das linkeste Präfix des Indexes zugreifen kann.
+Wenn man nur das zweite Attribut eines Indexes angibt, ohne das erste zu referenzieren, kann der Index nicht direkt verwendet werden.
+Es ist wichtig zu beachten, dass ein Index, der über zwei Spalten definiert ist, nicht mit zwei getrennten einspaltigen Indizes gleichzusetzen ist.
+In diesem Fall können Abfragen nur auf einer der beiden Spalten basieren, was zu schlechterer Performance führt, wenn beide Spalten gleichzeitig abgefragt werden.
 
 Um zu verstehen, wie man Indizes für eine Datenbank auswählt, ist es wichtig zu wissen, welcher Teil der Abfrage am meisten Zeit in Anspruch nimmt (\cite[S. 350--353]{garcia2008database}).
-Das Datenbanksystem ist so aufgebaut, dass die Tupel einer Relation üblicherweise auf viele Seiten einer Festplatte verteilt sind, die jeweils mehrere Tausend Bytes umfassen und viele Tupel speichern.
+Das Datenbanksystem verteilt die Tupel einer Relation üblicherweise auf viele Festplattenseiten.
 Um die Werte eines Tupels zu prüfen, muss die gesamte Seite, auch Block genannt, in den Hauptspeicher geladen werden.
-Dabei kostet es kaum mehr Zeit, alle Tupel einer Seite anstatt nur ein einzelnes zu prüfen.
-
-In der Regel stellt der Schlüssel den sinnvollsten Index für eine Tabelle dar, weshalb MySQL standardmäßig den B-Tree-Index für Primary Keys verwendet (\cite{mysql_primary_key}).
-Die Entscheidung, ob für ein bestimmtes Attribut ein Index definiert werden soll, hängt von drei Faktoren ab:
+Dabei erfordert es nahezu gleich viel Zeit, alle Tupel einer Seite zu prüfen, anstatt nur ein einzelnes.
+Aufgrund dieser Tatsache kann die Entscheidung, ob für ein bestimmtes Attribut ein Index definiert werden soll, von drei Faktoren abhängig gemacht werden.
 Erstens ist ein Index besonders nützlich, wenn Abfragen häufig auf ein bestimmtes Attribut zugreifen.
 Zweitens kann ein Index sinnvoll sein, wenn es nur wenige Tupel für einen bestimmten Wert des Attributs gibt, da dies den Festplattenzugriff bei einer Abfrage reduziert.
-Sobald nicht alle Blöcke geladen werden müssen, kann der Index Zeit sparen.
-Der letzte Fall betrifft Situation, in denen Tupel nach einem Attribut geclustert sind.
-Durch einen Index können müssen hier weniger Datenblöcke geladenen werden, da die Werte des Attributs aufeinanderfolgender gespeichert sind.
-Mit diesen Faktoren kann begründet werden, warum die Schlüssel einer Tabelle gut geeignet sind.
-Zum einen kommen sie oft in Abfragen vor (erster Punkt) und zum anderen enthalten sie keine doppelten Werte, da jedes Tupel einen eindeutigen Wert hat (zweiter Punkt).
+Und der letzte Fall betrifft Situation, in denen Tupel nach einem Attribut geclustert sind.
+Da die Werte des Attributs aufeinanderfolgender gespeichert sind, müssen durch einen Index weniger Datenblöcke geladenen werden.
 
-Das Auswählen von Indizes erfordert von den Entwicklern eine Tradeoff abzuwägen.
+Trotz dieser Faktoren müssen Entwickler bei der Auswahl von Schlüsseln und Indizes einen Tradeoff abwägen.
 Es gibt dabei zwei Faktoren, die die Entscheidung beeinflussen.
 Zum einen kann ein Index auf einem Attribut Abfragen mit diesem Attribut erheblich beschleunigen.
 Zum anderen erschwert jeder Index Einfügungen, Löschungen und Aktualisierungen, da diese mehr Zeit und Aufwand erfordern.
-Aber selbst wenn Modifikationen die häufigste Form von Datenbankaktionen sind, kann ein Index auf ein häufig verwendetes Attribut die Leistung verbessern.
-Dies liegt daran, dass einige Modifikationsbefehle zuvor die Datenbank abfragen.
-Im Kapitel \nameref{ch:partitions} wird uns dieses Thema wieder begegnen.
+Dennoch kann ein Index auf ein häufig verändertes Attribut die Leistung verbessern, da einige Modifikationen zunächst eine Datenbankabfrage erfordern.
+Im Kapitel \nameref{ch:partitions} wird dieses Thema erneut behandelt
 
-Um Zeitersparnis durch die Nutzung von Tupeln ohne vollständige Durchsuchung der Relation zu erreichen, müssen Indizes auf der Festplatte gespeichert werden.
-Dies führt jedoch zu zusätzlichen Festplattenzugriffen.
-Allgemein lässt sich sagen, dass Modifikationen in etwa doppelt so kostenintensiv sind wie der Zugriff auf den Index oder die Daten während einer Abfrage.
-Damit berechnet werden kann, ob sich ein Index für eine Spalte lohnt, muss bekannt sein, mit welcher Wahrscheinlichkeit Abfragen und Modifikationen durchgeführt werden.
-
-Um die Vorgehensweise anhand einer beispielhaften Berechnung durchzuführen, wird die folgende Tabelle benutzt (abgeändertes Beispiel aus~\cite[S. 355--357]{garcia2008database}):
+Zur Entscheidungsfindung anhand einer Berechnung wird die folgende Tabelle verwendet (abgeändertes Beispiel aus~\cite[S. 355--357]{garcia2008database}):
 \vspace{-4pt}
 \begin{lstlisting}
 Fakten(Id, Bestelldatum, Artikel_Id, Kunden_Id, ...)
 \end{lstlisting}
 \vspace{-8pt}
 
-Der Schlüssel der Faktentabelle ist die Spalte \texttt{Id} und für die Attribute \texttt{Artikel\_Id} sowie \texttt{Kunden\_Id} wird jeweils ein Index erstellt.
-Damit stehen uns insgesamt drei unterschiedliche Indexe zur Verfügung, einschließlich des Primärschlüssels.
-Als Nächstes werden Befehle benötigt, bei denen die Indexe benutzt werden (siehe~\ref{lst:indexing:fakten-select-insert-queries}).
-In der ersten Zeile wird nur der Kundenindex verwendet, in der zweiten nur der Artikelindex und in der Letzten fügen wie eine Zeile ein.
+Der Schlüssel der Faktentabelle ist die Spalte \texttt{Id} und für die \texttt{Artikel\_Id} sowie die \texttt{Kunden\_Id} werden eigene Indizes erstellt, sodass insgesamt drei Indizes vorhanden sind.
+Als Nächstes werden Befehle benötigt, bei denen die Indizes benutzt werden (siehe~\ref{lst:indexing:fakten-select-insert-queries}).
+In der ersten Zeile wird nur der Kundenindex verwendet und in der zweiten nur der Artikelindex.
 
 \vspace{-12pt}
 \begin{lstlisting}[language=SQL,caption=Select-Queries für die Faktentabelle,label={lst:indexing:fakten-select-insert-queries}]
 SELECT Bestelldatum, Artikel_Id FROM Fakten WHERE Kunden_Id = k;
 SELECT Bestelldatum, Kunden_Id FROM Fakten WHERE Artikel_Id = a;
-INSERT INTO Fakten VALUES(i, b, a, k);
 \end{lstlisting}
 \vspace{-8pt}
 
@@ -97,7 +82,7 @@ Damit berechnet werden kann, ob es sinnvoll ist, die Indizes zu erstellen, müss
 Zuallererst wird davon ausgegangen, dass die Faktentabelle 10 Datenblöcke belegt und im Durchschnitt jeder Kunde 3 Artikel kauft, während ein Artikel von 3 Kunden gekauft wird.
 Die Tupel für einen bestimmten Kunden oder Artikel sind gleichmäßig über die 10 Seiten verteilt.
 Trotzdem sind mit einem Index nur 3 Festplattenzugriffe erforderlich, um die durchschnittlich 3 Tupel für einen Kunden oder Artikel zu finden.
-Dazu ist ein Festplattenzugriff erforderlich, um die Seite des Indexes zu lesen und ein weiterer, um die modifizierte Seite zurückzuschreiben, falls eine Indexseite geändert werden muss.
+Um die Seite des Indexes zu lesen, ist ein Festplattenzugriff erforderlich und ein weiterer, um die modifizierte Seite zurückzuschreiben, falls eine Indexseite geändert werden muss.
 Ohne Index sind 10 Festplattenzugriffe zum Lesen und zwei Festplattenzugriffe zum Schreiben erforderlich.
 Unter diesen Bedingungen ergibt sich die folgende Kostentabelle:
 
@@ -120,33 +105,30 @@ Unter diesen Bedingungen ergibt sich die folgende Kostentabelle:
 \end{table}
 \vspace{-25pt}
 
-Die letzte Zeile aus Tabelle~\ref{tab:performance-queries} gibt die durchschnittlichen Kosten einer Aktion an.
-Unter der Annahme, dass der Anteil der Zeit, in der die erste Abfrage ausgeführt wird, p1 beträgt und der Anteil der Zeit für die zweite Abfrage p2 ist, ergibt sich der Anteil der Zeit, in der I ausgeführt wird, zu 1 – p1 – p2.
-Der Durchschnitt für den Kundenindex wird wie folgt berechnet:
+Unter der Annahme, dass die erste Abfrage p1 und die zweite p2 der Zeit beansprucht, ergibt sich für I ein Anteil von 1 – p1 – p2.
+Damit kann der Durchschnitt für den Kundenindex wird wie folgt berechnet (siehe letzte Zeile aus~\ref{tab:performance-queries}):
 \[
     4p_{1} + 10p_{2} + 4 \cdot (1 - p_{1} - p_{2}) = 4p_{1} + 10p_{2} + 4 - 4p_{1} - 4p_{2} = 4 + 6p_{2}
 \]
 
 Abhängig von den Werten für p1 und p2 kann jede der vier Optionen die geringsten Kosten für die drei Operationen verursachen.
 Zum Beispiel, wenn p1 = p2 = 0,1, dann ist der Ausdruck 2 + 8p1 + 8p2 am kleinsten, sodass keine Indizes bevorzugt werden würden.
-Wenn jedoch p1 = 0,5 und p2 = 0,1 gelten, ergibt ein Index für die Kunden den besten Durchschnittswert.
-
 Damit wurde gezeigt, dass es sinnvoll ist, keinen Index zu verwenden, wenn überwiegend Einfügungen durchgeführt werden und nur sehr wenige Abfragen anfallen.
 Intuitiv gilt, dass bei vielen Abfragen und einer ungefähr gleichen Häufigkeit von Abfragen, die Artikel und Kunden angeben, beide Indizes vorteilhaft sind.
 Wird hingegen nur ein Typ von Abfrage häufig genutzt, sollte nur der Index definiert werden, der bei dieser Abfrageart hilft.
 
-Es gibt zahlreiche Tools, die entwickelt wurden, um die Verantwortung der Wahl der Indizes vom Datenbankdesigner zu übernehmen.
-Dabei optimiert das System sich selbst oder dem Designer werden zumindest Empfehlungen für sinnvolle Entscheidungen gegeben.
+Um die Verantwortung für die Wahl der Indizes vom Datenbankdesigner zu übernehmen, wurden zahlreiche Tools entwickelt.
+Dabei optimiert das System sich selbst oder dem Entwickler werden zumindest Empfehlungen für sinnvolle Entscheidungen gegeben.
 Ein bewährter Ansatz zur Auswahl von Indizes ist das sogenannte Greedy-Verfahren (\cite[S. 824]{garcia2008database}), bei dem zunächst ohne ausgewählte Indizes der Nutzen jedes Kandidaten-Index bewertet wird.
 Wenn es einen Index mit positivem Nutzen gibt, wird dieser ausgewählt und anschließend wird eine Neubewertung ausgeführt, wobei davon ausgegangen wird, dass der zuvor ausgewählte Index bereits verfügbar ist.
 Dieser Prozess wird so lange wiederholt, bis es keinen Kandidaten-Index mit positivem Nutzen mehr gibt.
 
-\newpage
 \section{B-Baum-Index}\label{sec:indexing-b-baum-index}
 
 Der erste zu betrachtende Indextyp ist der B-Baum-Index (engl.\ B-Tree Index), der auf einer speziellen Baum-Datenstruktur basiert.
 Diese Struktur wird von den meisten MySQL-Storage-Engines unterstützt.
-Die Implementierung und Nutzung des B-Baum-Indexes kann jedoch je nach verwendeter Storage-Engine variieren.
+Außerdem verwendet ihn MySQL standardmäßig für die Primary Keys (\cite{mysql_primary_key}).
+Die Implementierung und Nutzung des B-Baum-Indexes kann je nach verwendeter Storage-Engine variieren.
 
 Das Grundprinzip eines B-Baums ist, dass alle Werte in einer bestimmten Reihenfolge gespeichert werden und jede Blattseite den gleichen Abstand zum Wurzelknoten hat.
 
@@ -183,7 +165,7 @@ CREATE INDEX combined_index ON KUNDEN(NAME, VORNAME, GEBURTSTAG);
 \end{lstlisting}
 \vspace{-8pt}
 
-Als Nächstes werden die möglichen Abfragen betrachtet, bei denen B-Baum-Indizes besonders hilfreich sind, um ein besseres Verständnis für ihre optimale Nutzung zu gewinnen.
+Als Nächstes werden mögliche Abfragen betrachtet, bei denen B-Baum-Indizes besonders hilfreich sind, um ein besseres Verständnis für ihre optimale Nutzung zu gewinnen.
 Eine Übereinstimmung mit dem vollständigen Schlüsselwert liefert Werte für alle Spalten im Index.
 Eine beispielhafte Abfrage zur Suche nach allen Einträgen mit dem Index aus~\ref{lst:indexing-create-combined} ist die Suche nach allen Kunden, die Max Mustermann heißen und am 01.01.2000 geboren wurden.
 Auch Abfragen, die nur mit dem linken Präfix übereinstimmen, können von diesem Index profitieren.
@@ -216,6 +198,7 @@ Um die Performance der Select-Abfragen zu messen, werden verschiedene Queries an
 Dazu gehören \texttt{GROUP BY}- und \texttt{COUNT}-Abfragen, bei denen die Index-Attribute verwendet werden oder sie spielen in der \texttt{WHERE}-Bedingung eine Rolle.
 Damit es übersichtlich bleibt, werden einmal 10 Datensätze mit 40 und einmal 400 mit 4000 Zeilen verglichen.
 
+\vspace{-8pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
@@ -231,25 +214,25 @@ Damit es übersichtlich bleibt, werden einmal 10 Datensätze mit 40 und einmal 4
         \caption{Mit 400 und 4000 Zeilen}
         \label{indexing-b-tree-high-reads}
     \end{subfigure}
+    \vspace{-6pt}
     \caption[B-Tree-Indexing: Mit Index vs Ohne]{Grafik zeigt Performance mit und ohne Index für Readsabfragen}
     \label{fig:indexing-vs-no}
 \end{figure}
 \vspace{-15pt}
 
 In der Abbildung~\ref{indexing-b-tree-low-reads} ist zu erkennen, dass bei 10 Datensätzen die Kundentabelle ohne Indizes schneller ist als die mit Indizes.
-Bei 40, 400 oder 4000 Zeilen (siehe~\ref{indexing-b-tree-high-reads}) wird schon die Wirkung der Indizes deutlich, da in diesen Fällen jeweils die Version mit Indizes effizienter ist.
-Der Unterschied bei 40 Datensätzen ist zwar etwas geringer, aber in den anderen Fällen sehen noch eindeutigere Unterschiede.
+Bei 40, 400 oder 4000 Zeilen (siehe~\ref{indexing-b-tree-low-reads} und~\ref{indexing-b-tree-high-reads}) wird die Wirkung der Indizes deutlich.
+Der Unterschied bei 40 Datensätzen ist zwar etwas geringer, aber in den anderen Fällen sind die Unterschiede noch größer.
 Interessant ist, dass es nicht linear oder quadratisch mit der Anzahl an Datensätzen in der Tabelle steigt, sondern bei 400 und 4000 Zeilen beträgt der Unterschied zur Tabelle ohne Index jeweils etwa 500--700 Abfragen.
 Bei der Schreibgeschwindigkeit liegen beide auf einem sehr ähnlichen Niveau, wobei die Version ohne Index tendenziell einen leichten Vorteil hat.
 
 Mit dem vorherigen Benchmark können die Vorteile eines Indexes bereits deutlich erkannt werden.
 Nun soll jedoch auch die Funktionalität des B-Tree-Indexes in Bezug auf unterschiedliche Selects untersucht werden.
 Dazu wird erneut die Kundentabelle erstellt, aber diesmal wird nur ein Index definiert (siehe~\ref{lst:indexing-create-combined}).
-
 Anschließend wird die Tabelle mit einer festgelegten Anzahl an Datensätzen befüllt und es werden unterschiedliche Select-Befehle ausgeführt.
 Im Codeblock~\ref{lst:indexing-b-tree-selects} sind aus Platzgründen nur die Where-Bedingungen zu sehen und am Ende jeder Zeile steht der Name der Query, damit später in der Analyse nachvollzogen werden kann, welche Query welche Performance liefert.
 
-\newpage
+\vspace{-5pt}
 \begin{lstlisting}[language=SQL,caption=Unterschiedliche Where-Bedingungen für B-Tree-Index,label={lst:indexing-b-tree-selects},basicstyle=\ttfamily\scriptsize]
 WHERE NAME LIKE 'M%'; -- columm_prefix
 WHERE NAME = 'Müller' AND VORNAME = 'Max' AND GEBURTSTAG < '1980-01-01'; -- combined_match_with_range
@@ -266,7 +249,7 @@ WHERE NAME = 'Müller' AND GEBURTSTAG < '1980-01-01'; -- skip_columns
 Anhand der Grafik in Abbildung~\ref{fig:indexing-b-tree-query-reads} lässt sich erkennen, bei welchen Abfragen der Index am effizientesten ist.
 Auf der linken Seite können die Ergebnisse für die Read-Befehle mit Index betrachtet werden, während auf der rechten Seite die Werte ohne Index zu sehen sind.
 
-\vspace{-5pt}
+\vspace{-8pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
@@ -317,18 +300,18 @@ Anschließend werden die Werte entnommen und in einer Tabelle zusammengefasst.
     \caption{Ergebnisse der COUNT(*)-Abfragen für B-Tree-Index}
     \label{tab:indexing_b_tree_count_results}
 \end{table}
-\vspace{-25pt}
+\vspace{-30pt}
 
 Anhand der Spalte \texttt{Anzahl an Zeilen} lässt sich erkennen, dass die Queries, die am wenigsten Zeilen zurückgeben, auch diejenigen sind, bei denen die höchste Performance erzielt wird.
-Deshalb ist auch die Reihenfolge mit und ohne Index gleich, weshalb man meinen könnte, dass der Index keinen Einfluss auf die Performance hat.
+Damit ist auch die Reihenfolge mit und ohne Index gleich, weshalb man meinen könnte, dass der Index keinen Einfluss auf die Performance hat.
 Dies betrifft jedoch nur die Reihenfolge, nicht aber die Werte der Abfragen, da hier deutliche Unterschiede erkennbar sind.
 Anschaulich wird das mit der Betrachtung der Spalte \texttt{Faktor}.
 Um den Wert zu berechnen, werden die Werte aus der Gesamtstatistik entnommen und die Version mit Index durch die Version ohne Index geteilt.
-Dadurch lässt sich erkennen, dass \texttt{full\_match} zwar bei beiden Versionen am schnellsten ist, jedoch mit Index etwa 6-mal schneller als ohne.
+Dadurch lässt sich erkennen, dass \texttt{full\_match} zwar bei beiden Versionen am schnellsten ist, jedoch mit Index etwa 7-mal schneller als ohne.
 Es lässt sich auch erkennen, dass je weniger Zeilen zurückgegeben werden, desto größer ist der Faktor.
 Bei den Queries \texttt{range\_values} und \texttt{not\_leftmost} liegt der Faktor sehr nah 1, was bedeutet, dass der Index keinen Einfluss auf die Performance hat.
 Deshalb stellt sich auch die Frage, ob der Index überhaupt verwendet wird.
-Um das zu überprüfen, wird der \texttt{EXPLAIN}-Operator verwendet, das Ergebnis erneut geloggt und der Tabelle hinzugefügt (siehe Spalte \texttt{Index benutzt?}).
+Um das zu überprüfen, wird der \texttt{EXPLAIN}-Operator verwendet, das Ergebnis erneut geloggt und der Tabelle hinzugefügt.
 Und tatsächlich sehen wir, dass die vermuteten Queries die einzigen sind, bei denen der Index nicht verwendet wird.
 
 \section{Hash-Index}\label{sec:indexing-hash-index}
@@ -340,42 +323,39 @@ Sie erstellen dann automatisch einen Hash-Index für diese Werte im Speicher, de
 Die Funktionsweise der Storage-Engine lässt sich wie folgt beschreiben.
 
 Für jede Zeile wird mithilfe einer Hash-Funktion ein Hash-Wert der indexierten Spalte berechnet.
-Der Hash-Wert (engl.\ hash code) ist eine kleine Zahl, die sich in der Regel von den Hash-Werten anderer Zeilen mit unterschiedlichen Schlüsselwerten unterscheidet.
+Der Hash-Wert (engl.\ hash code) ist eine kleine Zahl, die sich in der Regel von den Hash-Werten anderer Zeilen unterscheidet.
 Anschließend wird die Position im Index gesucht und man findet einen Zeiger auf die entsprechende Zeile.
 In letzten Schritt überprüft man die Werte der Zeile, um sicherzustellen, dass es sich um die richtige Zeile handelt.
 
-Wenn mehrere Werte denselben Hash-Wert besitzen, speichert der Index die Zeiger auf die Zeilen (engl.\ row pointers) in demselben Hash-Tabelleneintrag, typischerweise mithilfe einer verketteten Liste (z.B.\ einer \textit{Linked List}).
+Wenn mehrere Werte denselben Hash-Wert besitzen, speichert der Index die Zeiger auf die Zeilen (engl.\ row pointers) in demselben Hash-Tabelleneintrag, typischerweise mithilfe einer verketteten Liste (z.B.\ einer Linked List).
 Hash-Kollisionen können die Leistung eines Hash-Index beeinträchtigen, da jeder Zeiger in der verketteten Liste durchlaufen und die entsprechenden Werte mit dem Suchwert verglichen werden müssen, um die richtigen Zeilen zu finden.
-Das ist auch Index-Wartungsoperationen mit viel Aufwand verbunden.
-Hingegen eindeutige Hash-Indizes stellen sicher, dass für jeden Hash-Wert nur ein einziger Eintrag existiert.
-Bei Konflikten wird ein Mechanismus wie die Open Addressing-Strategie (z.B.\ Linear Probing oder Quadratic Probing) eingesetzt, um Konflikte zu lösen und den Speicherplatz effizient zu verwalten.
+Das ist auch bei Index-Wartungsoperationen mit viel Aufwand verbunden.
+Es gibt auch eindeutige Hash-Indizes, die stellen sicher, dass für jeden Hash-Wert nur ein einziger Eintrag existiert.
+Bei Konflikten wird ein Mechanismus wie die Open Addressing-Strategie (z.B.\ Linear Probing) eingesetzt, um Konflikte zu lösen und den Speicherplatz effizient zu verwalten.
 Hierbei wird versucht, Konflikte direkt innerhalb der Hash-Tabelle zu bewältigen, anstatt auf zusätzliche Datenstrukturen wie verkettete Listen zurückzugreifen.
-Die eindeutigen Hash-Indizes werden nicht von der Memory-Engine in MySQL unterstützt.
+Jedoch werden die eindeutigen Hash-Indizes nicht von der Memory-Engine in MySQL unterstützt.
 
-Um die Verwendung des Hash-Indexes zu veranschaulichen, benutzen folgt folgendes Beispiel:
+%Um die Verwendung des Hash-Indexes zu veranschaulichen, benutzen folgt folgendes Beispiel:
+%
+%\vspace{-5pt}
+%\begin{lstlisting}[language=SQL]
+%SELECT * FROM KUNDEN WHERE NAME = 'Peter';
+%\end{lstlisting}
+%\vspace{-8pt}
+%
+%Zunächst berechnet MySQL den Hash-Wert für \texttt{'Peter'} und verwendet diesen, um den entsprechenden Zeiger im Index zu finden.
+%Angenommen, die Hash-Funktion liefert für \texttt{'Peter'} den Wert \texttt{7654}.
+%In diesem Fall sucht MySQL im Index an der Position 7654 und findet einen Zeiger auf Zeile 3.
+%Im letzten Schritt wird der Wert in Zeile 3 mit \texttt{'Peter'} verglichen.
+%Da die Indizes nur kompakte Hash-Werte speichern, sind Hash-Indizes äußerst platzsparend und Suchvorgänge erfolgen in hoher Geschwindigkeit.
 
-\vspace{-5pt}
-\begin{lstlisting}[language=SQL]
-SELECT * FROM KUNDEN WHERE NAME = 'Peter';
-\end{lstlisting}
-\vspace{-8pt}
-
-Zunächst berechnet MySQL den Hash-Wert für \texttt{'Peter'} und verwendet diesen, um den entsprechenden Zeiger im Index zu finden.
-Angenommen, die Hash-Funktion liefert für \texttt{'Peter'} den Wert \textbf{7654}.
-MySQL sucht nun im Index an der Position 7654 und findet einen Zeiger auf Zeile 3.
-Im letzten Schritt wird der Wert in Zeile 3 mit \texttt{'Peter'} verglichen.
-Da die Indizes nur kompakte Hash-Werte speichern, sind Hash-Indizes äußerst platzsparend und Suchvorgänge erfolgen in hoher Geschwindigkeit.
-
-Ähnlich wie der B-Baum-Index hat auch der Hash-Index einige Einschränkungen.
+Ähnlich wie der B-Baum-Index hat aber auch der Hash-Index einige Einschränkungen.
 Zum einen enthält der Index nur Hash-Werte und Zeiger auf Zeilen (engl.\ row pointers), jedoch nicht die Werte selbst.
 Deshalb kann MySQL den Index nicht verwenden, um das Einlesen der Zeilen zu vermeiden.
-Allerdings erfolgt der Zugriff auf die in den Speicher geladenen Zeilen sehr schnell, wodurch die Leistung nicht wesentlich beeinträchtigt ist.
-Zum anderen können Hash-Indizes nicht für Sortierungen verwendet werden, da die Werte nicht in einer geordneten Reihenfolge gespeichert sind.
-Im Gegensatz dazu sind B-Baum-Indizes in der Lage.
-Darüber hinaus ermöglichen Hash-Indizes keine partiellen Schlüsselübereinstimmungen (engl.\ partial key matching).
-Da der Hash-Wert aus dem gesamten indexierten Wert berechnet wird, hilft ein Hash-Index beispielsweise nicht, wenn ein Index aus den Spalten (A, B) besteht und die \texttt{WHERE}-Klausel nur auf A verweist.
-Ein weiterer Nachteil besteht darin, dass Hash-Indizes keine Bereichsabfragen unterstützen.
-Sie eignen sich lediglich für Gleichheitsvergleiche, wie die Operatoren \texttt{=} (gleich), \texttt{<=>} (null-sicher gleich) und \texttt{IN()}.
+Zum anderen können Hash-Indizes, anders als B-Baum-Indizes, nicht für Sortierungen verwendet werden, da die Werte nicht in einer geordneten Reihenfolge gespeichert sind.
+Darüber hinaus ermöglichen Hash-Indizes keine partiellen Schlüsselübereinstimmungen, da der Hash-Wert aus dem gesamten indexierten Wert berechnet wird.
+Bei einem Index aus den Spalten (A, B) und einer \texttt{WHERE}-Klausel, die nur auf A verweist, ist dies daher nicht hilfreich.
+Ein weiterer Nachteil von Hash-Indizes ist, dass sie keine Bereichsabfragen unterstützen und nur für Gleichheitsvergleiche wie \texttt{=}, \texttt{<=>} und \texttt{IN()} geeignet sind.
 
 Als Nächstes werden die Benchmarks mit Hash-Indizes betrachtet.
 Dazu wird erneut die Kundentabelle verwendet und diesmal nur ein Index für die Spalte \texttt{NAME} erstellt.
@@ -406,7 +386,6 @@ Anschließend werden alle Zeilen mit dem Wert \texttt{Kunde\_1} für die Spalte 
 An den Ergebnissen in Abbildung~\ref{fig:hash-collision-comparison} ist zu erkennen, dass je geringer die Wahrscheinlichkeit für eine Kollision ist, desto schneller fällt die Select-Abfrage aus.
 Es fällt auch auf, dass die Unterschiede zwischen den verschiedenen Kollisionswahrscheinlichkeiten sehr groß sind.
 Hingegen die Einfüge-Performance ist bei allen 4 Varianten auf einem ähnlichen Niveau.
-
 Als zweiten Test soll überprüft werden, ob der Index bei bestimmten Select-Queries benutzt wird oder nicht.
 Dazu wird erneut die Kundentabelle verwendet, der gleiche Index wie in Beispiel~\ref{lst:indexing-create-combined} erstellt, die Testdaten eingefügt und die Select-Befehle aus~\ref{lst:indexing-b-tree-selects} genutzt.
 Dieses Mal werden aber nicht alle Select-Befehle verwendet, sondern nur die aus folgender Tabelle:
@@ -436,7 +415,7 @@ Das stimmt auch mit den Ergebnissen aus der Abbildung~\ref{fig:indexing-hash-que
 Interessant ist, dass die Query mit 206 zurückgegebenen Zeilen nur unwesentlich langsamer ist als die anderen.
 Die Reihenfolge ist wieder bei beiden identisch und hängt von der Anzahl der zurückgegebenen Zeilen ab.
 
-\vspace{-4pt}
+\vspace{-8pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
@@ -453,11 +432,11 @@ Die Reihenfolge ist wieder bei beiden identisch und hängt von der Anzahl der zu
     \label{fig:indexing-hash-query-reads}
 \end{figure}
 
-\section{Vergleich von B-Tree- und Hash-Index}\label{sec:indexing-comp-b-tree-hash-index}
+\section{Vergleich zwischen B-Tree- und Hash-Index}\label{sec:indexing-comp-b-tree-hash-index}
 
 In den vorherigen Kapiteln wurden der B-Tree-Index und der Hash-Index jeweils getrennt voneinander betrachtet.
 Dabei wurde auch analysiert, bei welchen Select-Queries die Indizes Vorteile bieten und bei welchen nicht.
-Damit fehlt uns noch der Vergleich zwischen dem B-Tree-Index und dem Hash-Index.
+Damit fehlt noch der Vergleich zwischen B-Tree- und Hash-Index.
 
 Um die Unterschiede zwischen beiden Indexstrukturen genauer zu analysieren, wird ein neuer Benchmark durchgeführt, der die Skripte aus Kapitel~\ref{sec:indexing-b-baum-index} und~\ref{sec:indexing-hash-index} wiederverwendet.
 Da der Hash-Index aber nur 4 unterschiedliche Select-Queries aufruft, sollen auch nur diese mit dem B-Tree-Index ausgeführt werden.

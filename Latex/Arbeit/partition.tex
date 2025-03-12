@@ -22,8 +22,9 @@ Zunächst muss geklärt werden, was mit Partitionen gemeint ist.
 In NoSQL-Datenbanken werden diese Partitionen häufig auf verschiedene Server verteilt, können jedoch auch innerhalb eines einzelnen Servers gespeichert werden.
 Im Gegensatz dazu bezieht sich die Partitionierung in MySQL ausschließlich auf die Verteilung von Tabellendaten innerhalb einer einzigen Datenbankinstanz.
 Dabei werden die Daten auf verschiedene physische oder logische Partitionen innerhalb desselben Servers verteilt.
-Zur Verteilung auf mehrere Server kann in relationalen Datenbanken Replikation eingesetzt werden, die im nächsten Kapitel~\ref{ch:partitions} ausführlicher erläutert wird.
-Das System verwaltet sie intern so, dass der Benutzer nicht bemerkt, wie genau die Daten organisiert sind (\cite[S. 265--273]{schwartz2012high}).
+Zur Verteilung auf mehrere Server kann in relationalen Datenbanken Replikation eingesetzt werden, die im nächsten Kapitel~\ref{ch:replikation} ausführlicher erläutert wird.
+
+Das System verwaltet Partitionen intern so, dass der Benutzer nicht bemerkt, wie genau die Daten organisiert sind (\cite[S. 265--273]{schwartz2012high}).
 Damit eine Tabelle die Partitionierung nutzt, muss bei ihrer Erstellung die \texttt{PARTITION BY}-Klausel angegeben werden, die festlegt, in welcher Partition jede Datenzeile gespeichert wird.
 Dies führt zu einer erhöhten Komplexität des \texttt{CREATE TABLE}-Befehls.
 In der Partitionsklausel selbst können nicht nur Ausdrücke und Berechnungen zur Bestimmung der Partitionierung eingesetzt werden, sondern auch Funktionen.
@@ -44,7 +45,7 @@ Wie bereits erwähnt, bestehen partitionierte Tabellen aus mehreren zugrunde lie
 Das Handler-Objekt fungiert als Schnittstelle, die es dem Datenbankmanagementsystem ermöglicht, mit den Partitionen zu interagieren.
 Dabei leitet es Anfragen an die Storage Engine weiter, die die Daten verwaltet.
 Aus Sicht der Storage Engine sind Partitionen normale Tabellen, unabhängig davon, ob sie eigenständig oder Teil einer partitionierten Tabelle sind.
-Abhängig vom jeweiligen Datenbankmanagementsystem können einzelne Partitionen entweder direkt oder, wie beispielsweise in MySQL, nicht direkt angesprochen werden.
+Abhängig vom jeweiligen DBMS können einzelne Partitionen entweder direkt oder, wie beispielsweise in MySQL, nicht direkt angesprochen werden.
 In Oracle ist dies wie folgt möglich:
 
 \vspace{-5pt}
@@ -63,7 +64,7 @@ Als Nächstes ist es wichtig zu verstehen, wie der Abfrageoptimierer (engl.\ Que
 Beim Ausführen von Abfragen versucht er, überflüssige Partitionen auszuschließen und sich gezielt auf diejenigen zu konzentrieren, die die relevanten Daten enthalten.
 Damit das sogenannte Pruning funktioniert, muss die \texttt{WHERE}-Klausel mit dem Partitionsausdruck übereinstimmen.
 Der Query Optimizer entscheidet bei SELECT-Abfragen, welche Partitionen ignoriert werden können und leitet die Anfrage gezielt weiter.
-Bei DELETE-Abfragen wird die betroffene Zeile lokalisiert und die Anfrage an die passende Partition übermittelt.
+Bei einer DELETE-Abfrage wird die betroffene Zeile lokalisiert und die Anfrage an die passende Partition übermittelt.
 Für INSERT-Abfragen wird zunächst die Zielpartition für die neue Zeile ermittelt.
 Erfolgt ein UPDATE innerhalb einer Partition, wird die Anfrage ebenfalls an die jeweilige Partition übermittelt.
 Wenn aber Teile der Partitionslogik verändert werden, dann stellt UPDATE eine Kombination von INSERT und DELETE dar, da eine Einfügungsanfrage an die Zielpartition und eine Löschanfrage an die Quellpartition weitergeleitet wird.
@@ -74,9 +75,9 @@ Wie bei der Indexierung und der Datenclusterung einer Tabelle, trägt Partitioni
 Daher bietet es sich an, anstelle von indexierten Tabellen partitionierte Strukturen zu verwenden, um einen schnellen Zugriff auf die gewünschten Zeilen zu ermöglichen.
 Durch die korrekte Verteilung der Partitionen befindet man sich, wie bei Indizes, nahe der gewünschten Daten und kann von dort aus entweder das relevante Datengebiet sequentiell scannen oder es in den Speicher laden und indexieren.
 Im Gegensatz zu Indizes hat die Partitionierung aber zwei entscheidende Vorteile.
-Zum einen ist keine separate Datenstruktur erforderlich, auf die verwiesen werden muss und die ständig aktualisiert wird, wodurch nur geringer Mehraufwand verursacht wird.
-Stattdessen gibt es eine mathematische Formel, die bestimmt, welche Partitionen welche Kategorien von Zeilen enthalten können.
-Zum anderen lassen sich auch physisch verteilen, sodass der Server mehrere Festplatten effizienter nutzen kann.
+Zum einen ist keine separate Datenstruktur erforderlich, auf die verwiesen werden muss und die ständig aktualisiert wird.
+Stattdessen legt eine mathematische Formel fest, welche Partitionen welche Kategorien von Zeilen enthalten können, wodurch nur geringer Mehraufwand verursacht wird.
+Zum anderen lassen sie sich auch physisch verteilen, sodass der Server mehrere Festplatten effizienter nutzen kann.
 Besonders vorteilhaft ist dies, wenn die Tabellen sehr groß sind und nicht mehr vollständig in den Speicher passen.
 
 \begin{quote}
@@ -92,7 +93,7 @@ Diese Annahmen sind jedoch nicht immer gültig, weshalb drei Anwendungsfälle mi
 Zunächst sollte berücksichtigt werden, dass das Ergebnis einer Partitionierungsfunktion, wie z.B.\ \texttt{YEAR()}, den Wert \texttt{NULL} annehmen kann.
 Selbst wenn eine zeitbasierte Spalte als \texttt{NOT NULL} deklariert wird, können ungültige Datumswerte auftreten, die in MySQL in der ersten definierten Partition gespeichert werden.
 Eine Abfrage, die Jahre außer 2020 herausfiltert, muss daher zwei Partitionen durchsuchen, was insbesondere größeren Partitionen die Performance beeinträchtigt.
-Aus diesem Grund empfiehlt es sich, entweder eine dedizierte Partition für solche Sonderfälle einzuführen oder Erweiterung wie \texttt{RANGE COLUMNS} verwenden, die auf Funktionen in der Partitionsdefinition verzichten.
+Aus diesem Grund empfiehlt es sich, entweder eine dedizierte Partition für solche Sonderfälle einzuführen oder eine Erweiterung wie \texttt{RANGE COLUMNS} zu verwenden, die auf Funktionen in der Partitionsdefinition verzichtet.
 Des Weiteren muss man bei der Definition von Indizes vorsichtig sein, wenn diese nicht mit der Partitionsklausel übereinstimmen, da sie unerwartet zu umfassenderen Suche der Partitionen führen können.
 Daher sollte man es vermeiden, Indizes auf nicht partitionierten Spalten zu erstellen.
 Dies gilt nur dann nicht, wenn sichergestellt ist, dass die Abfragen Ausdrücke enthalten, die das Pruning der Partitionen unterstützen.
@@ -100,7 +101,7 @@ Zuletzt sollte die Anzahl der definierten Partitionen begrenzt werden, da der Se
 Zusätzlich entsteht ein nicht vermeidbarer Mehraufwand durch das Öffnen und Sperren von Partitionen vor dem Pruning, was die Abfrageleistung weiter beeinträchtigen kann.
 Wie genau die Partitionen für die verschiedenen Typen definiert werden können, wird im Folgenden erläutert.
 
-\section{Arten der Partitionierung}\label{sec:arten-der-partitionierung}
+\section{Partitionierungstypen}\label{sec:arten-der-partitionierung}
 
 In diesem Unterkapitel werden die verschiedenen Partitionierungsarten, die von MySQL unterstützt werden, jeweils mit einem Beispiel näher erläutert.
 Die Analyse der Ergebnisse erfolgt in Abschnitt~\ref{sec:partition-analyse}.
@@ -121,7 +122,7 @@ Damit es zu keinen Fehlern kommt, muss hier der Geburtstag auch Teil des Primär
 Außerdem muss die Spalte \texttt{GEBURTSTAG} bei der Bestelltabelle hinzugefügt werden, damit das Joinen der Tabellen über den Primärschlüssel effizienter ist.
 Seit MySQL 5.5 kann für Datumsspalten auch die Erweiterung \texttt{RANGE COLUMNS} verwendet werden, wodurch bei der Partitionsklausel die Funktion \texttt{YEAR()} nicht erforderlich ist.
 Um die Performance der beiden Ansätze zu vergleichen, werden beide Varianten bei der Tabellenerstellung verwendet.
-Die Tabelle mit der Funktion \texttt{YEAR{}} wird wie folgt erstellt:
+Die Tabelle mit der Funktion \texttt{YEAR()} wird wie folgt erstellt:
 
 \lstinputlisting[
 	language=sql,
@@ -138,9 +139,9 @@ Die verschiedenen Select-Befehle unterscheiden sich in den folgenden \texttt{WHE
 
 \vspace{-5pt}
 \begin{lstlisting}[language=SQL,caption=Unterschiedliche WHERE-Bedingungen,label={lst:different_where_conditions}]
-WHERE YEAR(k.GEBURTSTAG) = 1985;		             -- failing_pruning.sql
-WHERE k.GEBURTSTAG BETWEEN '1985-01-01' AND '1985-12-31'; 	-- with_pruning.sql
-WHERE k.GEBURTSTAG = '1985-01-01';		            -- with_primary_key.sql
+WHERE YEAR(k.GEBURTSTAG) = 1985;		                    -- year_1985.sql
+WHERE k.GEBURTSTAG BETWEEN '1985-01-01' AND '1985-12-31'; 	 -- between_1985.sql
+WHERE k.GEBURTSTAG = '1985-01-01';		               -- first_day_1985.sql
 \end{lstlisting}
 \vspace{-5pt}
 
@@ -182,7 +183,7 @@ Im Zusammenhang mit Joins ist der Effekt besonders stark, da MySQL bei einem par
 Welche der Varianten jedoch am effizientesten ist, wird erst bei der Analyse ersichtlich sein.
 
 Zum Schluss wird die HASH-Partitionierung betrachtet, bei der die Partition anhand eines Hash-Werts zugewiesen wird, der aus den Spaltenwerten der Zeilen berechnet wird.
-Dadurch kann eine gleichmäßige Verteilung der Daten auf die Partitionen werden.
+Dadurch kann eine gleichmäßige Verteilung der Daten auf die Partitionen garantiert werden.
 
 \begin{quote}
 	\enquote{Because of this risk of skew and hot spots, many distributed datastores use a hash function to determine the partition for a given key.} (\cite[S. 203]{kleppmann2017designing})
@@ -192,7 +193,6 @@ Zur Umsetzung der Tabelle müssen ausschließlich die Zeilen aus dem Codeblock~\
 In diesem Fall wird auch nur eine einzige Select-Query getestet, die wieder beide Tabellen joined und in der \texttt{WHERE}-Bedingung überprüft, ob die \texttt{KUNDEN\_ID} zwischen den Werten 1000 und 2000 liegt.
 Um mehr Werte miteinander zu vergleichen, werden verschiedene Varianten der Hash-Partitionierung getestet, indem die Anzahl der Partitionen variiert wird.
 Die Anzahl der Partitionen beträgt in den Benchmarks 5, 50 und 500.
-Einschließlich des Referenzfalls ergeben sich somit vier unterschiedliche Testfälle, die miteinander verglichen werden.
 
 \vspace{-7pt}
 \begin{lstlisting}[language=SQL,caption=Hash-Partitonierung,label={lst:create_kunden_partition_hash}]
@@ -206,32 +206,31 @@ Um die Performance zu überprüfen, wird genau das Gleiche wie bei der Hash-Part
 Dafür muss im Codeblock~\ref{lst:create_kunden_partition_hash} das Signalwort \texttt{HASH} mit \texttt{KEY} ersetzt werden und das Ergebnis wird mit dem von \texttt{HASH} verglichen.
 Die Erkenntnisse aus diesem Benchmark werden im nächsten Kapitel zusammengefasst.
 
-\section{Analyse}\label{sec:partition-analyse}
+\section{Auswertung der Benchmarks}\label{sec:partition-analyse}
 
 Im vorherigen Abschnitt wurden die verschiedenen Arten von Partitionen erläutert.
 Nun sollen für jedes dieser Beispiele Benchmarks durchgeführt und die Ergebnisse untersucht werden.
 Um den Einfluss der Partitionierung auf die Abfragen zu verdeutlichen, werden jeweils partitionierte mit nicht partitionierten Tabellen verglichen.
 Beide Varianten stellen die gleichen Insert-Befehle, während sich die Select-Queries je nach Partitionierungstyp leicht unterscheiden können.
-Abhängig vom Typ werden zusätzlich leicht unterschiedliche Abfragen gestellt.
 Die Ergebnisse des Referenzbenchmarks sollten weitgehend mit denen der partitionierten Varianten übereinstimmen.
 Es können jedoch kleinere Unterschiede auftreten, da jeweils zufällig generierte Daten eingefügt werden.
 Bei signifikanten Abweichungen sind die Performancemessungen jedoch schwerer miteinander vergleichbar.
 
 Im ersten Benchmark mit der Range-Partitionierung fällt auf, dass die Benutzung von \texttt{RANGE} oder \texttt{RANGE COLUMNS} keinerlei Einfluss auf die Performance hat.
 Daher stellt sich bei der Verwendung nicht die Frage nach der Performance, sondern nach der Präferenz des Nutzers.
-Bei der Analyse der Abbildung~\ref{fig:range-partition} wird deutlich, dass die \texttt{with\_pruning}-Query mit erheblichem Abstand schneller ist als die anderen.
-Damit funktioniert das Pruning besonders gut, wenn die Geburtstage zwischen dem ersten und letzten Tage des Jahres abfragen.
-Als Nächstes kommen die Skripte ohne Partitionierung, die aber etwa 50\% ineffizienter sind, als das Skript zuvor.
-Da beide auf einem sehr ähnlichen Niveau liegen, kann davon ausgegangen werden, dass die Verarbeitung durch \texttt{YEAR()} hier keine Rolle spielt.
-Etwas langsamer bei der Range-Partitionierung ist \texttt{with\_primary\_key}, bei der nur die Kunden abgerufen werden, die am 1.\ Januar 1985 geboren wurden.
-Wenn die Ergebnisse von \texttt{EXPLAIN} betrachtet werden, zeigt sich, dass bei der Abfrage nur eine Partition verwendet wurde.
+Bei der Analyse der Abbildung~\ref{fig:range-partition} wird sichtbar, dass die \texttt{between\_1985}-Query mit Partitionierung deutlich schneller ist als die anderen.
+Damit funktioniert das Pruning besonders gut, wenn die Geburtstage zwischen dem ersten und letzten Tage des Jahres abfragt werden.
+Als Nächstes kommt \texttt{first\_day\_1985} mit der Range-Partitionierung, bei der nur die Kunden abgerufen werden, die am 1.\ Januar 1985 geboren wurden.
+Wenn die Ergebnisse von \texttt{EXPLAIN} betrachtet werden, zeigt sich, dass bei dieser Abfrage auch nur eine Partition verwendet wurde.
+Etwas langsamer sind die Skripte ohne Partitionierung, die aber etwa 50\% ineffizienter sind, als das schnellste Skript.
+Die Varianten mit \texttt{YEAR()} und dem ersten Tag liegen auf einem sehr ähnlichen Niveau, während die Abfrage mit dem Operator \texttt{BETWEEN} leicht darunter liegt.
 Als Letztes kommen die beiden Select-Queries, die alle Partitionen durchsuchen.
 Bei der einen Abfrage wurde keine \texttt{WHERE}-Bedingung angegeben und bei der anderen wurde die Funktion \texttt{YEAR()} verwendet.
 Es lässt sich also feststellen, dass Pruning mithilfe von \texttt{YEAR()} offensichtlich nicht funktioniert.
 Dies hat auch der Ausführungsplan für die Query bestätigt (siehe Kapitel~\ref{sec:arten-der-partitionierung}).
-Bei den Insert-Befehlen ist der Fall ohne Partitionierung nur geringfügig schneller als mit Partitionierung.
+Bei den Insert-Befehlen ist die Partitionierung geringfügig schneller, jedoch sind sie nahezu gleich.
 
-\vspace{-7pt}
+\vspace{-5pt}
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}[t]{0.48\textwidth}
@@ -241,11 +240,11 @@ Bei den Insert-Befehlen ist der Fall ohne Partitionierung nur geringfügig schne
 	\begin{subfigure}[t]{0.48\textwidth}
 		\includegraphics[width=\textwidth]{PNGs/Script/Partition/range-partition/Writes}
 	\end{subfigure}
-	\vspace{-9pt}
+	\vspace{-7pt}
 	\caption[Range-Partitionierung: Unterschiedliche Selects mit und ohne Partition]{Vergleich zwischen der Range-Partitionierung und ohne Partition}
 	\label{fig:range-partition}
 \end{figure}
-\vspace{-19pt}
+\vspace{-17pt}
 
 Bei der List-Partitionierung~\ref{fig:list-partition} können ebenfalls einige interessante Beobachtungen gemacht werden.
 Beim ersten Fall ist nur ein Land in der WHERE-Bedingung vorhanden.
@@ -273,12 +272,12 @@ Die Performance beim Einfügen der Daten ist bei der Partitionierung und dem Ref
 \vspace{-19pt}
 
 Bei der Key-Partitionierung fällt auf, dass es keinen signifikanten Performance-Unterschied zur Hash-Partitionierung gibt, sofern derselbe Datensatz und die gleiche Anzahl von Partitionen verwendet werden.
-Generell ist die Key-Partitionierung häufig stabiler und optimierter ist, insbesondere wenn es um Primärschlüssel geht.
-Bei der Hash-Partitionierung~\ref{fig:hash-partition} fällt auf, dass die Werte der Abfragen sehr konstant sind.
-Nur bei der Variante mit 500 Partitionen gibt es deutlich sichtbare Schwankungen.
-Diese liegen aber nicht an dem Pruning, denn mit dem SQL-Befehl \texttt{EXPLAIN} sehen wir, dass alle 500 Partitionen benötigt werden und keine Partitionen zufällig geprunt werden.
+Generell ist die Key-Partitionierung häufig stabiler und optimierter, insbesondere wenn es um Primärschlüssel geht.
+Bei der Hash-Partitionierung in~\ref{fig:hash-partition} fällt auf, dass die Werte der Abfragen nicht sehr konstant sind.
+Nur bei der Variante mit 500 Partitionen gibt es keine deutlich sichtbaren Schwankungen.
+Diese liegen aber nicht an dem Pruning, denn mit dem SQL-Befehl \texttt{EXPLAIN} sehen wir, dass immer alle Partitionen benötigt werden und keine Partitionen zufällig geprunt werden.
 Die Hash-Partitionierung berechnet aus dem Wert einer bestimmten Spalte mithilfe einer Hash-Funktion einen Hash-Wert und anhand dessen wird die Zeile einer der Partitionen zugewiesen.
-Da der Hash-Wert bei 500 Partitionen mit modulo 500 gebildet wird, landet jeder 500-ste Wert in der gleichen Partition.
+Bei 500 Partitionen wird der Hash-Wert mit modulo 500 gebildet, weshalb jeder 500-ste Wert in der gleichen Partition landet.
 Damit ist klargestellt, dass immer alle Partitionen benutzt werden, was die folgenden Ergebnisse zeigen.
 Was die Performance angeht, zeigt sich, dass die Abfrage ohne Partitionierung am schnellsten ist.
 Danach lässt sich die Regel ableiten, dass eine höhere Anzahl an Partitionen zu einer langsameren Abfrage führt.
