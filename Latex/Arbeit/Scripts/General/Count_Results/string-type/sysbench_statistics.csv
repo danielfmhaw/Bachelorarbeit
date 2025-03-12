@@ -1,0 +1,5 @@
+Script,Read (noq),Write (noq),Other (noq),Total (noq),Transactions (per s.),Queries (per s.),Ignored Errors (per s.),Reconnects (per s.),Total Time (s),Total Events,Latency Min (ms),Latency Avg (ms),Latency Max (ms),Latency 95th Percentile (ms),Latency Sum (ms)
+string_comb_typ_char_4_select,42157.00,62030.00,63.00,104250.00,10570.00,104250.00,0.00,0.00,60.6413s60.0056s,10570.00,1921.51,1961.76,2015.19,2015.11,120633.28
+string_comb_typ_char_64_select,31241.00,62030.00,63.00,93334.00,7841.00,93334.00,0.00,0.00,60.7374s60.0066s,7841.00,1855.37,1966.86,2059.77,2017.21,120732.13
+string_comb_typ_varchar_4_select,43509.00,66032.00,67.00,109608.00,10910.00,109608.00,0.00,0.00,61.0029s60.0068s,10910.00,1693.26,1854.01,1946.27,1909.24,120995.63
+string_comb_typ_varchar_64_select,31837.00,66032.00,67.00,97936.00,7992.00,97936.00,0.00,0.00,61.7518s60.0071s,7992.00,1785.92,1878.72,2048.84,1981.22,121746.89

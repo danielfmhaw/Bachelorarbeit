@@ -1,0 +1,7 @@
+Script,Read (noq),Write (noq),Other (noq),Total (noq),Transactions (per s.),Queries (per s.),Ignored Errors (per s.),Reconnects (per s.),Total Time (s),Total Events,Latency Min (ms),Latency Avg (ms),Latency Max (ms),Latency 95th Percentile (ms),Latency Sum (ms)
+list_partitioning_select_in_multiple_countries,14110.00,67516.00,20.00,81646.00,14117.00,81646.00,0.00,0.00,62.5129s60.0067s,14117.00,6794.35,6949.81,7046.35,7091.12,122498.18
+list_partitioning_select_or_multiple_countries,13493.00,67516.00,20.00,81029.00,13500.00,81029.00,0.00,0.00,62.5129s60.0062s,13500.00,6794.58,6950.01,7046.39,7091.28,122498.85
+list_partitioning_select_union_multiple_countries,5358.00,67516.00,20.00,72894.00,5365.00,72894.00,0.00,0.00,62.5129s60.0029s,5365.00,6801.42,6956.76,7058.71,7098.08,122504.00
+list_partitioning_select_with_pruning_simple,28759.00,67516.00,20.00,96295.00,28766.00,96295.00,0.00,0.00,62.5129s60.0047s,28766.00,6792.66,6947.65,7042.67,7088.77,122496.49
+without_partitioning_select_without_list_pruning_multiple,11900.00,75018.00,22.00,86940.00,11908.00,86940.00,0.00,0.00,66.5891s60.0040s,11908.00,6351.07,6663.62,6958.38,6965.45,126572.99
+without_partitioning_select_without_list_pruning_simple,15987.00,75018.00,22.00,91027.00,15995.00,91027.00,0.00,0.00,66.5891s60.0058s,15995.00,6350.25,6662.33,6956.83,6963.99,126577.37

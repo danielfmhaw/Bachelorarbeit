@@ -1,0 +1,10 @@
+LogFile,CountValue,Index
+query_differences_select_full_match,0,ja
+query_differences_select_combined_match_with_range,8,ja
+query_differences_select_range_with_like,29,ja
+query_differences_select_exact_with_prefix,51,ja
+query_differences_select_skip_columns,146,ja
+query_differences_select_leftmost_prefix,255,ja
+query_differences_select_column_prefix,517,ja
+query_differences_select_range_values,1340,nein
+query_differences_select_not_leftmost,2371,nein

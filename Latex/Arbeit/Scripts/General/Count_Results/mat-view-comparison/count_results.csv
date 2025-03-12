@@ -1,5 +1,5 @@
 LogFile,CountValue
-mat_view_db_postgres_comb_refresh_once_select,139
 mat_view_db_postgres_comb_refresh_every_select,140
+mat_view_db_postgres_comb_refresh_once_select,140
 with_trigger_db_mysql_select,140
 with_trigger_pg_db_postgres_select,140

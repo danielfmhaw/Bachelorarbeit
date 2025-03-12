@@ -1,0 +1,7 @@
+Script,Read (noq),Write (noq),Other (noq),Total (noq),Transactions (per s.),Queries (per s.),Ignored Errors (per s.),Reconnects (per s.),Total Time (s),Total Events,Latency Min (ms),Latency Avg (ms),Latency Max (ms),Latency 95th Percentile (ms),Latency Sum (ms)
+replication_comb_format_mixed_select_with_port_3307,23886.00,53236.00,40.00,77162.00,23902.00,77162.00,0.00,0.00,63.0931s60.0043s,23902.00,3206.53,3323.02,3466.10,3389.56,123075.25
+replication_comb_format_mixed_select_with_port_3308,14425.00,53236.00,40.00,67701.00,14441.00,67701.00,0.00,0.00,63.0931s60.0026s,14441.00,3208.16,3324.67,3466.88,3391.24,123079.43
+replication_comb_format_row_select_with_port_3307,23629.00,53236.00,40.00,76905.00,23645.00,76905.00,0.00,0.00,62.4097s60.0026s,23645.00,3111.44,3287.09,3414.35,3389.60,122391.73
+replication_comb_format_row_select_with_port_3308,14330.00,53236.00,40.00,67606.00,14346.00,67606.00,0.00,0.00,62.4097s60.0027s,14346.00,3113.06,3288.74,3417.92,3391.24,122395.81
+replication_comb_format_statement_select_with_port_3307,23781.00,53236.00,40.00,77057.00,23797.00,77057.00,0.00,0.00,62.7837s60.0032s,23797.00,3228.89,3306.71,3398.11,3389.56,122764.96
+replication_comb_format_statement_select_with_port_3308,14379.00,53236.00,40.00,67655.00,14395.00,67655.00,0.00,0.00,62.7837s60.0037s,14395.00,3230.52,3308.36,3402.80,3391.24,122770.13

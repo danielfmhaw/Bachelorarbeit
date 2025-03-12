@@ -1,0 +1,5 @@
+Script,Read (noq),Write (noq),Other (noq),Total (noq),Transactions (per s.),Queries (per s.),Ignored Errors (per s.),Reconnects (per s.),Total Time (s),Total Events,Latency Min (ms),Latency Avg (ms),Latency Max (ms),Latency 95th Percentile (ms),Latency Sum (ms)
+selectivity_changes_comb_prob_1_select,286288.00,92114.00,231.00,378633.00,286402.00,378633.00,0.00,0.00,60.0546s60.0026s,286402.00,439.39,522.40,621.60,601.53,119914.69
+selectivity_changes_comb_prob_10_select,230491.00,92915.00,233.00,323639.00,230606.00,323639.00,0.00,0.00,60.3042s60.0024s,230606.00,463.04,520.10,585.16,569.96,120189.49
+selectivity_changes_comb_prob_25_select,174133.00,94517.00,237.00,268887.00,174250.00,268887.00,0.00,0.00,60.1575s60.0026s,174250.00,450.49,510.12,605.65,580.39,120076.31
+selectivity_changes_comb_prob_5_select,255627.00,92915.00,233.00,348775.00,255742.00,348775.00,0.00,0.00,60.1022s60.0025s,255742.00,435.02,518.33,786.84,569.93,119975.01

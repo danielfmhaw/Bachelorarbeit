@@ -1,0 +1,5 @@
+Script,Read (noq),Write (noq),Other (noq),Total (noq),Transactions (per s.),Queries (per s.),Ignored Errors (per s.),Reconnects (per s.),Total Time (s),Total Events,Latency Min (ms),Latency Avg (ms),Latency Max (ms),Latency 95th Percentile (ms),Latency Sum (ms)
+hash_partitioning_comb_partitions_size_5_select,14461.00,67516.00,20.00,81997.00,14468.00,81997.00,0.00,0.00,65.7831s60.0065s,14468.00,7115.81,7313.08,8407.46,8337.79,125773.16
+hash_partitioning_comb_partitions_size_50_select,13456.00,67516.00,20.00,80992.00,13463.00,80992.00,0.00,0.00,64.7110s60.0045s,13463.00,7100.01,7194.26,7277.52,7220.13,124699.43
+hash_partitioning_comb_partitions_size_500_select,11973.00,67516.00,20.00,79509.00,11980.00,79509.00,0.00,0.00,65.2180s60.0068s,11980.00,7152.97,7251.16,7326.96,7351.77,125209.92
+without_partitioning_select_without_hash_pruning_range,15226.00,67516.00,20.00,82762.00,15233.00,82762.00,0.00,0.00,64.9493s60.0054s,15233.00,6883.40,7220.23,8830.02,8800.18,124937.67
