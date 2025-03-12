@@ -31,7 +31,7 @@ cd Tools/Shell-Scripts
   -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
   -scripts '{
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/without_partitioning": {
-      "selects": ["without_range_failing_pruning","without_range_primary_key"]
+      "selects": ["without_range_first_day_1985","without_range_year_1985","without_range_between_1985"]
     },
     "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/range_partitioning": {}
   }'

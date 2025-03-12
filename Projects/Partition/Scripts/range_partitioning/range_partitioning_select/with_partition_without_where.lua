@@ -3,23 +3,22 @@ package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):mat
 local utils = require("utils")
 local explain_executed = false
 
-function select_with_pruning()
-    local with_pruning_query = [[
+function select_without_where()
+    local without_where_query = [[
         SELECT *
         FROM KUNDEN k
         JOIN BESTELLUNG b ON k.KUNDEN_ID = b.FK_KUNDEN
-        WHERE k.GEBURTSTAG BETWEEN '1985-01-01' AND '1985-12-31';
     ]];
 
     if not explain_executed then
-        utils.print_results(con, "EXPLAIN " .. with_pruning_query)
-        utils.print_results(con, (with_pruning_query:gsub("%*", "COUNT(*)")))
+        utils.print_results(con, "EXPLAIN " .. without_where_query)
+        utils.print_results(con, (without_where_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 
-    con:query(with_pruning_query)
+    con:query(without_where_query)
 end
 
 function event()
-    select_with_pruning()
+    select_without_where()
 end

@@ -3,23 +3,23 @@ package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):mat
 local utils = require("utils")
 local explain_executed = false
 
-function select_without_range_failing_pruning()
-    local without_range_failing_pruning_query = [[
+function select_without_range_between_1985()
+    local without_range_between_1985_query = [[
         SELECT *
         FROM KUNDEN k
         JOIN BESTELLUNG b ON k.KUNDEN_ID = b.FK_KUNDEN
-        WHERE YEAR(k.GEBURTSTAG) = 1985;
+        WHERE k.GEBURTSTAG BETWEEN '1985-01-01' AND '1985-12-31';
     ]];
 
     if not explain_executed then
-        utils.print_results(con, "EXPLAIN " .. without_range_failing_pruning_query)
-        utils.print_results(con, (without_range_failing_pruning_query:gsub("%*", "COUNT(*)")))
+        utils.print_results(con, "EXPLAIN " .. without_range_between_1985_query)
+        utils.print_results(con, (without_range_between_1985_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 
-    con:query(without_range_failing_pruning_query)
+    con:query(without_range_between_1985_query)
 end
 
 function event()
-    select_without_range_failing_pruning()
+    select_without_range_between_1985()
 end

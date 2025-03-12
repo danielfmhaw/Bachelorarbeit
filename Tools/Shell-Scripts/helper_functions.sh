@@ -111,20 +111,13 @@ prepare_variables(){
 
 # Helper function to run sysbench for each port
 run_sysbench_for_each_port() {
-  local DB_PORTS="$1" SCRIPT_PATH="$2" SCRIPT_NAME="$3" SEL_THR="$4" THREADS="$5" MODE="$6"
+  local DB_PORTS="$1" SCRIPT_PATH="$2" SCRIPT_NAME="$3" MODE="$4" CUSTOM_THREADS="$5"
 
   OUTPUT_BASE_FILE="${OUTPUT_FILE%.log}"
   for PORT in $DB_PORTS; do
     echo "Running $(basename "$SCRIPT_PATH") on port $PORT for $TIME seconds ..."
     local CUSTOM_SCRIPT_NAME="${SCRIPT_NAME%_select}_select_with_port_${PORT}"
     OUTPUT_FILE="${OUTPUT_BASE_FILE%.log}_port_${PORT}.log"
-
-    if [[ "$SCRIPT_PATH" == *select* && -n $SEL_THR ]]; then
-       local CUSTOM_THREADS=$((SEL_THR / $(echo ${DB_PORTS:-0} | wc -w)))
-       CUSTOM_THREADS=${CUSTOM_THREADS:-$SEL_THR}
-    else
-       local CUSTOM_THREADS="$THREADS"
-    fi
 
     run_sysbench "$SCRIPT_PATH" "$MODE" "$OUTPUT_FILE" "$PORT" "$CUSTOM_THREADS" || { echo "Benchmark failed for script $SCRIPT_PATH on port $PORT"; exit 1; }
 
@@ -135,7 +128,7 @@ run_sysbench_for_each_port() {
 
 # Helper function to run sysbench with specified Lua script and mode
 run_sysbench() {
-  local LUA_SCRIPT_PATH="$1" MODE="$2" LOG_FILE="$3" CUSTOM_PORT="${4:-$DB_PORT}" CUSTOM_THREADS="${5:-$THREADS}"
+  local LUA_SCRIPT_PATH="$1" MODE="$2" LOG_FILE="$3" CUSTOM_PORT="${4}" CUSTOM_THREADS="${5}"
 
   sysbench \
     --db-driver="$DRIVER" \
