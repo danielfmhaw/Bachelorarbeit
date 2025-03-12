@@ -1,0 +1,6 @@
+Script,Read (noq),Write (noq),Other (noq),Total (noq),Transactions (per s.),Queries (per s.),Ignored Errors (per s.),Reconnects (per s.),Total Time (s),Total Events,Latency Min (ms),Latency Avg (ms),Latency Max (ms),Latency 95th Percentile (ms),Latency Sum (ms)
+replication_db_mysql_master_slave_select_with_port_3307,13685.00,47632.00,36.00,61353.00,13699.00,61353.00,0.00,0.00,61.7051s60.0030s,13699.00,3454.03,3633.85,4044.60,3777.99,121673.38
+replication_db_mysql_master_slave_select_with_port_3308,13741.00,47632.00,36.00,61409.00,13755.00,61409.00,0.00,0.00,61.7051s60.0045s,13755.00,3454.02,3633.84,4044.81,3777.91,121674.11
+replication_db_mysql_master_slave_select_with_port_3309,13692.00,47632.00,36.00,61360.00,13706.00,61360.00,0.00,0.00,61.7051s60.0075s,13706.00,3454.02,3633.85,4044.97,3777.99,121677.28
+replication_db_mysql_master_slave_select_with_port_3310,13635.00,47632.00,36.00,61303.00,13649.00,61303.00,0.00,0.00,61.7051s60.0054s,13649.00,3454.03,3633.87,4043.74,3777.99,121675.91
+replication_db_mysql_single_server_no_select,26447.00,50434.00,38.00,76919.00,26462.00,76919.00,0.00,0.00,62.9374s60.0028s,26462.00,3174.64,3498.63,3802.89,3642.29,122905.67

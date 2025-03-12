@@ -1,0 +1,8 @@
+Script,Read (noq),Write (noq),Other (noq),Total (noq),Transactions (per s.),Queries (per s.),Ignored Errors (per s.),Reconnects (per s.),Total Time (s),Total Events,Latency Min (ms),Latency Avg (ms),Latency Max (ms),Latency 95th Percentile (ms),Latency Sum (ms)
+range_partitioning_select_with_partition_between_1985,45645.00,442616.00,120.00,488381.00,45702.00,488381.00,0.00,0.00,60.8666s60.0050s,45702.00,995.58,1032.92,1271.50,0.00,120840.85
+range_partitioning_select_with_partition_first_day_1985,19091.00,442616.00,120.00,461827.00,19148.00,461827.00,0.00,0.00,60.8666s60.0029s,19148.00,997.40,1034.75,1280.58,0.00,120854.52
+range_partitioning_select_with_partition_without_where,1197.00,442616.00,120.00,443933.00,1254.00,443933.00,0.00,0.00,60.8666s60.0405s,1254.00,1043.79,1081.85,1474.83,0.00,120898.58
+range_partitioning_select_with_partition_year_1985,1264.00,442616.00,120.00,444000.00,1321.00,444000.00,0.00,0.00,60.8666s60.0398s,1321.00,1041.68,1079.18,1368.59,0.00,120899.00
+without_partitioning_select_without_range_between_1985,13255.00,412608.00,112.00,425975.00,13308.00,425975.00,0.00,0.00,60.6348s60.0076s,13308.00,1014.12,1106.95,1855.61,0.00,120622.97
+without_partitioning_select_without_range_first_day_1985,15736.00,412608.00,112.00,428456.00,15789.00,428456.00,0.00,0.00,60.6348s60.0082s,15789.00,1013.43,1106.23,1859.57,0.00,120623.03
+without_partitioning_select_without_range_year_1985,15534.00,412608.00,112.00,428254.00,15587.00,428254.00,0.00,0.00,60.6348s60.0055s,15587.00,1013.51,1106.28,1853.76,0.00,120617.91

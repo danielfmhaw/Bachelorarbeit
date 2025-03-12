@@ -1,0 +1,7 @@
+LogFile,Average CPU Usage,Read Value
+replication_comb_sel_thr_8_select,97.51,56884
+replication_comb_sel_thr_16_select,100.00,56507
+replication_comb_sel_thr_32_select,100.00,56133
+replication_comb_sel_thr_4_select,72.99,55528
+replication_comb_sel_thr_2_select,26.91,45972
+replication_comb_sel_thr_1_select,1.73,24975

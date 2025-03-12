@@ -12,10 +12,12 @@ target_folder_csv_results="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Latex
 
 # Alle count_results.csv in einem Ordner und nach Parent benennen
 mkdir -p "$target_folder_csv_results"
-find "$base_folder" -type f -name "count_results.csv" | while read file; do
+find "$base_folder" -type f -name "*.csv" \! -name "*temp*" | while read file; do
   parent_dir=$(basename "$(dirname "$file")")
-  new_name="$parent_dir.csv"
-  mv "$file" "$target_folder_csv_results/$new_name"
+  target_dir="$target_folder_csv_results/$parent_dir"
+
+  mkdir -p "$target_dir"
+  mv "$file" "$target_dir/$(basename "$file")"
 done
 
 # Bilder finden und verschieben

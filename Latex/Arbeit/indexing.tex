@@ -302,15 +302,15 @@ Anschließend werden die Werte entnommen und in einer Tabelle zusammengefasst.
         \hline
         \textbf{Select-Query} & \textbf{Anzahl an Zeilen} & \textbf{Faktor} & \textbf{Index benutzt?} \\
         \hline
-        full\_match & 0 & 6.42 & ja \\
-        combined\_match\_with\_range & 13 & 5.78 & ja \\
-        range\_with\_like & 31 & 5.22 & ja \\
-        exact\_with\_prefix & 51 & 5.14 & ja \\
-        skip\_columns & 147 & 3.47 & ja \\
-        leftmost\_prefix & 263 & 2.73 & ja \\
-        column\_prefix & 551 & 1.69 & ja \\
-        range\_values & 1343 & 0.96 & nein \\
-        not\_leftmost & 2371 & 0.98 & nein \\
+        full\_match & 0 & 7.31 & ja \\
+        combined\_match\_with\_range & 8 & 6.75 & ja \\
+        range\_with\_like & 29 & 5.80 & ja \\
+        exact\_with\_prefix & 51 & 5.03 & ja \\
+        skip\_columns & 146 & 3.77 & ja \\
+        leftmost\_prefix & 255 & 3.13 & ja \\
+        column\_prefix & 517 & 1.88 & ja \\
+        range\_values & 1340 & 1.00 & nein \\
+        not\_leftmost & 2371 & 1.02 & nein \\
         \hline
     \end{tabular}
     \vspace{3pt}
@@ -419,10 +419,10 @@ Dieses Mal werden aber nicht alle Select-Befehle verwendet, sondern nur die aus 
         \hline
         \textbf{Select-Query} & \textbf{Anzahl an Zeilen} & \textbf{Faktor} & \textbf{Index benutzt?} \\
         \hline
-        full\_match & 0 & 2.67 & ja \\
-        combined\_match\_with\_range & 6 & 0.97 & nein \\
-        exact\_with\_prefix & 45 & 1.01 & nein \\
-        leftmost\_prefix & 206 & 1.00 & nein \\
+        full\_match & 0 & 2.96 & ja \\
+        combined\_match\_with\_range & 9 & 1.16 & nein \\
+        exact\_with\_prefix & 42 & 1.13 & nein \\
+        leftmost\_prefix & 204 & 1.22 & nein \\
         \hline
     \end{tabular}
     \vspace{3pt}

@@ -1,0 +1,5 @@
+Script,Read (noq),Write (noq),Other (noq),Total (noq),Transactions (per s.),Queries (per s.),Ignored Errors (per s.),Reconnects (per s.),Total Time (s),Total Events,Latency Min (ms),Latency Avg (ms),Latency Max (ms),Latency 95th Percentile (ms),Latency Sum (ms)
+mat_view_db_postgres_comb_refresh_every_select,330921.00,45674.00,15278.00,391873.00,82768.00,391873.00,0.00,0.00,60.3343s60.0011s,82768.00,1424.28,1588.44,1761.13,1740.48,120283.33
+mat_view_db_postgres_comb_refresh_once_select,328113.00,183904.00,461.00,512478.00,82181.00,512478.00,0.00,0.00,60.3596s60.0008s,82181.00,359.33,395.23,460.17,427.87,120311.38
+with_trigger_db_mysql_select,242425.00,52886.00,90.00,295401.00,60650.00,295401.00,0.00,0.00,60.5428s60.0031s,60650.00,1276.07,1376.88,1513.48,1454.09,120500.87
+with_trigger_pg_db_postgres_select,302613.00,158662.00,266.00,461541.00,75785.00,461541.00,0.00,0.00,60.0569s60.0010s,75785.00,417.83,455.76,494.22,485.34,120010.02

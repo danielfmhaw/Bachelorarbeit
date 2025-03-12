@@ -1,0 +1,5 @@
+Script,Read (noq),Write (noq),Other (noq),Total (noq),Transactions (per s.),Queries (per s.),Ignored Errors (per s.),Reconnects (per s.),Total Time (s),Total Events,Latency Min (ms),Latency Avg (ms),Latency Max (ms),Latency 95th Percentile (ms),Latency Sum (ms)
+replication_db_mysql_master_slave_comb_sel_thr_16_select,129127.00,53236.00,40.00,182403.00,129098.00,182403.00,0.00,0.00,62.9018s60.0051s60.0104s60.0079s60.0115s,129098.00,3114.38,3342.36,3640.54,3482.75,1022881.94
+replication_db_mysql_master_slave_comb_sel_thr_8_select,114345.00,53236.00,40.00,167621.00,114340.00,167621.00,0.00,0.00,62.2830s60.0055s60.0053s60.0065s60.0052s,114340.00,3142.36,3295.58,3503.11,3474.97,542229.44
+replication_db_mysql_single_server_comb_sel_thr_16_select,26958.00,56038.00,42.00,83038.00,26975.00,83038.00,0.00,0.00,61.0090s60.0045s,26975.00,2682.19,3052.53,3337.58,3269.45,120990.43
+replication_db_mysql_single_server_comb_sel_thr_8_select,26998.00,56038.00,42.00,83078.00,27015.00,83078.00,0.00,0.00,62.1915s60.0025s,27015.00,2924.78,3111.66,3267.68,3269.45,122172.68
