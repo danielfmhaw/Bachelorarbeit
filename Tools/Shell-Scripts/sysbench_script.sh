@@ -57,11 +57,18 @@ run_benchmark() {
   fi
   [[ "$MODE" == "cleanup" ]] && echo -e "Cleaning up database for $(basename "$SCRIPT_PATH")\n"
 
+  if [[ "$SCRIPT_PATH" == *select* && -n $SEL_THR ]]; then
+     local CUSTOM_THREADS=$((SEL_THR / $(echo ${DB_PORTS:-0} | wc -w)))
+     CUSTOM_THREADS=${CUSTOM_THREADS:-$SEL_THR}
+  else
+     local CUSTOM_THREADS="$THREADS"
+  fi
+
   # Check if mode is run, script contains '_select' and DB_PORTS is set
   if [[ "$MODE" == "run" && $(basename "$SCRIPT_PATH") == *_select* && -n "$DB_PORTS" ]]; then
-    run_sysbench_for_each_port "$DB_PORTS" "$SCRIPT_PATH" "$SCRIPT_NAME" "$SEL_THR" "$THREADS" "$MODE"
+    run_sysbench_for_each_port "$DB_PORTS" "$SCRIPT_PATH" "$SCRIPT_NAME" "$MODE" "$CUSTOM_THREADS"
   else
-    run_sysbench "$SCRIPT_PATH" "$MODE" "$OUTPUT_FILE" || { echo "Benchmark failed for script $SCRIPT_PATH"; exit 1; }
+    run_sysbench "$SCRIPT_PATH" "$MODE" "$OUTPUT_FILE" "$DB_PORT" "$CUSTOM_THREADS" || { echo "Benchmark failed for script $SCRIPT_PATH"; exit 1; }
 
     if [ "$MODE" == "run" ]; then
       extract_run_data "$OUTPUT_FILE" "$SCRIPT_NAME"

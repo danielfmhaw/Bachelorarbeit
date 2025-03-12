@@ -3,23 +3,23 @@ package.path = package.path .. ";" .. debug.getinfo(1).source:match("@(.*)"):mat
 local utils = require("utils")
 local explain_executed = false
 
-function select_with_primary_key()
-    local with_primary_key_query = [[
+function select_with_pruning_between_1985()
+    local with_pruning_between_1985_query = [[
         SELECT *
         FROM KUNDEN k
         JOIN BESTELLUNG b ON k.KUNDEN_ID = b.FK_KUNDEN
-        WHERE k.GEBURTSTAG = '1985-01-01';
+        WHERE k.GEBURTSTAG BETWEEN '1985-01-01' AND '1985-12-31';
     ]];
 
     if not explain_executed then
-        utils.print_results(con, "EXPLAIN " .. with_primary_key_query)
-        utils.print_results(con, (with_primary_key_query:gsub("%*", "COUNT(*)")))
+        utils.print_results(con, "EXPLAIN " .. with_pruning_between_1985_query)
+        utils.print_results(con, (with_pruning_between_1985_query:gsub("%*", "COUNT(*)")))
         explain_executed = true
     end
 
-    con:query(with_primary_key_query)
+    con:query(with_pruning_between_1985_query)
 end
 
 function event()
-    select_with_primary_key()
+    select_with_pruning_between_1985()
 end
