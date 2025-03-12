@@ -1,10 +1,10 @@
 {
-  "join-typ": {
+  "join-type": {
     "scripts": {
-      "./YOUR_PATH_TO_PROJECT/Scripts/varchar_queries": {
+      "./Projects/Scripts/varchar_queries": {
         "vars": "length"
       },
-      "./YOUR_PATH_TO_PROJECT/Scripts/int_queries": {
+      "./Projects/Scripts/int_queries": {
         "vars": "length"
       }
     },

@@ -12,7 +12,6 @@ In den letzten beiden Kapiteln wird die Durchführung der Benchmarks näher betr
 
 Grundlegend existieren Relationen, bzw.\ Tabellen, die durch das \texttt{CREATE TABLE}-Statement definiert werden, physisch in der Datenbank.
 Damit sind sie persistent, was bedeutet, dass sie dauerhaft existieren und sich nicht ändern, es sei denn, sie werden explizit durch eine SQL-Änderungsanweisung dazu aufgefordert.
-Dies entspricht der Dauerhaftigkeit des ACID-Prinzips (\cite[S. 630--631]{silberschatz2011database}), die sicherstellt, dass bestätigte Transaktionen dauerhaft gespeichert bleiben und auch bei Systemausfällen nicht verloren gehen.
 Es gibt jedoch eine weitere Klasse von SQL-Relationen, die nicht wie Tabellen physisch gespeichert werden (\cite[341--349, 353--366]{garcia2008database}).
 %~\cite[S. 276--281]{schwartz2012high}
 Sie werden als virtuelle Sichten bezeichnet.
@@ -25,17 +24,17 @@ Virtuelle Sichten werden durch einen Ausdruck definiert, der einer Abfrage ähne
 Sie können auch so abgefragt werden, als ob sie tatsächlich physisch existierten (vgl.\ \cite[S. 87]{ramakrishnan2002database}).
 In einigen Fällen lassen sich sogar Datensätze über die Sicht ändern.
 
-\vspace{-5pt}
+\vspace{-10pt}
 \begin{lstlisting}[language=SQL,caption=Allgemeine View-Deklaration,label={lst:create_view}]
 CREATE VIEW <name> AS <view-definition>;
 \end{lstlisting}
-\vspace{-5pt}
+\vspace{-9pt}
 
 In dem Codeblock~\ref{lst:create_view} wird die Struktur der Definition einer View gezeigt.
 Als Nächstes muss die \texttt{view-definition} mit einer SQL-Abfrage ersetzt werden, die den Inhalt der virtuellen Sicht abbilden soll.
 Um dieses Vorgehen mit einem Beispiel näher zu veranschaulichen, werden die Tabellen Kunden (\ref{lst:tools-create-table-kunde}) und Bestellung (\ref{lst:tools-create-table-bestellung}) genutzt.
 Nun wollen wir, dass die beiden Tabellen über die \texttt{KUNDEN\_ID} in der Sicht zusammengefügt werden, da sie sowohl der Primärschlüssel in der Kundentabelle als auch der Fremdschlüssel in der Bestellung ist.
-Um in die SQL-Abfrage noch etwas mehr Komplexität zu bringen, soll neben der Join-Operation auch der Umsatz pro Jahr und pro Stadt aggregiert werden.
+Um in die SQL-Abfrage noch etwas mehr Komplexität zu bringen, soll neben der Join-Operation auch der Umsatz pro Jahr und pro Land aggregiert werden.
 Die View \texttt{KUNDEN\_OVERVIEW} hat folgende Struktur:
 
 \vspace{-5pt}
@@ -129,8 +128,8 @@ Wenn die Prozedur korrekt ist, dann werden die Änderungen bei der nächsten \te
 ]{Scripts/Views/03_create_procedure.sql}
 
 Jetzt kann die Methode \texttt{insert\_view} einfach mit dem \texttt{CALL}-Befehl aufgerufen werden und die Werte für die drei Parameter werden in Klammern übergeben.
-Dadurch werden die Werte in die Bestelltabelle eingefügt.
-Als Bestelldatum wird stets der erste Tag des Jahres verwendet und als Kunde wird einer gewählt, der in dem jeweiligen Land lebt.
+Auf diese Weise erfolgt das Einfügen der Werte in die Bestelltabelle.
+Materialized Als Bestelldatum wird stets der erste Tag des Jahres verwendet und als Kunde wird einer gewählt, der in dem jeweiligen Land lebt.
 
 Im Vergleich zum direkten Einfügen in die Bestelltabelle geht jedoch Datenpräzision verloren.
 Einerseits fehlt das genaue Datum und andererseits sind die Informationen zur \texttt{KUNDEN\_ID} und \texttt{ARTIKEL\_ID} nicht vorhanden.
@@ -184,20 +183,20 @@ Für diese Funktionalität muss die materialisierte Sicht mit der Funktion \text
 Die Abfrage wird aber nur dann umformuliert, wenn alle Relationen in der Sicht enthalten sind und die Bedingungen entsprechend angepasst werden.
 
 \vspace{-5pt}
-\begin{lstlisting}[language=SQL,caption=Select mit View,label={lst:select-with-mat-view}]
+\begin{lstlisting}[language=SQL,caption=Select mit Materialized View,label={lst:select-with-mat-view}]
 SELECT Land, Jahr, Gesamtumsatz
 FROM KUNDEN K JOIN BESTELLUNG B ON K.KUNDEN_ID = B.FK_KUNDEN
 WHERE LAND = 'Deutschland' AND JAHR = 2024;
 \end{lstlisting}
 \vspace{-5pt}
 
-In Oracle könnte die Abfrage~\ref{lst:select-with-mat-view} intern so umgeschrieben werden, dass die Abfrage nicht auf diesen Tabellen erfolgt, sondern direkt auf die materialisierte Sicht \texttt{UmsatzProJahrLand}.
+Die Abfrage~\ref{lst:select-with-mat-view} könnte intern so umgeschrieben werden, dass sie nicht auf den angegebenen Tabellen erfolgt, sondern direkt auf die materialisierte Sicht \texttt{UmsatzProJahrLand}.
 Die materialisierte Sicht enthält bereits die aggregierten Umsätze und muss daher weniger Berechnungen durchführen.
 Bei der zweiten Abfrage~\ref{lst:select-without-mat-view} wird die materialisierte View nicht verwendet, da sie nicht die Spalten \texttt{STADT} und \texttt{MONAT} enthält.
-Wie in PostgreSQL bei beiden Befehlen erfolgt in diesem Fall auch bei Oracle keine automatische Abfrageumschreibung, weshalb die Abfrage explizit auf die Tabellen zugreifen muss.
+Wie in PostgreSQL bei beiden Befehlen erfolgt in diesem Fall auch in Oracle keine automatische Abfrageumschreibung, weshalb die Abfrage explizit auf die Tabellen zugreifen muss.
 
 \vspace{-5pt}
-\begin{lstlisting}[language=SQL,caption=Select nicht für View,label={lst:select-without-mat-view}]
+\begin{lstlisting}[language=SQL,caption=Select nicht mit Materialized View,label={lst:select-without-mat-view}]
 SELECT Stadt, Monat, Gesamtumsatz
 FROM KUNDEN K JOIN BESTELLUNG B ON K.KUNDEN_ID = B.FK_KUNDEN
 WHERE STADT = 'Hamburg' AND EXTRACT(MONTH FROM K.GEBURTSTAG) = 8;
@@ -210,16 +209,14 @@ Auf diese Weise können Einfügungen, Löschungen und Aktualisierungen in einer 
 Diese inkrementelle Aktualisierung der materialisierten Sicht ist damit deutlich effizienter als die ständige Neuberechnung der Sicht.
 Aber nicht jedes Datenbankmanagementsystem unterstützt die inkrementelle Auffrischung.
 Oracle bietet diese Funktion nativ mithilfe von Materialized View Logs an, während in PostgreSQL eine manuelle Planung erforderlich ist, da keine automatische Auffrischung unterstützt wird (\cite{mat_view_features_per_db}).
-MySQL bietet gar nicht erst eine Möglichkeit an, um materialisierte Sichten nativ zu erstellen.
-Allerdings kann man die Funktionsweise mithilfe einer physischen Tabelle und Triggern auf den zugrundeliegenden Tabellen nachstellen.
+MySQL hingegen bietet gar nicht erst eine Möglichkeit an, um materialisierte Sichten nativ zu erstellen.
+Allerdings kann man die Funktionsweise mithilfe einer physischen Tabelle und Triggern wie folgt nachstellen nachstellen.
 
-Zunächst eine physische Tabelle, z.B.\ mit dem Namen \texttt{KUNDEN\_MAT\_OVERVIEW}, erstellt.
+Zunächst muss eine physische Tabelle, z.B.\ mit dem Namen \texttt{KUNDEN\_MAT\_OVERVIEW}, erstellt werden.
 Diese Tabelle besteht, ähnlich wie die materialisierte Sicht~\ref{lst:create_mat_view}, aus den Spalten \texttt{JAHR}, \texttt{LAND} und \texttt{GESAMTUMSATZ}, wobei die Kombination aus Jahr und Land der Schlüssel der Tabelle ist.
-Wenn nun Daten in die zugrundeliegenden Tabellen \texttt{KUNDEN} und \texttt{BESTELLUNG} eingefügt werden, bleibt die \texttt{KUNDEN\_MAT\_OVERVIEW}-Tabelle unverändert.
-Das leigt daran, weil bisher keine Verbindung zur neuen Tabelle hergestellt wurde.
+Wenn nun Daten in die zugrundeliegenden Tabellen \texttt{KUNDEN} und \texttt{BESTELLUNG} eingefügt werden, bleibt die \texttt{KUNDEN\_MAT\_OVERVIEW}-Tabelle unverändert, da bisher keine Verbindung zur neuen Tabelle hergestellt wurde.
 Dieses Problem kann gelöst werden, indem Trigger definiert werden, die bei Änderungen in der Bestell- oder Kundentabelle ausgelöst werden.
-Da die beiden Tabellen über die \texttt{KUNDEN\_ID} verknüpft sind, kann der Fremdschlüssel mit der Option \texttt{ON DELETE CASCADE} versehen sein.
-Dadurch werden die Einträge, die in der Kundentabelle gelöscht werden, automatisch auch aus der Bestelltabelle entfernt und man muss nur die Änderungen in der Bestelltabelle als Auslöser für die Trigger beachten.
+Durch die Verknüpfung über \texttt{KUNDEN\_ID} und \texttt{ON DELETE CASCADE} werden beim Löschen eines Kundeneintrags automatisch auch die Bestelleinträge entfernt, sodass nur die Änderungen in der Bestelltabelle für den Trigger berücksichtigt werden müssen.
 
 In MySQL kann ein Trigger nur für einen Datenbankmanipulationsoperator gleichzeitig verwendet werden (\cite{mysql_trigger_syntax}), weshalb für \texttt{INSERT} und \texttt{DELETE} jeweils ein Trigger definiert werden muss.
 Da keine Datensätze aktualisiert werden, wird aus Simplizitätsgründen der Trigger für \texttt{UPDATE} vernachlässigt.
@@ -243,7 +240,7 @@ Wenn Analysten eines Motorradunternehmens beispielsweise den Einkauf für die Zu
 Diese Entscheidungen werden jedoch nicht täglich abgefragt, sondern nur in regelmäßigen Abständen.
 Damit wird die materialisierte Sicht eher selten abgefragt, während Änderungen an den zugrundeliegenden Tabellen, wie z.B.\ der Bestand an Motorrädern oder die Anzahl der Motorradteile im Lager, sehr häufig vorkommen.
 Wenn man die Sicht bei jeder Änderung im Lager aktualisieren würde, würde dies zu einem enormen Aufwand führen.
-Daher kann es sinnvoll sein, die Daten nur einmal täglich zu aktualisieren, zum Beispiel durch einen Cron-Job in der Nacht.
+Daher kann es sinnvoll sein, die Daten nur einmal täglich zu aktualisieren, beispielsweise durch einen Cron-Job in der Nacht.
 Zu dieser Zeit ist zusätzlich die Systemlast in der Regel gering.
 In diesem Fall haben die Analysten zwar nur den Stand des Vortages, aber da sie in der Regel mit vergangenen Daten arbeiten, ist dieses Risiko vertretbar.
 Anders ist es bei einer schnellen Lieferung an den Kunden, da es für den Verkauf entscheidend ist, über aktuelle Bestandsdaten zu verfügen.
@@ -265,7 +262,7 @@ Das Ziel für die Durchführung ist es den Performanceunterschied zwischen einer
 Dafür wird zuallererst mit der Umsetzung der virtuellen Sicht begonnen, für die, wie bei den anderen Sichten auch, zunächst die Basistabellen erstellt werden müssen.
 Als Basis werden die Tabellen Kunden (\ref{lst:tools-create-table-kunde}) und Bestellung (\ref{lst:tools-create-table-bestellung}) verwendet und die View (\ref{lst:create_kunden_bestellung_view}) erstellt, die bereits in Kapitel~\ref{sec:virtuelle-views} beschrieben wurde.
 Anschließend werden die Testdaten direkt die beiden physischen Tabellen eingefügt und nicht über die virtuelle Sicht.
-Bei Select-Befehlen wird die Sicht explizit angesprochen und es werden mehrere Select-Befehle (siehe~\ref{lst:view-select-query}) auf verschiedenen Spalten untersucht, um die Unterschiede in der Lesegeschwindigkeit repräsentativ zu erfassen.
+Bei den Select-Befehlen wird die Sicht explizit angesprochen und es werden mehrere Select-Befehle (siehe~\ref{lst:view-select-query}) auf verschiedenen Spalten untersucht, um die Unterschiede in der Lesegeschwindigkeit repräsentativ zu erfassen.
 
 \vspace{-5pt}
 \begin{lstlisting}[language=SQL,caption=Select-Abfragen auf alle Spalten der View,label={lst:view-select-query}]
@@ -278,13 +275,12 @@ SELECT * FROM KUNDEN_OVERVIEW WHERE Gesamtumsatz > 2500;
 
 Wie schon im Kapitel (\ref{sec:virtuelle-views}) erklärt, lassen sich die Abfragen auf die virtuelle Sicht in direkte Abfragen auf die Kundentabelle umwandeln.
 Um den Einfluss der virtuellen Sicht auf die Performance zu untersuchen, wird ein Benchmark mithilfe der Sicht durchgeführt, während bei der anderen Variante keine Sicht deklariert wird und alle Befehle auf die Sicht direkt in SQL-Befehle auf die zugrunde liegenden Tabellen umgewandelt werden.
-
-Zusätzlich müssen die Ergebnisse mit und ohne virtualisierte Sicht auch mit dem im Kapitel~\ref{sec:materialisierte-views} beschriebenen Ansatz unter Verwendung von Triggern in MySQL verglichen werden.
+Zusätzlich müssen die Ergebnisse mit und ohne virtualisierte Sicht mit dem im Kapitel~\ref{sec:materialisierte-views} beschriebenen Ansatz von Triggern in MySQL verglichen werden.
 Dafür müssen neben der Kunden- und Bestelltabelle auch die Tabelle \texttt{KUNDEN\_MAT\_OVERVIEW} sowie die Trigger für die \texttt{INSERT}- und \texttt{DELETE}-Operationen erstellt werden.
-Im nächsten Schritt werden die ersten beiden Tabellen mit Testdaten befüllt und bei den Select-Befehlen aus~\ref{lst:view-select-query} der Tabellenbezeichner angepasst.
+Das Befüllen der Testdaten erfolgt, wie bei der virtuellen Sicht, in den ersten beiden Tabellen und bei den Select-Befehlen aus~\ref{lst:view-select-query} muss der Tabellenbezeichner angepasst werden.
 Damit sind alle Voraussetzungen für den Vergleich zwischen keiner View, der virtuellen View und dem Ansatz mit Triggern in MySQL erfüllt.
 
-\vspace{-5pt}
+\vspace{-9pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
@@ -294,18 +290,18 @@ Damit sind alle Voraussetzungen für den Vergleich zwischen keiner View, der vir
     \begin{subfigure}[t]{0.48\textwidth}
         \includegraphics[width=\textwidth]{PNGs/Script/Views/view-comparison/Writes}
     \end{subfigure}
-    \vspace{-5pt}
+    \vspace{-6pt}
     \caption[Views: Keine View, virtuelle View und Ansatz mit Triggern]{Vergleich zwischen keiner View, der virtuellen und Triggeransatz in MySQL}
     \label{fig:view-comparison-comp-metric}
 \end{figure}
 \vspace{-15pt}
 
 Bei den Ergebnissen fällt auf, dass die Unterschiede zwischen der virtuellen Sicht und den direkten SQL-Befehlen (\texttt{without\_view}) nur minimal sind.
-Dennoch weist \texttt{with\_view} eine leicht schlechtere Performance auf, sowohl bei Lese- als auch bei Schreiboperationen (\ref{fig:view-comparison-comp-metric}).
-Einen klaren Performancevorteil kann man beim Trigger-Ansatz erkennen, da die Lesewerte etwa um den Faktor 3 höher sind.
+Dennoch weist \texttt{virtual\_view} eine leicht schlechtere Performance auf, sowohl bei Lese- als auch bei Schreiboperationen (\ref{fig:view-comparison-comp-metric}).
+Einen klaren Performancevorteil kann man beim Trigger-Ansatz erkennen, da die Lesewerte etwa um den Faktor 4 höher sind.
 Das liegt daran, dass direkt die Tabelle mit den aggregierten Werten abgefragt wird, wodurch weniger Rechenaufwand erforderlich ist.
 Anders hingegen sieht es bei der Schreibperformance aus, da die Trigger ausgelöst werden und zusätzliche Aktualisierungen an der Tabelle \texttt{KUNDEN\_MAT\_OVERVIEW} durchführt werden müssen.
-Dadurch sehen wie einen deutlichen Unterschied zu den anderen beiden Ansätzen, da die Werte bei den Schreibvorgängen etwa 15--20\% langsamer sind.
+Dadurch sehen wie einen deutlichen Unterschied zu den anderen beiden Ansätzen, da die Werte bei den Schreibvorgängen etwa 10--15\% langsamer sind.
 
 Im letzten Benchmark sollen unterschiedliche Implementierungen von materialisierten Sichten getestet werden.
 Dazu wird der Ansatz mit Triggern in MySQL mit der nativen Implementierung in PostgreSQL verglichen.
@@ -316,10 +312,10 @@ Da der Einfluss auf die Performance des Befehls~\ref{lst:refresh-materialized-vi
 Um die Performanceunterschiede zwischen PostgreSQL und MySQL zu ermitteln, wird der Trigger-Ansatz auch in PostgreSQL implementiert.
 Die Implementierungen für die Insert- und Select-Befehle sind bei beiden DBMS identisch, bei der Erstellung der Tabellen und Trigger gibt es aber Unterschiede.
 Zum einen unterscheiden sich die Mechanismen zur automatischen Generierung von Primärschlüsseln, da PostgreSQL \texttt{SERIAL} und MySQL \texttt{AUTO\_INCREMENT} verwendet.
-Zum anderen kann in MySQL die Logik eines Triggers direkt in der \texttt{CREATE TRIGGER}-Anweisung definiert werden, während in PostgreSQL ein Trigger eine separate Funktion aufrufen muss, die die Logik enthält und mit \texttt{RETURNS TRIGGER} definiert ist.
+Zum anderen kann MySQL die Logik eines Triggers direkt in der \texttt{CREATE TRIGGER}-Anweisung angeben, während in PostgreSQL ein Trigger eine separate Funktion aufruft, die die Logik enthält und mit \texttt{RETURNS TRIGGER} definiert ist
 Auch die Deklarierung der Variablen unterscheidet sich, da in PostgreSQL mehrere Variablen in einem \texttt{DECLARE}-Block und in MySQL jede Variable einzeln im \texttt{BEGIN...END}-Block deklariert werden muss.
 
-\vspace{-5pt}
+\vspace{-12pt}
 \begin{figure}[H]
     \centering
     \begin{subfigure}[t]{0.48\textwidth}
@@ -329,7 +325,7 @@ Auch die Deklarierung der Variablen unterscheidet sich, da in PostgreSQL mehrere
     \begin{subfigure}[t]{0.48\textwidth}
         \includegraphics[width=\textwidth]{PNGs/Script/Views/mat-view-comparison/Writes}
     \end{subfigure}
-    \vspace{-5pt}
+    \vspace{-7pt}
     \caption[Views: Beide Triggeransätze sowie materialisierte Sicht]{Vergleich zwischen Triggeransatz in MySQL und Postgres, sowie zwei nativen Implementierungen in Postgres }
     \label{fig:mat-view-comparison-comp-metric}
 \end{figure}
@@ -337,14 +333,15 @@ Auch die Deklarierung der Variablen unterscheidet sich, da in PostgreSQL mehrere
 
 Bei der Grafik~\ref{fig:mat-view-comparison-comp-metric} wird zuallererst ein sehr deutlicher Performanceunterschied beim Ansatz mit den Triggern zwischen PostgreSQL und MySQL sichtbar.
 Begründet werden kann dieser Unterschied mit den verschiedenen Vorteilen des jeweiligen DBMS und dessen Umgebung.
-Beide Systeme wurden mit dem gleichen Ansatz gebenchmarkt, um die Implementierung der nativen materialisierten Sicht, die nur in PostgreSQL möglich ist, besser vergleichen zu können.
-Denn die Ergebnisse der nativen Implementierung sind in Bezug auf die Abfragegeschwindigkeit tatsächlich am performantesten und die Anzahl an Aktualisierungen (\ref{lst:refresh-materialized-view}) hat dabei keinen Einfluss.
+Interessant ist auch, dass der Trigger in Postgres nach etwa 25 Sekunden einen starken Performanceanstiegt erfährt.
+Dieser Trend zeigte sich bei mehrfacher Ausführung sowohl lokal auf dem Rechner als auch im Workflow.
+MySQL und PostgreSQL wurden mit dem gleichen Ansatz gebenchmarkt, um die Implementierung der nativen materialisierten Sicht, die nur in PostgreSQL möglich ist, besser vergleichen zu können.
+Die Ergebnisse der nativen Implementierung sind in Bezug auf die Abfragegeschwindigkeit tatsächlich am performantesten und die Anzahl an Aktualisierungen (\ref{lst:refresh-materialized-view}) hat dabei keinen Einfluss.
 Anders hingegen sieht es bei der Einfüge-Geschwindigkeit aus, da dort die Implementierung, die nach jedem Insert-Befehl aktualisiert nicht am schnellsten, sondern am langsamsten ist.
-Der Vergleich zwischen den Datenbankmanagementsystemen fällt wieder schwer, da die Unterschiede zwischen \texttt{with\_trigger} und \texttt{with\_trigger\_postgres} sehr groß sind (etwa um Faktor 2--3).
-Damit wird noch einmal deutlich wie stark die Einfügedauer bei den materialisierten Sichten von der Anzahl an Refreshs abhängig ist, da \texttt{mat\_view\_refresh\_every} unterhalb der Performance von \texttt{with\_trigger} liegt.
-In vorliegenden Beispiel ist die einmalige Aktualisierung der Sicht besser als das Verwenden der Trigger in Postgres.
+Damit wird noch einmal deutlich wie stark die Einfügedauer bei den materialisierten Sichten von der Anzahl an Refreshs abhängig ist, da \texttt{mat\_view\_refresh\_every} sogar unterhalb der Performance von \texttt{with\_trigger} liegt.
+Hingegen schneidet die einmalige Aktualisierung der Sicht im vorliegenden Beispiel besser ab als die Triggern in Postgres.
 
 Es lässt sich also zusammenfassen, dass virtuelle Sichten wenig Auswirkungen auf die Performance haben.
 Dies ist im eigentlichen Sinne aber auch nicht der Absicht der virtuellen Sicht, denn sie ist besser geeignet, um beispielsweise die Organisation der Rechte für unterschiedliche Nutzer der Datenbank zu gewährleisten.
-Wenn man hingegen beispielweise in OLTP-Systemen die Notwendigkeit hat, dass man aggregierte Daten häufig zu der Analyse von bestimmten Daten benötigt, dann sind materialisierte Sichten nützlich.
+Wenn in OLTP-Systemen die Notwendigkeit besteht, häufig aggregierte Daten für analytische Auswertungen zu nutzen, erweisen sich materialisierte Sichten als nützlich.
 Man sollte allerdings vor allem die Performanceauswirkungen von diesen Sichten nicht unterschätzen und sich gut überlegen, wie häufig und zu welcher Zeit die Daten aktualisiert werden müssen.

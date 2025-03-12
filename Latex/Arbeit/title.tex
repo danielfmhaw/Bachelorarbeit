@@ -85,10 +85,10 @@ Relationale Datenbanken sind ein essenzieller Bestandteil moderner IT-Systeme un
 Mit wachsender Datenmenge steigen jedoch die Antwortzeiten von Abfragen, was die Systemnutzung erschwert.
 Die Herausforderung besteht darin, geeignete Optimierungsstrategien zu finden, die sowohl Lese- als auch Schreiboperationen effizient gestalten und eine hohe Skalierbarkeit gewährleisten.
 Diese Arbeit untersucht verschiedene Ansätze zur Optimierung der Performance, darunter Datentypen, Indexierung, Views, Partitionierung und Replikation.
-Zur Analyse der Auswirkungen dieser Methoden wird das Tool Sysbench für Benchmarks eingesetzt.
-Die Ergebnisse zeigen, dass die Wahl des kleinstmöglichen Datentyps und die Verwendung von \texttt{NOT NULL}-Spalten die Leistung optimieren, indem sie Speicherplatz sparen.
-Hash-Indizes sind besonders bei exakten Schlüsselvergleichen effektiv, während B-Baum-Indizes vielseitigere Einsatzmöglichkeiten bieten.
-Materialisierte Sichten bieten Performancevorteile durch gespeicherte Abfrageergebnisse, während virtuelle Sichten Echtzeitdaten liefern, aber bei jedem Zugriff die Abfrage neu ausführen und daher langsamer sind.
+Zur Analyse der Auswirkungen dieser Methoden wird das Tool Sysbench für Leistungsmessungen eingesetzt.
+Die Ergebnisse zeigen, dass die Wahl des kleinstmöglichen Datentyps und die Verwendung von Not Null-Spalten die Effizienz verbessern, indem sie Speicherplatz sparen.
+Hash-Indizes sind besonders bei exakten Schlüsselvergleichen effektiv, wohingegen B-Baum-Indizes vielseitigere Einsatzmöglichkeiten bieten.
+Materialisierte Sichten bieten Performancevorteile durch gespeicherte Abfrageergebnisse, im Gegensatz dazu liefern virtuelle Sichten Echtzeitdaten, müssen jedoch bei jedem Zugriff die Abfrage neu ausführen und sind daher langsamer.
 Bei großen Datenmengen kann Partitionierung eine effektive Lösung darstellen, während Replikation die Lastverteilung insbesondere bei hoher CPU-Last verbessert.
 Es gibt keine universelle Lösung, aber je nach Anwendungsfall können geeignete Konzepte ausgewählt, optimiert und auch miteinander kombiniert werden.
 
@@ -99,12 +99,12 @@ Es gibt keine universelle Lösung, aber je nach Anwendungsfall können geeignete
     Relational databases are an essential component of modern IT systems and form the foundation for numerous applications used daily by millions of users.
     However, as data volumes grow, query response times increase, making system usage more challenging.
     The challenge lies in identifying suitable optimization strategies that make both read and write operations efficient while ensuring high scalability.
-    This paper examines various approaches to performance optimization, including data types, indexing, views, partitioning, and replication.
+    This paper examines various approaches to performance optimization, including data types, indexing, views, partitioning and replication.
     The impact of these methods is analyzed through benchmarking with the Sysbench tool.
-    The results show that choosing the smallest possible data type and using \texttt{NOT NULL} columns optimize performance by saving storage space.
+    The results show that choosing the smallest possible data type and using Not Null columns optimizes performance by saving storage space.
     Hash indexes are particularly effective for exact key comparisons, while B-tree indexes offer more versatile applications.
     Materialized views provide performance benefits by storing query results, whereas virtual views deliver real-time data but execute the query anew with each access, making them slower.
-    For large datasets, partitioning can be an effective solution, while replication improves load distribution, especially under high CPU load.
-    There is no universal solution, but depending on the use case, suitable concepts can be selected, optimized, and even combined.
+    For large datasets, partitioning can be an effective solution, with replication improving load distribution, especially under high CPU load.
+    There is no universal solution, but depending on the use case, suitable concepts can be selected, optimized and even combined.
   \end{otherlanguage}
 }
