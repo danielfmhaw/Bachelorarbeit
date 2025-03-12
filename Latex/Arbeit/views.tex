@@ -12,7 +12,7 @@ In den letzten beiden Kapiteln wird die Durchführung der Benchmarks näher betr
 
 Grundlegend existieren Relationen, bzw.\ Tabellen, die durch das \texttt{CREATE TABLE}-Statement definiert werden, physisch in der Datenbank.
 Damit sind sie persistent, was bedeutet, dass sie dauerhaft existieren und sich nicht ändern, es sei denn, sie werden explizit durch eine SQL-Änderungsanweisung dazu aufgefordert.
-Dies entspricht der Dauerhaftigkeit des ACID-Prinzips (\cite{acid_eigenschaften}), die sicherstellt, dass bestätigte Transaktionen dauerhaft gespeichert bleiben und auch bei Systemausfällen nicht verloren gehen.
+Dies entspricht der Dauerhaftigkeit des ACID-Prinzips (\cite[S. 630--631]{silberschatz2011database}), die sicherstellt, dass bestätigte Transaktionen dauerhaft gespeichert bleiben und auch bei Systemausfällen nicht verloren gehen.
 Es gibt jedoch eine weitere Klasse von SQL-Relationen, die nicht wie Tabellen physisch gespeichert werden (\cite[341--349, 353--366]{garcia2008database}).
 %~\cite[S. 276--281]{schwartz2012high}
 Sie werden als virtuelle Sichten bezeichnet.
@@ -87,7 +87,7 @@ In diesem Fall kann die View nur für Select-Abfragen genutzt werden.
 
 Das Einfügen über die Sicht ist jedoch nicht die intuitivste Möglichkeit, um Änderungen an den unterliegenden Tabellen durchzuführen.
 Das liegt vor allem an dem Umgang mit den nicht definierten Werten, weshalb sich das Konzept von Triggern anbietet.
-Trigger in SQL sind Datenbankobjekte, die mit einer Tabelle verknüpft sind und sobald bestimmte Ereignisse eintreten, führen sie eine Reihe von Anweisungen aus (\cite{trigger_erklaerung}).
+Trigger in SQL sind Datenbankobjekte, die mit einer Tabelle verknüpft sind und sobald bestimmte Ereignisse eintreten, führen sie eine Reihe von Anweisungen aus (vgl.\ \cite[S. 180]{silberschatz2011database}).
 Die Auslösung eines Triggers kann entweder vor (\texttt{BEFORE}) oder nach (\texttt{AFTER}) einem bestimmten Ereignis erfolgen, wie \texttt{INSERT}, \texttt{UPDATE} oder \texttt{DELETE}.
 Bei Triggern auf Sichten können auch \texttt{INSTEAD-OF}-Trigger verwendet werden, die Änderungsversuche an der Sicht abfangen und stattdessen eine frei definierbare Aktion ausführen.
 
@@ -164,7 +164,7 @@ Passend zu der virtuellen Sicht (\ref{lst:create_kunden_bestellung_view}) sieht 
 Wie zu sehen ist, unterscheidet sich die materialisierte Sicht nur in der ersten Zeile von der Virtuellen.
 Einen Nachteil der materialisierten Sicht gegenüber der Virtuellen ist der zusätzliche Aufwand, ähnlich wie bei Indizes.
 Wenn Änderungen an der zugrunde liegenden Basistabelle vorgenommen werden, ist die materialisierte Sicht nicht mehr aktuell.
-Die einfachste Lösung besteht darin, bei jeder Änderung eine vollständige Neuberechnung der Sicht durchzuführen (vgl.\ \cite[S. 608]{silberschatz2011database})
+Die einfachste Lösung besteht darin, bei jeder Änderung eine vollständige Neuberechnung der Sicht durchzuführen (vgl.\ \cite[S. 608]{silberschatz2011database}).
 Dies kann explizit mit dem folgenden Befehl durchgeführt werden:
 
 \vspace{-5pt}
