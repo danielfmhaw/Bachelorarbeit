@@ -59,13 +59,13 @@ Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und
 cd ../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Join_Typ/Output" \
   -var '{"length":[4, 16]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/varchar_queries": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Join_Typ/Scripts/varchar_queries": {
       "vars": "length"
     },
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Scripts/int_queries": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Join_Typ/Scripts/int_queries": {
       "vars": "length"
     }
   }'
@@ -75,5 +75,5 @@ cd Tools/Shell-Scripts
 cd ../..
 cd Tools/Shell-Scripts
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Join_Typ/Output
+  /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Join_Typ/Output
 ```

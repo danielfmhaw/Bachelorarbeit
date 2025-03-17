@@ -22,11 +22,11 @@ Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und
 cd ../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Views/Output" \
   -scripts '{
-   "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/without_view": {},
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/virtual_view": {},
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/with_trigger": {}
+   "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Views/Scripts/without_view": {},
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Views/Scripts/virtual_view": {},
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Views/Scripts/with_trigger": {}
   }'
 ```
 
@@ -35,14 +35,14 @@ cd Tools/Shell-Scripts
 cd ../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Views/Output" \
   -var '{"refresh":["every","once"]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/with_trigger": {},
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/with_trigger_pg": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Views/Scripts/with_trigger": {},
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Views/Scripts/with_trigger_pg": {
       "db": ["postgres"]
     },
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Scripts/mat_view": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Views/Scripts/mat_view": {
       "vars": "refresh",
       "db": ["postgres"]
     }
@@ -54,5 +54,5 @@ cd Tools/Shell-Scripts
 cd ../..
 cd Tools/Shell-Scripts
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Views/Output
+  /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Views/Output
 ```

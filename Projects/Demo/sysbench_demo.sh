@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ABS_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo"
+ABS_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo"
 GENERATE_PLOT_SCRIPT="${ABS_PATH}/Tools/Python/generatePlot.py"
 
 # shellcheck disable=SC2046

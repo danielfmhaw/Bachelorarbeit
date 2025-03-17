@@ -1,5 +1,5 @@
 #!/bin/bash
-# ./extract_cpu_usage_from_logs.sh /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Replication/Output
+# ./extract_cpu_usage_from_logs.sh /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Replication/Output
 
 # Überprüfen, ob Outputordner übergeben wurde
 [ -z "$1" ] && { echo "Bitte geben Sie einen Ordner an."; exit 1; }
