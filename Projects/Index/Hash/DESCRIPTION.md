@@ -25,10 +25,10 @@ Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und
 cd ../../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/Hash/Output" \
   -var '{"prob":[25,10,5,1]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Scripts/selectivity_changes": {"vars": "prob"}
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/Hash/Scripts/selectivity_changes": {"vars": "prob"}
   }'
 ```
 
@@ -37,9 +37,9 @@ cd Tools/Shell-Scripts
 cd ../../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/Hash/Output" \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Scripts/query_differences": {}
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/Hash/Scripts/query_differences": {}
   }'
 ```
 
@@ -48,10 +48,10 @@ cd Tools/Shell-Scripts
 cd ../../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/Hash/Output" \
   -var '{"no":["index"]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Scripts/query_differences": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/Hash/Scripts/query_differences": {
       "vars": "no"
     }
   }'
@@ -62,5 +62,5 @@ cd Tools/Shell-Scripts
 cd ../../..
 cd Tools/Shell-Scripts
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/Hash/Output
+  /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/Hash/Output
 ```

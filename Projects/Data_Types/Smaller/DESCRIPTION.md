@@ -24,10 +24,10 @@ Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und
 cd ../../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Data_Types/Smaller/Output" \
   -var '{"datatyp":["smallint_13","smallint_16","mediumint_24","int_32","bigint_64","decimal_65"]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/int": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Data_Types/Smaller/Scripts/int": {
       "vars": "datatyp"
     }
   }'
@@ -38,10 +38,10 @@ cd Tools/Shell-Scripts
 cd ../../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Data_Types/Smaller/Output" \
   -var '{"typ":["char_4","char_64","varchar_4","varchar_64"],"num_rows":[250]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/string": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Data_Types/Smaller/Scripts/string": {
       "vars": "typ,num_rows"
     }
   }'
@@ -52,10 +52,10 @@ cd Tools/Shell-Scripts
 cd ../../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
--out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Output" \
+-out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Data_Types/Smaller/Output" \
 -var '{"typ":["char_255","varchar_255"],"length":[56,240],"num_rows":[250]}' \
 -scripts '{
-  "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Scripts/string": {
+  "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Data_Types/Smaller/Scripts/string": {
       "vars": "typ,length,num_rows",
       "stats_select_columns": "Total Time (s),Write (noq)",
       "stats_insert_columns": "",
@@ -70,5 +70,5 @@ cd Tools/Shell-Scripts
 cd ../../..
 cd Tools/Shell-Scripts
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Smaller/Output
+  /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Data_Types/Smaller/Output
 ```

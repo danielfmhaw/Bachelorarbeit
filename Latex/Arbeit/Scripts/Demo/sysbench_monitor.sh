@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # File Paths
-GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Tools/Pandas/generateplot.py"
+GENERATE_PLOT_SCRIPT="/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Tools/Pandas/generateplot.py"
 OUTPUT_DIR="output"
 OUTPUT_FILE="output/sysbench_output.csv"
 RAW_RESULTS_FILE="output/sysbench.log"

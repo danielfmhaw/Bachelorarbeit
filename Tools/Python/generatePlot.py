@@ -86,7 +86,7 @@ def plot_metrics(args, datafile, detailed_pngs_dir, combined_pngs_dir):
     try:
         # Detailed plots for each measure
         for measure in measures:
-            plt.figure(figsize=(10, 6))
+            plt.figure(figsize=(16, 6))
             script_data_dict = {}
             # Sort scripts by the average value of the specified measure in descending order
             sorted_scripts = sorted(scripts, key=lambda script: data[data['Script'] == script][measure].mean(), reverse=True)

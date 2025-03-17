@@ -1,5 +1,5 @@
 #!/bin/bash
-# ./extract_explain_from_logs.sh /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/b-tree-query-differences combined_index
+# ./extract_explain_from_logs.sh /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Output/b-tree-query-differences combined_index
 
 # Überprüfen, ob Outputordner und Index-Name übergeben wurden
 if [ -z "$1" ] || [ -z "$2" ]; then

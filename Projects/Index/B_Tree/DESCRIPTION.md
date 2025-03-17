@@ -24,13 +24,13 @@ Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und
 cd ../../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Output" \
   -var '{"length":[500,5000]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/count_row_changes/with_index": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Scripts/count_row_changes/with_index": {
       "vars": "length"
     },
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/count_row_changes/without_index": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Scripts/count_row_changes/without_index": {
       "vars": "length"
     }
   }'
@@ -41,13 +41,13 @@ cd Tools/Shell-Scripts
 cd ../../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Output" \
   -var '{"length":[10,40]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/count_row_changes/with_index": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Scripts/count_row_changes/with_index": {
       "vars": "length"
     },
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/count_row_changes/without_index": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Scripts/count_row_changes/without_index": {
       "vars": "length"
     }
   }'
@@ -58,9 +58,9 @@ cd Tools/Shell-Scripts
 cd ../../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Output" \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/query_differences": {}
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Scripts/query_differences": {}
   }'
 ```
 
@@ -69,10 +69,10 @@ cd Tools/Shell-Scripts
 cd ../../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Output" \
   -var '{"no":["index"]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Scripts/query_differences": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Scripts/query_differences": {
       "vars": "no"
     }
   }'
@@ -83,5 +83,5 @@ cd Tools/Shell-Scripts
 cd ../../..
 cd Tools/Shell-Scripts
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output
+  /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Output
 ```

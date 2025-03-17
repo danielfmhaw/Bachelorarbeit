@@ -28,12 +28,12 @@ Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und
 cd ../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Output" \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/without_partitioning": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Scripts/without_partitioning": {
       "selects": ["without_range_first_day_1985","without_range_year_1985","without_range_between_1985"]
     },
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/range_partitioning": {}
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Scripts/range_partitioning": {}
   }'
 ```
 
@@ -42,10 +42,10 @@ cd Tools/Shell-Scripts
 cd ../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Output" \
   -var '{"type":["range_columns","only_range"]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/range_partitioning": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Scripts/range_partitioning": {
       "vars": "type",
       "selects": ["with_primary_key","with_pruning"]
     }
@@ -57,13 +57,13 @@ cd Tools/Shell-Scripts
 cd ../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Output" \
   -var '{"partitions_size":[5,50,500]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/without_partitioning": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Scripts/without_partitioning": {
       "selects": ["without_hash_pruning_range"]
     },
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/hash_partitioning": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Scripts/hash_partitioning": {
       "vars": "partitions_size"
     }
   }'
@@ -74,10 +74,10 @@ cd Tools/Shell-Scripts
 cd ../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Output" \
   -var '{"type":["hash","key"],"partitions_size":[5,100]}' \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/hash_partitioning": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Scripts/hash_partitioning": {
       "vars": "type,partitions_size"
     }
   }'
@@ -88,12 +88,12 @@ cd Tools/Shell-Scripts
 cd ../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Output" \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/without_partitioning": {
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Scripts/without_partitioning": {
       "selects": ["without_list_pruning_simple","without_list_pruning_multiple"]
     },
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Scripts/list_partitioning": {}
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Scripts/list_partitioning": {}
   }'
 ```
 
@@ -101,5 +101,5 @@ cd Tools/Shell-Scripts
 cd ../..
 cd Tools/Shell-Scripts
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Partition/Output
+  /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Partition/Output
 ```

@@ -1,5 +1,5 @@
 #!/bin/bash
-# ./calculate_difference_factor.sh /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/b-tree-query-differences/count_results_explain.csv /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/b-tree-query-differences/sysbench_statistics.csv /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/b-tree-query-differences-no-index/sysbench_statistics.csv
+# ./calculate_difference_factor.sh /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Output/b-tree-query-differences/count_results_explain.csv /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Output/b-tree-query-differences/sysbench_statistics.csv /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Output/b-tree-query-differences-no-index/sysbench_statistics.csv
 
 # Überprüfen, ob die notwendigen Argumente (CSV-Dateien) übergeben wurden
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then

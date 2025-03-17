@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# ./extract_pngs_and_csv.sh /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Tools/combined-output
+# ./extract_pngs_and_csv.sh /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Tools/combined-output
 
 # Überprüfen, ob ein Ordner übergeben wurde
 [ -z "$1" ] && { echo "Bitte geben Sie einen Ordner an."; exit 1; }
 
 # Eingabe- und Zielordner
 base_folder="$1"
-target_folder_pngs="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Latex/Arbeit/PNGs/Script"
-target_folder_csv_results="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Latex/Arbeit/Scripts/General/Count_Results"
+target_folder_pngs="/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Latex/Arbeit/PNGs/Script"
+target_folder_csv_results="/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Latex/Arbeit/Scripts/General/Count_Results"
 
 # Alle count_results.csv in einem Ordner und nach Parent benennen
 mkdir -p "$target_folder_csv_results"

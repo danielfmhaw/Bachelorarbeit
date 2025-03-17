@@ -4,7 +4,7 @@
 OUTPUT_DIR="$1"
 
 # File Paths
-PYTHON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Tools/Python"
+PYTHON_PATH="/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Tools/Python"
 RUNTIME_FILE="$OUTPUT_DIR/sysbench_runtime.csv"
 RUNTIME_FILE_TEMP="$OUTPUT_DIR/sysbench_runtime_temp.csv"
 STATISTICS_FILE="$OUTPUT_DIR/sysbench_statistics.csv"

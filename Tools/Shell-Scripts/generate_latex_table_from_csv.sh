@@ -1,5 +1,5 @@
 #!/bin/bash
-#./generate_latex_table_from_csv.sh /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Index/B_Tree/Output/b-tree-query-differences/count_results_index_factor.csv
+#./generate_latex_table_from_csv.sh /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Index/B_Tree/Output/b-tree-query-differences/count_results_index_factor.csv
 
 # Überprüfen, ob eine Eingabedatei übergeben wurde
 [ -z "$1" ] && { echo "Bitte geben Sie den Pfad zur CSV-Datei an."; exit 1; }

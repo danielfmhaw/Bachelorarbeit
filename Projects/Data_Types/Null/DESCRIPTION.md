@@ -22,10 +22,10 @@ Führe die folgenden Scripts aus, um die Benchmarks mit den korrekten Pfaden und
 cd ../../..
 cd Tools/Shell-Scripts
 ./sysbench_script.sh \
-  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Output" \
+  -out "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Data_Types/Null/Output" \
   -scripts '{
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/with_null": {},
-    "/Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Scripts/not_null": {}
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Data_Types/Null/Scripts/with_null": {},
+    "/Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Data_Types/Null/Scripts/not_null": {}
   }'
 ```
 
@@ -34,5 +34,5 @@ cd Tools/Shell-Scripts
 cd ../../..
 cd Tools/Shell-Scripts
 ./generate_graph.sh \
-  /Users/danielmendes/Desktop/Bachelorarbeit/Repo/Projects/Data_Types/Null/Output
+  /Users/danielmendes/Desktop/Bachelorarbeit/Projekte_BA/Bachelorarbeit_Repo/Projects/Data_Types/Null/Output
 ```
